@@ -67,3 +67,12 @@ func TestVerifyInvalidHash(t *testing.T) {
 		t.Fatal("invalid hash accepted")
 	}
 }
+
+func TestAdminDefaultPasswordHash(t *testing.T) {
+	hash := "$argon2id$v=19$m=65536,t=3,p=4$+nFL9iyH72N6vxGptXsgvA$17JkDoHXDbfCRRbLYuoaxCUvFnwXAS4xs6YdF2F41N4"
+	ok, err := VerifyPassword("Admin@Chiprin2026!", hash)
+	if err != nil || !ok {
+		t.Fatalf("failed to verify admin password hash: %v", err)
+	}
+}
+

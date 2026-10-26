@@ -54,11 +54,34 @@ func newHandlerWithVerification(
 	)
 }
 
-// newHandlerWithResend registers all DAOCOIN API routes including resend verification.
+// newHandlerWithResend preserves compatibility with existing tests.
 func newHandlerWithResend(
 	loginHandler *auth.LoginHandler,
 	verificationHandler *auth.VerificationHandler,
 	resendHandler *auth.ResendVerificationHandler,
+	httpLimiter *middleware.HTTPRateLimiter,
+	emailLimiter *middleware.EmailRateLimiter,
+	resendEnabled bool,
+	authHandlers ...*auth.Handler,
+) http.Handler {
+	return newHandlerWithSystem(
+		loginHandler,
+		verificationHandler,
+		resendHandler,
+		nil,
+		httpLimiter,
+		emailLimiter,
+		resendEnabled,
+		authHandlers...,
+	)
+}
+
+// newHandlerWithSystem registers all DAOCOIN API routes including accounts-system administration.
+func newHandlerWithSystem(
+	loginHandler *auth.LoginHandler,
+	verificationHandler *auth.VerificationHandler,
+	resendHandler *auth.ResendVerificationHandler,
+	systemHandler *auth.SystemHandler,
 	httpLimiter *middleware.HTTPRateLimiter,
 	emailLimiter *middleware.EmailRateLimiter,
 	resendEnabled bool,
@@ -170,6 +193,25 @@ func newHandlerWithResend(
 		mux.Handle(
 			"POST /api/v1/auth/resend-verification",
 			handler,
+		)
+	}
+
+	// =====================================================
+	// 7. System Accounts Management APIs
+	// =====================================================
+
+	if systemHandler != nil {
+		mux.HandleFunc(
+			"POST /api/v1/system/auth/login",
+			systemHandler.SystemLogin,
+		)
+		mux.HandleFunc(
+			"GET /api/v1/system/accounts",
+			systemHandler.ListAccounts,
+		)
+		mux.HandleFunc(
+			"POST /api/v1/system/accounts",
+			systemHandler.CreateAccount,
 		)
 	}
 
@@ -395,13 +437,21 @@ func main() {
 	}
 
 	// =====================================================
-	// 9. HTTP Router
+	// 9. Accounts System Handler (Quản Trị Viên, Trợ Lý, Chuyên Viên)
 	// =====================================================
 
-	router := newHandlerWithResend(
+	roleRepo := auth.NewRoleRepository(db)
+	systemHandler := auth.NewSystemHandler(authService, roleRepo, cookieSecure)
+
+	// =====================================================
+	// 10. HTTP Router
+	// =====================================================
+
+	router := newHandlerWithSystem(
 		loginHandler,
 		verificationHandler,
 		resendHandler,
+		systemHandler,
 		httpLimiter,
 		emailLimiter,
 		rateLimitCfg.ResendVerificationEnabled,

@@ -55,8 +55,24 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <p style={{ opacity: 0.6 }}>
               © 2026 CHIPCOIN Platform. Bảo mật giao dịch & kiểm soát lạm dụng với PostgreSQL Transactional Outbox.
             </p>
+            <p style={{ marginTop: '12px' }}>
+              <Link
+                href="/system/login"
+                style={{
+                  color: 'var(--text-muted)',
+                  fontSize: '0.82rem',
+                  textDecoration: 'underline',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                🔒 Cổng Quản Trị Hệ Thống (Accounts-System)
+              </Link>
+            </p>
           </div>
         </footer>
+
       </body>
     </html>
   );
