@@ -7,6 +7,8 @@ import (
 	"encoding/hex"
 	"errors"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -59,7 +61,7 @@ func SetSessionCookie(
 	token string,
 	secure bool,
 ) {
-	http.SetCookie(w, &http.Cookie{
+	cookie := &http.Cookie{
 		Name:     SessionCookieName,
 		Value:    token,
 		Path:     "/",
@@ -67,7 +69,20 @@ func SetSessionCookie(
 		Secure:   secure,
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   int(SessionDuration.Seconds()),
-	})
+	}
+
+	if domain := os.Getenv("COOKIE_DOMAIN"); domain != "" {
+		cookie.Domain = domain
+	}
+
+	if sameSite := strings.ToLower(os.Getenv("COOKIE_SAME_SITE")); sameSite == "none" {
+		cookie.SameSite = http.SameSiteNoneMode
+		cookie.Secure = true
+	} else if sameSite == "strict" {
+		cookie.SameSite = http.SameSiteStrictMode
+	}
+
+	http.SetCookie(w, cookie)
 }
 
 // ClearSessionCookie xóa cookie phía trình duyệt.
@@ -75,7 +90,7 @@ func ClearSessionCookie(
 	w http.ResponseWriter,
 	secure bool,
 ) {
-	http.SetCookie(w, &http.Cookie{
+	cookie := &http.Cookie{
 		Name:     SessionCookieName,
 		Value:    "",
 		Path:     "/",
@@ -83,5 +98,18 @@ func ClearSessionCookie(
 		Secure:   secure,
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   -1,
-	})
+	}
+
+	if domain := os.Getenv("COOKIE_DOMAIN"); domain != "" {
+		cookie.Domain = domain
+	}
+
+	if sameSite := strings.ToLower(os.Getenv("COOKIE_SAME_SITE")); sameSite == "none" {
+		cookie.SameSite = http.SameSiteNoneMode
+		cookie.Secure = true
+	} else if sameSite == "strict" {
+		cookie.SameSite = http.SameSiteStrictMode
+	}
+
+	http.SetCookie(w, cookie)
 }
