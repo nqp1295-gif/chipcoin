@@ -1,0 +1,23 @@
+# Environment & secrets
+.env
+.env*.local
+
+# Node & Frontend
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Binaries & Archives
+*.exe
+*.dll
+*.so
+*.dylib
+*.dump
+*.zip
+*.tar.gz
+*.bak
+*.log
+.DS_Store
+Thumbs.db
