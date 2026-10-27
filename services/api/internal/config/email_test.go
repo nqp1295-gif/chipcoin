@@ -43,6 +43,44 @@ func TestEmailConfigEnabled(t *testing.T) {
 	}
 }
 
+func TestEmailConfigGmailSMTP(t *testing.T) {
+	t.Setenv("EMAIL_ENABLED", "true")
+	t.Setenv("EMAIL_PROVIDER", "gmail_smtp")
+	t.Setenv("SMTP_HOST", "smtp.gmail.com")
+	t.Setenv("SMTP_PORT", "587")
+	t.Setenv("SMTP_USERNAME", "medubaiso1@gmail.com")
+	t.Setenv("SMTP_PASSWORD", "sample_app_password")
+	t.Setenv("SMTP_FROM_EMAIL", "medubaiso1@gmail.com")
+	t.Setenv("SMTP_FROM_NAME", "CHIPCOIN | Xác thực tài khoản")
+	t.Setenv("SMTP_STARTTLS_REQUIRED", "true")
+	t.Setenv("PUBLIC_WEB_URL", "https://chipcoin.io")
+
+	cfg, err := LoadEmailConfig()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !cfg.Enabled {
+		t.Fatal("email should be enabled")
+	}
+
+	if cfg.Provider != "gmail_smtp" {
+		t.Fatalf("unexpected provider: %s", cfg.Provider)
+	}
+
+	if cfg.SMTPUsername != "medubaiso1@gmail.com" {
+		t.Fatalf("unexpected username: %s", cfg.SMTPUsername)
+	}
+
+	if cfg.SMTPPort != 587 {
+		t.Fatalf("unexpected port: %d", cfg.SMTPPort)
+	}
+
+	if cfg.PublicURL != "https://chipcoin.io" {
+		t.Fatalf("unexpected public url: %s", cfg.PublicURL)
+	}
+}
+
 func TestEmailConfigMissingAPIKey(t *testing.T) {
 	t.Setenv("EMAIL_ENABLED", "true")
 	t.Setenv("EMAIL_PROVIDER", "resend")

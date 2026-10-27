@@ -415,6 +415,30 @@ export const SYSTEM_MENU_GROUPS: MenuGroup[] = [
         ),
       },
       {
+        nameKey: 'nav_sys_email',
+        defaultName: 'Giám Sát Gmail SMTP & Outbox',
+        href: '/system/email',
+        badge: 'SMTP',
+        badgeType: 'pulse',
+        descKey: 'nav_sys_email_desc',
+        defaultDesc: 'medubaiso1@gmail.com, hàng đợi outbox & gửi thử nghiệm',
+        icon: ({ active }) => (
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={active ? '#38bdf8' : 'currentColor'}
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect width="20" height="16" x="2" y="4" rx="2" />
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+          </svg>
+        ),
+      },
+      {
         nameKey: 'nav_sys_reports',
         defaultName: 'Thống Kê Báo Cáo Hệ Thống',
         href: '/system/reports',

@@ -18,3 +18,17 @@ type Sender interface {
 		verificationURL string,
 	) error
 }
+
+type ExtendedSender interface {
+	Sender
+	SendVerificationSuccess(
+		ctx context.Context,
+		to string,
+		loginURL string,
+	) error
+	SendTestEmail(
+		ctx context.Context,
+		to string,
+		diagnosticInfo string,
+	) error
+}

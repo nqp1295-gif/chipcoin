@@ -111,18 +111,35 @@ function RegisterForm() {
                 và phân hạng <strong>CHIP MEMBER</strong>.
               </p>
               {referralCode && (
-                <div style={{ fontSize: '0.82rem', color: '#f5d77f' }}>
+                <div style={{ fontSize: '0.82rem', color: '#f5d77f', marginBottom: '8px' }}>
                   ✓ Đã gắn vào nhánh bảo trợ của mã: <strong>{referralCode}</strong>
                 </div>
               )}
+              <div
+                style={{
+                  background: 'rgba(0,0,0,0.25)',
+                  padding: '10px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  fontSize: '0.82rem',
+                  lineHeight: 1.45,
+                }}
+              >
+                <div style={{ color: '#38bdf8', fontWeight: 700, marginBottom: '4px' }}>
+                  ✉️ Vui lòng xác thực email của bạn:
+                </div>
+                <div>
+                  Một email xác nhận đã được gửi từ <strong>medubaiso1@gmail.com</strong> tới hòm thư của bạn. Vui lòng mở hộp thư (kiểm tra cả mục Spam / Thư rác) và bấm liên kết xác nhận trong vòng <strong>15 phút</strong> để kích hoạt tài khoản.
+                </div>
+              </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '1.8rem' }}>
-              <Link href="/" className="btn-primary" style={{ textAlign: 'center' }}>
-                Vào Bảng Điều Khiển Của Tôi →
+              <Link href="/verify-email" className="btn-primary" style={{ textAlign: 'center' }}>
+                Nhập Mã / Xác Thực Email Ngay →
               </Link>
-              <Link href="/activities" className="btn-secondary" style={{ textAlign: 'center' }}>
-                ⭐ Xem Nhiệm Vụ &amp; Điểm Danh Nhận Thêm CHIP
+              <Link href="/" className="btn-secondary" style={{ textAlign: 'center' }}>
+                Vào Bảng Điều Khiển Của Tôi
               </Link>
             </div>
           </div>

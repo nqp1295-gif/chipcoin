@@ -148,7 +148,27 @@ function ResendVerificationContent() {
           </button>
         </form>
 
-        <div style={{ textAlign: 'center', marginTop: '1.8rem', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
+        <div
+          style={{
+            marginTop: '1.5rem',
+            padding: '12px 14px',
+            borderRadius: '8px',
+            background: 'rgba(245, 215, 127, 0.06)',
+            border: '1px solid rgba(245, 215, 127, 0.2)',
+            fontSize: '0.8rem',
+            color: 'var(--text-secondary)',
+            lineHeight: 1.5,
+          }}
+        >
+          <div style={{ color: '#f5d77f', fontWeight: 700, marginBottom: '4px' }}>
+            ℹ️ Lưu ý khi nhận email:
+          </div>
+          <div>• Thư được gửi chính thức từ địa chỉ: <strong style={{ color: '#fff' }}>medubaiso1@gmail.com</strong></div>
+          <div>• Hãy kiểm tra kỹ hộp thư đến (Inbox) và mục Thư rác (Spam / Junk).</div>
+          <div>• Mã xác minh có hiệu lực trong <strong>15 phút</strong>. Giới hạn yêu cầu gửi lại <strong>60 giây/lần</strong> (tối đa 3 lần/giờ).</div>
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
           Đã nhận được mã xác nhận?{' '}
           <Link href="/verify-email" style={{ color: 'var(--accent-bronze)', fontWeight: 600 }}>
             Nhập mã tại đây

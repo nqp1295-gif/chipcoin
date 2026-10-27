@@ -76,12 +76,37 @@ func newHandlerWithResend(
 	)
 }
 
-// newHandlerWithSystem registers all DAOCOIN API routes including accounts-system administration.
+// newHandlerWithSystem preserves compatibility with existing tests.
 func newHandlerWithSystem(
 	loginHandler *auth.LoginHandler,
 	verificationHandler *auth.VerificationHandler,
 	resendHandler *auth.ResendVerificationHandler,
 	systemHandler *auth.SystemHandler,
+	httpLimiter *middleware.HTTPRateLimiter,
+	emailLimiter *middleware.EmailRateLimiter,
+	resendEnabled bool,
+	authHandlers ...*auth.Handler,
+) http.Handler {
+	return newHandlerWithDiagnostics(
+		loginHandler,
+		verificationHandler,
+		resendHandler,
+		systemHandler,
+		nil,
+		httpLimiter,
+		emailLimiter,
+		resendEnabled,
+		authHandlers...,
+	)
+}
+
+// newHandlerWithDiagnostics registers all DAOCOIN API routes including accounts-system administration and email diagnostics.
+func newHandlerWithDiagnostics(
+	loginHandler *auth.LoginHandler,
+	verificationHandler *auth.VerificationHandler,
+	resendHandler *auth.ResendVerificationHandler,
+	systemHandler *auth.SystemHandler,
+	emailDiagHandler *email.DiagnosticsHandler,
 	httpLimiter *middleware.HTTPRateLimiter,
 	emailLimiter *middleware.EmailRateLimiter,
 	resendEnabled bool,
@@ -212,6 +237,21 @@ func newHandlerWithSystem(
 		mux.HandleFunc(
 			"POST /api/v1/system/accounts",
 			systemHandler.CreateAccount,
+		)
+	}
+
+	// =====================================================
+	// 8. Email Verification & Gmail SMTP Diagnostics APIs
+	// =====================================================
+
+	if emailDiagHandler != nil {
+		mux.HandleFunc(
+			"GET /api/v1/system/email/status",
+			emailDiagHandler.Status,
+		)
+		mux.HandleFunc(
+			"POST /api/v1/system/email/test-send",
+			emailDiagHandler.TestSend,
 		)
 	}
 
@@ -381,9 +421,43 @@ func main() {
 	// =====================================================
 
 	emailCfg, emailErr := config.LoadEmailConfig()
+	var emailSender email.Sender
+	var emailDiagHandler *email.DiagnosticsHandler
+
 	if emailErr != nil {
 		log.Printf("Email configuration check: %v", emailErr)
 	} else if emailCfg.Enabled {
+		if emailCfg.Provider == "gmail_smtp" || emailCfg.Provider == "smtp" || emailCfg.Provider == "gmail" {
+			emailSender = email.NewGmailSMTPSender(email.GmailSMTPConfig{
+				Host:            emailCfg.SMTPHost,
+				Port:            emailCfg.SMTPPort,
+				Username:        emailCfg.SMTPUsername,
+				Password:        emailCfg.SMTPPassword,
+				FromEmail:       emailCfg.SMTPFromEmail,
+				FromName:        emailCfg.SMTPFromName,
+				RequireSTARTTLS: emailCfg.SMTPRequireTLS,
+			})
+			log.Printf("Gmail SMTP sender configured (%s:%d as %s)", emailCfg.SMTPHost, emailCfg.SMTPPort, emailCfg.SMTPUsername)
+		} else {
+			emailSender = email.NewResendSender(emailCfg.APIKey, emailCfg.From)
+			log.Println("Resend email sender configured")
+		}
+
+		emailDiagHandler = email.NewDiagnosticsHandler(
+			email.GmailSMTPConfig{
+				Host:            emailCfg.SMTPHost,
+				Port:            emailCfg.SMTPPort,
+				Username:        emailCfg.SMTPUsername,
+				Password:        emailCfg.SMTPPassword,
+				FromEmail:       emailCfg.SMTPFromEmail,
+				FromName:        emailCfg.SMTPFromName,
+				RequireSTARTTLS: emailCfg.SMTPRequireTLS,
+			},
+			emailSender,
+			db,
+			emailCfg.PublicURL,
+		)
+
 		var cipher *email.TokenCipher
 		if len(rateLimitCfg.TokenEncryptionKey) == 32 {
 			var err error
@@ -394,7 +468,6 @@ func main() {
 		}
 
 		if cipher != nil {
-			emailSender := email.NewResendSender(emailCfg.APIKey, emailCfg.From)
 			workerRepo, err := email.NewOutboxWorkerRepository(db)
 			if err != nil {
 				log.Fatalf("Outbox worker repo initialization failed: %v", err)
@@ -447,11 +520,12 @@ func main() {
 	// 10. HTTP Router
 	// =====================================================
 
-	router := newHandlerWithSystem(
+	router := newHandlerWithDiagnostics(
 		loginHandler,
 		verificationHandler,
 		resendHandler,
 		systemHandler,
+		emailDiagHandler,
 		httpLimiter,
 		emailLimiter,
 		rateLimitCfg.ResendVerificationEnabled,
