@@ -41,7 +41,7 @@ export default function LoginPage() {
       if (!res.success) {
         if (res.error === 'account_unavailable') {
           setError(
-            'Tài khoản của bạn chưa kích hoạt hoặc chưa xác thực email. Vui lòng kiểm tra email kích hoạt từ medubaiso1@gmail.com (bao gồm cả thư rác / spam).'
+            'Tài khoản của bạn chưa kích hoạt hoặc chưa xác thực email. Vui lòng kiểm tra email kích hoạt từ jinofc.ytb@gmail.com (bao gồm cả thư rác / spam).'
           );
           setUnverified(true);
           return;

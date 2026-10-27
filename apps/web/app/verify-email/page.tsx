@@ -79,7 +79,7 @@ function VerifyEmailContent() {
             Xác Minh Địa Chỉ Email
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem' }}>
-            Kích hoạt tài khoản CHIPCOIN chính thức phát hành từ <strong>medubaiso1@gmail.com</strong>
+            Kích hoạt tài khoản CHIPCOIN chính thức phát hành từ <strong>jinofc.ytb@gmail.com</strong>
           </p>
         </div>
 
@@ -148,7 +148,7 @@ function VerifyEmailContent() {
                 Tài khoản của bạn đã được kích hoạt thành công (trạng thái <strong>ACTIVE</strong>). Bạn đã chính thức gia nhập cộng đồng CHIPCOIN với hạng <strong>CHIP MEMBER</strong>.
               </p>
               <div style={{ fontSize: '0.82rem', color: '#4ade80', borderTop: '1px solid rgba(74, 222, 128, 0.2)', paddingTop: '6px' }}>
-                ✓ Thư xác nhận thành công (Mẫu B) đã được gửi từ <strong>medubaiso1@gmail.com</strong> tới hộp thư của bạn.
+                ✓ Thư xác nhận thành công (Mẫu B) đã được gửi từ <strong>jinofc.ytb@gmail.com</strong> tới hộp thư của bạn.
               </div>
             </div>
 

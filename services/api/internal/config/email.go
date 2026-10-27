@@ -70,7 +70,7 @@ func LoadEmailConfig() (EmailConfig, error) {
 
 	smtpUsername := strings.TrimSpace(os.Getenv("SMTP_USERNAME"))
 	if smtpUsername == "" {
-		smtpUsername = "medubaiso1@gmail.com"
+		smtpUsername = "jinofc.ytb@gmail.com"
 	}
 
 	smtpFromEmail := strings.TrimSpace(os.Getenv("SMTP_FROM_EMAIL"))

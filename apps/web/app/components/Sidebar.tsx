@@ -421,7 +421,7 @@ export const SYSTEM_MENU_GROUPS: MenuGroup[] = [
         badge: 'SMTP',
         badgeType: 'pulse',
         descKey: 'nav_sys_email_desc',
-        defaultDesc: 'medubaiso1@gmail.com, hàng đợi outbox & gửi thử nghiệm',
+        defaultDesc: 'jinofc.ytb@gmail.com, hàng đợi outbox & gửi thử nghiệm',
         icon: ({ active }) => (
           <svg
             width="20"

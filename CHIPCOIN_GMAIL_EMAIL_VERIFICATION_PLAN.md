@@ -93,9 +93,9 @@ Thêm vào file `.env` **không được commit** (giá trị minh họa, không
 EMAIL_PROVIDER=gmail_smtp
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USERNAME=medubaiso1@gmail.com
+SMTP_USERNAME=jinofc.ytb@gmail.com
 SMTP_PASSWORD=<LOAD_FROM_SECRET_STORE>
-SMTP_FROM_EMAIL=medubaiso1@gmail.com
+SMTP_FROM_EMAIL=jinofc.ytb@gmail.com
 SMTP_FROM_NAME="CHIPCOIN | Xác thực tài khoản"
 SMTP_STARTTLS_REQUIRED=true
 PUBLIC_WEB_URL=https://<your-chipcoin-domain>

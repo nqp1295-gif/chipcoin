@@ -163,7 +163,7 @@ function ResendVerificationContent() {
           <div style={{ color: '#f5d77f', fontWeight: 700, marginBottom: '4px' }}>
             ℹ️ Lưu ý khi nhận email:
           </div>
-          <div>• Thư được gửi chính thức từ địa chỉ: <strong style={{ color: '#fff' }}>medubaiso1@gmail.com</strong></div>
+          <div>• Thư được gửi chính thức từ địa chỉ: <strong style={{ color: '#fff' }}>jinofc.ytb@gmail.com</strong></div>
           <div>• Hãy kiểm tra kỹ hộp thư đến (Inbox) và mục Thư rác (Spam / Junk).</div>
           <div>• Mã xác minh có hiệu lực trong <strong>15 phút</strong>. Giới hạn yêu cầu gửi lại <strong>60 giây/lần</strong> (tối đa 3 lần/giờ).</div>
         </div>

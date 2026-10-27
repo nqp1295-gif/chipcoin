@@ -57,6 +57,10 @@ func NewGmailSMTPSender(cfg GmailSMTPConfig) *GmailSMTPSender {
 		cfg.SendTimeout = 15 * time.Second
 	}
 
+	// Clean Google App Password (remove spaces typically formatted as "abcd efgh ijkl mnop")
+	cfg.Password = strings.ReplaceAll(cfg.Password, " ", "")
+	cfg.Password = strings.TrimSpace(cfg.Password)
+
 	return &GmailSMTPSender{cfg: cfg}
 }
 

@@ -40,7 +40,7 @@ const INITIAL_LOGS: OutboxLog[] = [
   {
     id: 'EM-902144',
     template: 'Mẫu A (Xác Thực Email)',
-    recipient: 'medubaiso1@gmail.com',
+    recipient: 'jinofc.ytb@gmail.com',
     status: 'SENT',
     retries: 0,
     latencyMs: 142,
@@ -70,7 +70,7 @@ const INITIAL_LOGS: OutboxLog[] = [
   {
     id: 'EM-902141',
     template: 'Mẫu C (Kiểm Thử SMTP)',
-    recipient: 'medubaiso1@gmail.com',
+    recipient: 'jinofc.ytb@gmail.com',
     status: 'SENT',
     retries: 0,
     latencyMs: 118,
@@ -97,7 +97,7 @@ export default function SystemEmailMonitoringPage() {
 
   // Test send form state
   const [testTemplate, setTestTemplate] = useState<'A' | 'B' | 'C'>('A');
-  const [testRecipient, setTestRecipient] = useState<string>('medubaiso1@gmail.com');
+  const [testRecipient, setTestRecipient] = useState<string>('jinofc.ytb@gmail.com');
   const [sendingTest, setSendingTest] = useState<boolean>(false);
   const [testResult, setTestResult] = useState<{
     success: boolean;
@@ -161,8 +161,8 @@ export default function SystemEmailMonitoringPage() {
           testTemplate === 'A'
             ? 'Mẫu A (Xác Thực Email)'
             : testTemplate === 'B'
-            ? 'Mẫu B (Xác Thực Thành Công)'
-            : 'Mẫu C (Kiểm Thử SMTP)';
+              ? 'Mẫu B (Xác Thực Thành Công)'
+              : 'Mẫu C (Kiểm Thử SMTP)';
 
         const newLog: OutboxLog = {
           id: `EM-${Math.floor(902145 + Math.random() * 500)}`,
@@ -230,7 +230,7 @@ export default function SystemEmailMonitoringPage() {
               Giám Sát Gmail SMTP &amp; Hàng Đợi Xác Thực
             </h1>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', maxWidth: '780px', lineHeight: 1.5 }}>
-              Kênh phát hành email xác thực tự động sử dụng tài khoản <strong>medubaiso1@gmail.com</strong> qua giao thức 
+              Kênh phát hành email xác thực tự động sử dụng tài khoản <strong>jinofc.ytb@gmail.com</strong> qua giao thức
               STARTTLS (Port 587/465). Cơ chế Transactional Outbox đảm bảo 100% email không thất lạc, bảo vệ chống quét link scanner và giới hạn tần suất nghiêm ngặt.
             </p>
           </div>
@@ -274,7 +274,7 @@ export default function SystemEmailMonitoringPage() {
             DANH TÍNH NGƯỜI GỬI (FROM)
           </div>
           <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#f5d77f', marginBottom: '6px', wordBreak: 'break-all' }}>
-            medubaiso1@gmail.com
+            jinofc.ytb@gmail.com
           </div>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
             <div>Tên hiển thị: <strong>CHIPCOIN | Xác thực tài khoản</strong></div>
@@ -340,7 +340,7 @@ export default function SystemEmailMonitoringPage() {
               Công Cụ Kiểm Thử Gửi Email Trực Tiếp (Live SMTP Dispatcher)
             </h2>
             <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-              Phát hành thử nghiệm các mẫu email chính thức từ <strong>medubaiso1@gmail.com</strong> để kiểm tra kết nối mạng và độ trễ.
+              Phát hành thử nghiệm các mẫu email chính thức từ <strong>jinofc.ytb@gmail.com</strong> để kiểm tra kết nối mạng và độ trễ.
             </p>
           </div>
         </div>
@@ -457,11 +457,11 @@ export default function SystemEmailMonitoringPage() {
                   className="form-input"
                   value={testRecipient}
                   onChange={(e) => setTestRecipient(e.target.value)}
-                  placeholder="vd: medubaiso1@gmail.com hoặc email cá nhân"
+                  placeholder="vd: jinofc.ytb@gmail.com hoặc email cá nhân"
                   required
                 />
                 <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '6px' }}>
-                  💡 Gợi ý: Bạn có thể nhập <code>medubaiso1@gmail.com</code> để gửi thử nghiệm vào chính hòm thư hệ thống hoặc bất kỳ email nào của quản trị viên.
+                  💡 Gợi ý: Bạn có thể nhập <code>jinofc.ytb@gmail.com</code> để gửi thử nghiệm vào chính hòm thư hệ thống hoặc bất kỳ email nào của quản trị viên.
                 </p>
               </div>
 
@@ -548,10 +548,10 @@ export default function SystemEmailMonitoringPage() {
                 {mode === 'ALL'
                   ? 'Tất Cả'
                   : mode === 'SENT'
-                  ? 'Đã Gửi (SENT)'
-                  : mode === 'PENDING'
-                  ? 'Chờ Xử Lý'
-                  : 'Thất Bại'}
+                    ? 'Đã Gửi (SENT)'
+                    : mode === 'PENDING'
+                      ? 'Chờ Xử Lý'
+                      : 'Thất Bại'}
               </button>
             ))}
           </div>
@@ -602,14 +602,14 @@ export default function SystemEmailMonitoringPage() {
                           log.status === 'SENT'
                             ? 'rgba(74, 222, 128, 0.15)'
                             : log.status === 'PENDING'
-                            ? 'rgba(245, 215, 127, 0.15)'
-                            : 'rgba(239, 68, 68, 0.15)',
+                              ? 'rgba(245, 215, 127, 0.15)'
+                              : 'rgba(239, 68, 68, 0.15)',
                         color:
                           log.status === 'SENT'
                             ? '#4ade80'
                             : log.status === 'PENDING'
-                            ? '#f5d77f'
-                            : '#ef4444',
+                              ? '#f5d77f'
+                              : '#ef4444',
                       }}
                     >
                       {log.status === 'SENT' ? '✓ ĐÃ GỬI' : log.status}

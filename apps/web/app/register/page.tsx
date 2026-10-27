@@ -129,7 +129,7 @@ function RegisterForm() {
                   ✉️ Vui lòng xác thực email của bạn:
                 </div>
                 <div>
-                  Một email xác nhận đã được gửi từ <strong>medubaiso1@gmail.com</strong> tới hòm thư của bạn. Vui lòng mở hộp thư (kiểm tra cả mục Spam / Thư rác) và bấm liên kết xác nhận trong vòng <strong>15 phút</strong> để kích hoạt tài khoản.
+                  Một email xác nhận đã được gửi từ <strong>jinofc.ytb@gmail.com</strong> tới hòm thư của bạn. Vui lòng mở hộp thư (kiểm tra cả mục Spam / Thư rác) và bấm liên kết xác nhận trong vòng <strong>15 phút</strong> để kích hoạt tài khoản.
                 </div>
               </div>
             </div>
