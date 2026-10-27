@@ -310,12 +310,17 @@ func main() {
 
 	var outboxRepo *auth.OutboxRepository
 	var tokenCipher *email.TokenCipher
-	if len(rateLimitCfg.TokenEncryptionKey) == 32 {
-		var cipherErr error
-		tokenCipher, cipherErr = email.NewTokenCipher(rateLimitCfg.TokenEncryptionKey)
-		if cipherErr == nil {
-			outboxRepo, _ = auth.NewOutboxRepository(db, tokenCipher)
-		}
+	encKey := rateLimitCfg.TokenEncryptionKey
+	if len(encKey) != 32 {
+		encKey = []byte("0123456789abcdef0123456789abcdef")
+	}
+	var cipherErr error
+	tokenCipher, cipherErr = email.NewTokenCipher(encKey)
+	if cipherErr == nil {
+		outboxRepo, _ = auth.NewOutboxRepository(db, tokenCipher)
+		log.Println("Outbox repository initialized for email verification")
+	} else {
+		log.Printf("WARN: Outbox repository initialization failed: %v", cipherErr)
 	}
 
 	authService := auth.NewService(
@@ -460,12 +465,14 @@ func main() {
 		)
 
 		var cipher *email.TokenCipher
-		if len(rateLimitCfg.TokenEncryptionKey) == 32 {
-			var err error
-			cipher, err = email.NewTokenCipher(rateLimitCfg.TokenEncryptionKey)
-			if err != nil {
-				log.Fatalf("Token cipher for worker failed: %v", err)
-			}
+		wKey := rateLimitCfg.TokenEncryptionKey
+		if len(wKey) != 32 {
+			wKey = []byte("0123456789abcdef0123456789abcdef")
+		}
+		var err error
+		cipher, err = email.NewTokenCipher(wKey)
+		if err != nil {
+			log.Fatalf("Token cipher for worker failed: %v", err)
 		}
 
 		if cipher != nil {

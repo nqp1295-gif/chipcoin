@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"log"
 	"net/http"
 )
 
@@ -86,7 +87,13 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if h.outboxRepo != nil {
-		_ = h.outboxRepo.QueueResend(r.Context(), user.ID)
+		if err := h.outboxRepo.QueueResend(r.Context(), user.ID); err != nil {
+			log.Printf("ERROR: Failed to queue verification email for user %s (%s): %v", user.ID, user.Email, err)
+		} else {
+			log.Printf("INFO: Successfully queued verification email for user %s (%s)", user.ID, user.Email)
+		}
+	} else {
+		log.Printf("WARN: outboxRepo is nil in authHandler. Register did not queue email for user %s (%s)", user.ID, user.Email)
 	}
 
 	writeJSON(w, http.StatusCreated, map[string]any{

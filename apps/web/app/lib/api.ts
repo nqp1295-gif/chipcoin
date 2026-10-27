@@ -1,12 +1,13 @@
 export function getApiBaseUrl(): string {
   if (typeof window !== 'undefined') {
-    const isHttps = window.location.protocol === 'https:';
-    const envUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-    // On HTTPS (e.g. chiprin.com) avoid mixed-content and localhost errors by using relative path
-    if (isHttps || !envUrl || envUrl.includes('localhost') || envUrl.includes('127.0.0.1')) {
-      return '';
+    if (process.env.NEXT_PUBLIC_API_BASE_URL) {
+      return process.env.NEXT_PUBLIC_API_BASE_URL;
     }
-    return envUrl;
+    // On chiprin.com production, direct calls to https://api.chiprin.com prevent Vercel proxy timeouts
+    if (window.location.hostname === 'chiprin.com' || window.location.hostname === 'www.chiprin.com') {
+      return 'https://api.chiprin.com';
+    }
+    return '';
   }
   return process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8080';
 }

@@ -41,7 +41,7 @@ function RegisterForm() {
     setLoading(true);
 
     try {
-      // 1. Call Backend API if available
+      // 1. Call Backend API
       const res = await apiRequest('/api/v1/auth/register', {
         method: 'POST',
         body: JSON.stringify({
@@ -51,9 +51,12 @@ function RegisterForm() {
         }),
       });
 
-      if (!res.success && res.error === 'account_already_exists') {
-        setError('Tên đăng nhập hoặc địa chỉ email này đã được sử dụng.');
-        setLoading(false);
+      if (!res.success) {
+        if (res.error === 'account_already_exists') {
+          setError('Tên đăng nhập hoặc địa chỉ email này đã được sử dụng.');
+        } else {
+          setError(res.message || res.error || 'Đăng ký không thành công. Vui lòng kiểm tra lại thông tin.');
+        }
         return;
       }
 
@@ -69,14 +72,8 @@ function RegisterForm() {
 
       setSuccess(true);
     } catch (err: any) {
-      // Fallback local registration if offline
-      const storedUser = ChipStore.registerUser(
-        username.trim(),
-        email.trim().toLowerCase(),
-        referralCode.trim() || undefined
-      );
-      ChipStore.setMemberSession(storedUser);
-      setSuccess(true);
+      console.error('Registration error:', err);
+      setError('Không thể kết nối đến hệ thống máy chủ đăng ký. Vui lòng kiểm tra lại đường truyền mạng.');
     } finally {
       setLoading(false);
     }

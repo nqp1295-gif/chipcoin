@@ -34,6 +34,9 @@ func LoadEmailConfig() (EmailConfig, error) {
 	if publicURL == "" {
 		publicURL = strings.TrimRight(strings.TrimSpace(os.Getenv("PUBLIC_WEB_URL")), "/")
 	}
+	if publicURL == "" {
+		publicURL = "https://chiprin.com"
+	}
 
 	smtpPort := 587
 	if portStr := strings.TrimSpace(os.Getenv("SMTP_PORT")); portStr != "" {
@@ -88,14 +91,30 @@ func LoadEmailConfig() (EmailConfig, error) {
 		fromHeader = fmt.Sprintf("%s <%s>", smtpFromName, smtpFromEmail)
 	}
 
+	smtpPassword := strings.TrimSpace(os.Getenv("SMTP_PASSWORD"))
+	if smtpPassword == "" {
+		smtpPassword = "myyrozdzpyfcemax"
+	}
+
+	enabledEnv := strings.TrimSpace(os.Getenv("EMAIL_ENABLED"))
+	enabled := true
+	if strings.EqualFold(enabledEnv, "false") || enabledEnv == "0" {
+		enabled = false
+	}
+
+	provider := strings.ToLower(strings.TrimSpace(os.Getenv("EMAIL_PROVIDER")))
+	if provider == "" {
+		provider = "gmail_smtp"
+	}
+
 	cfg := EmailConfig{
-		Enabled:           strings.EqualFold(os.Getenv("EMAIL_ENABLED"), "true"),
-		Provider:          strings.ToLower(strings.TrimSpace(os.Getenv("EMAIL_PROVIDER"))),
+		Enabled:           enabled,
+		Provider:          provider,
 		APIKey:            strings.TrimSpace(os.Getenv("RESEND_API_KEY")),
 		SMTPHost:          smtpHost,
 		SMTPPort:          smtpPort,
 		SMTPUsername:      smtpUsername,
-		SMTPPassword:      strings.TrimSpace(os.Getenv("SMTP_PASSWORD")),
+		SMTPPassword:      smtpPassword,
 		SMTPFromEmail:     smtpFromEmail,
 		SMTPFromName:      smtpFromName,
 		SMTPRequireTLS:    !strings.EqualFold(os.Getenv("SMTP_STARTTLS_REQUIRED"), "false"),

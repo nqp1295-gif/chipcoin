@@ -84,24 +84,49 @@ func (s *GmailSMTPSender) SendVerification(
 	safeDisplayName := html.EscapeString(displayName)
 	safeURL := html.EscapeString(verificationURL)
 
-	subject := "[CHIPCOIN] Xác thực địa chỉ email của bạn"
+	rawToken := parsedURL.Query().Get("token")
+	safeToken := html.EscapeString(rawToken)
+
+	subject := "[CHIPCOIN] Mã xác thực tài khoản của bạn"
+
+	var tokenTextBlock string
+	if rawToken != "" {
+		tokenTextBlock = fmt.Sprintf("\n🔑 MÃ XÁC MINH CỦA BẠN (TOKEN 64 KÝ TỰ HEX):\n%s\n\nBạn có thể hoàn tất kích hoạt tài khoản bằng 1 trong 2 cách:\n- Cách 1: Nhấn trực tiếp vào liên kết bên dưới.\n- Cách 2: Mở trang xác thực https://chiprin.com/verify-email và dán mã 64 ký tự ở trên vào ô \"Mã xác minh (Token)\".\n", rawToken)
+	}
 
 	// Plain text version (Phase 7 - Mẫu A)
 	textBody := fmt.Sprintf(`Xin chào %s,
 
 Cảm ơn bạn đã đăng ký tài khoản CHIPCOIN.
-
-Để hoàn tất đăng ký, vui lòng xác thực địa chỉ email bằng liên kết sau:
+%s
+Liên kết xác thực trực tiếp:
 %s
 
-Liên kết có hiệu lực trong 15 phút và chỉ sử dụng một lần.
+Liên kết và mã xác minh có hiệu lực trong 15 phút và chỉ sử dụng một lần.
 
-Nếu bạn không tạo tài khoản này, hãy bỏ qua email. Không chia sẻ liên kết xác thực với bất kỳ ai.
+Nếu bạn không tạo tài khoản này, hãy bỏ qua email. Không chia sẻ mã xác thực với bất kỳ ai.
 
 Trân trọng,
 Đội ngũ CHIPCOIN
 Email gửi tự động từ %s — vui lòng không gửi mật khẩu hoặc mã bảo mật qua email.
-`, displayName, verificationURL, s.cfg.FromEmail)
+`, displayName, tokenTextBlock, verificationURL, s.cfg.FromEmail)
+
+	var tokenHTMLBlock string
+	if safeToken != "" {
+		tokenHTMLBlock = fmt.Sprintf(`
+              <!-- Token Box for copy-paste -->
+              <div style="background:#0e1014;border:1px dashed #d4af37;border-radius:12px;padding:18px;margin:0 0 24px 0;text-align:center">
+                <div style="font-size:12px;font-weight:700;color:#f5d77f;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px">
+                  🔑 MÃ XÁC MINH TÀI KHOẢN (TOKEN 64 KÝ TỰ HEX)
+                </div>
+                <div style="font-family:'Courier New',Courier,monospace;font-size:13px;font-weight:700;color:#38bdf8;background:#18191d;padding:12px 14px;border-radius:6px;word-break:break-all;user-select:all;-webkit-user-select:all;border:1px solid #28241b;margin-bottom:10px">
+                  %s
+                </div>
+                <div style="font-size:12px;color:#94a3b8;line-height:1.4">
+                  Sao chép mã trên và dán vào ô <strong>Mã xác minh (Token)</strong> tại trang xác thực email, hoặc bấm nút xác nhận bên dưới.
+                </div>
+              </div>`, safeToken)
+	}
 
 	// HTML version (Phase 7 - Mẫu A, responsive luxury design)
 	htmlBody := fmt.Sprintf(`<!doctype html>
@@ -134,16 +159,18 @@ Email gửi tự động từ %s — vui lòng không gửi mật khẩu hoặc 
               <p style="font-size:15px;line-height:1.6;color:#cbd5e1;margin:0 0 16px 0">
                 Xin chào <strong>%s</strong>,
               </p>
-              <p style="font-size:15px;line-height:1.6;color:#cbd5e1;margin:0 0 28px 0">
-                Cảm ơn bạn đã đăng ký tài khoản CHIPCOIN. Nhấn nút bên dưới để xác thực địa chỉ email và kích hoạt tài khoản nhận ngay <strong>+5,000 CHIP</strong> chào mừng.
+              <p style="font-size:15px;line-height:1.6;color:#cbd5e1;margin:0 0 24px 0">
+                Cảm ơn bạn đã đăng ký tài khoản CHIPCOIN. Sử dụng mã xác minh hoặc liên kết bên dưới để kích hoạt tài khoản và nhận ngay <strong>+5,000 CHIP</strong> chào mừng.
               </p>
+
+%s
 
               <!-- CTA Button -->
               <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 0 28px 0">
                 <tr>
                   <td align="center" style="border-radius:10px;background:linear-gradient(135deg,#f5d77f 0%%,#d4af37 100%%);box-shadow:0 8px 24px rgba(212,175,55,0.3)">
                     <a href="%s" target="_blank" style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:800;color:#0b0c0e;text-decoration:none;letter-spacing:0.02em">
-                      ✓ Xác Thực Kích Hoạt Tài Khoản
+                      ✓ Xác Thực Kích Hoạt Tài Khoản Ngay
                     </a>
                   </td>
                 </tr>
@@ -151,7 +178,7 @@ Email gửi tự động từ %s — vui lòng không gửi mật khẩu hoặc 
 
               <div style="background:#111215;border:1px solid #28241b;border-radius:10px;padding:16px;margin-bottom:24px">
                 <p style="font-size:13px;line-height:1.5;color:#fbbf24;margin:0 0 8px 0;font-weight:700">
-                  ⏳ Liên kết chỉ có hiệu lực trong 15 phút và chỉ sử dụng một lần.
+                  ⏳ Liên kết và mã xác minh chỉ có hiệu lực trong 15 phút và chỉ sử dụng một lần.
                 </p>
                 <p style="font-size:12px;line-height:1.5;color:#94a3b8;margin:0">
                   Nếu nút trên không mở được, hãy sao chép và dán liên kết sau vào trình duyệt:<br>
@@ -162,7 +189,7 @@ Email gửi tự động từ %s — vui lòng không gửi mật khẩu hoặc 
               <hr style="border:0;border-top:1px solid #2a251b;margin:24px 0">
 
               <p style="font-size:12px;line-height:1.6;color:#64748b;margin:0 0 8px 0">
-                Nếu bạn không thực hiện đăng ký này, hãy bỏ qua email. Không chia sẻ liên kết xác thực cho bất kỳ ai để bảo vệ tài sản của bạn.
+                Nếu bạn không thực hiện đăng ký này, hãy bỏ qua email. Không chia sẻ mã xác thực cho bất kỳ ai để bảo vệ tài sản của bạn.
               </p>
               <p style="font-size:12px;line-height:1.6;color:#64748b;margin:0">
                 CHIPCOIN · Email gửi tự động từ <strong>%s</strong>
@@ -174,7 +201,7 @@ Email gửi tự động từ %s — vui lòng không gửi mật khẩu hoặc 
     </tr>
   </table>
 </body>
-</html>`, safeDisplayName, safeURL, safeURL, safeURL, s.cfg.FromEmail)
+</html>`, safeDisplayName, tokenHTMLBlock, safeURL, safeURL, safeURL, s.cfg.FromEmail)
 
 	return s.sendMail(ctx, to, subject, textBody, htmlBody)
 }
