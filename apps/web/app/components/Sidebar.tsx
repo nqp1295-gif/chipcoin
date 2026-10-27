@@ -167,6 +167,32 @@ export const USER_MENU_GROUPS: MenuGroup[] = [
         ),
       },
       {
+        nameKey: 'tab_convert',
+        defaultName: 'Quy Đổi CHIP ↔ USDT',
+        href: '/wallet/convert',
+        badge: '1:5M',
+        badgeType: 'gold',
+        descKey: 'convert_desc',
+        defaultDesc: 'Tỷ giá cố định 1 USDT = 5,000,000 CHIP',
+        icon: ({ active }) => (
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={active ? '#f5d77f' : 'currentColor'}
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M17 1l4 4-4 4" />
+            <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+            <path d="M7 23l-4-4 4-4" />
+            <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+          </svg>
+        ),
+      },
+      {
         nameKey: 'nav_ton_wallet',
         defaultName: 'Liên Kết Ví TON',
         href: '/ton-wallet',

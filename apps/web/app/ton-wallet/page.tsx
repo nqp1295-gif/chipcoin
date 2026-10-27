@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useI18n } from '../lib/i18n';
 import { ChipStore, StoredUser, TIER_CONFIGS } from '../lib/store';
+import WalletNavTabs from '../wallet/components/WalletNavTabs';
 
 export default function TonWalletPage() {
   const { t } = useI18n();
@@ -18,6 +19,10 @@ export default function TonWalletPage() {
   const [otpCode, setOtpCode] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [otpTimer, setOtpTimer] = useState(0);
+
+  // Telegram Binding States
+  const [telegramId, setTelegramId] = useState('');
+  const [telegramUsername, setTelegramUsername] = useState('');
 
   // Status & Notification
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -34,6 +39,12 @@ export default function TonWalletPage() {
     setCurrentUser(mem);
     if (mem?.tonWalletAddress) {
       setTonAddress(mem.tonWalletAddress);
+    }
+    if (mem?.telegramUserId) {
+      setTelegramId(mem.telegramUserId);
+    }
+    if (mem?.telegramUsername) {
+      setTelegramUsername(mem.telegramUsername);
     }
   };
 
@@ -143,12 +154,32 @@ export default function TonWalletPage() {
     }, 600);
   };
 
+  const handleBindTelegram = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentUser) return;
+    if (!telegramId.trim()) {
+      setFeedback({ message: 'Vui lòng nhập ID người dùng Telegram (ví dụ: tg_982144912)', type: 'error' });
+      return;
+    }
+    try {
+      const updated = ChipStore.linkTelegram(currentUser.id, telegramId.trim(), telegramUsername.trim());
+      setCurrentUser(updated);
+      setFeedback({ message: '🎉 Đã liên kết tài khoản Telegram ID thành công với hệ thống CHIPCOIN!', type: 'success' });
+      setTimeout(() => setFeedback(null), 4500);
+    } catch (err: any) {
+      setFeedback({ message: err.message || 'Lỗi liên kết Telegram', type: 'error' });
+    }
+  };
+
   const isBound = Boolean(currentUser?.tonWalletAddress);
   const currentTierMeta = currentUser?.tier ? TIER_CONFIGS[currentUser.tier] : TIER_CONFIGS['CHIP GOLD'];
   const canWithdraw = currentTierMeta.canTransferAndWithdraw;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '1000px', margin: '0 auto', width: '100%' }}>
+      {/* Wallet Sub Navigation Tabs */}
+      <WalletNavTabs currentUser={currentUser} />
+
       {/* Top Banner with TON Styling */}
       <section
         className="glass-card"
@@ -687,6 +718,99 @@ export default function TonWalletPage() {
           )}
         </section>
       )}
+
+      {/* Telegram Identity & Wallet Link Section */}
+      <section
+        className="glass-card"
+        style={{
+          background: 'linear-gradient(135deg, rgba(0, 136, 204, 0.08) 0%, rgba(18, 20, 24, 0.95) 100%)',
+          border: '1.5px solid rgba(0, 136, 204, 0.35)',
+          padding: '2rem',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', flexWrap: 'wrap', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '1.8rem' }}>✈️</span>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#0088cc' }}>
+                Liên Kết Tài Khoản Telegram (Telegram Wallet & Mini App)
+              </h3>
+              <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                Đồng bộ tài khoản CHIPCOIN với Telegram User ID để nhận diện và nạp/rút USDT tức thì qua bot
+              </span>
+            </div>
+          </div>
+
+          <span
+            style={{
+              padding: '4px 12px',
+              borderRadius: '999px',
+              fontSize: '0.75rem',
+              fontWeight: 800,
+              background: currentUser?.telegramUserId ? 'rgba(52, 211, 153, 0.15)' : 'rgba(251, 191, 36, 0.15)',
+              color: currentUser?.telegramUserId ? '#34d399' : '#fbbf24',
+              border: `1px solid ${currentUser?.telegramUserId ? 'rgba(52, 211, 153, 0.35)' : 'rgba(251, 191, 36, 0.35)'}`,
+            }}
+          >
+            {currentUser?.telegramUserId ? '✓ ĐÃ LIÊN KẾT TELEGRAM' : 'CHƯA LIÊN KẾT'}
+          </span>
+        </div>
+
+        <form onSubmit={handleBindTelegram} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', alignItems: 'flex-end' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '6px' }}>
+              Telegram User ID (Định danh Telegram):
+            </label>
+            <input
+              type="text"
+              value={telegramId}
+              onChange={(e) => setTelegramId(e.target.value)}
+              placeholder="Ví dụ: tg_982144912 hoặc 982144912"
+              className="form-input"
+              style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem' }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '6px' }}>
+              Telegram Username (Tùy chọn):
+            </label>
+            <input
+              type="text"
+              value={telegramUsername}
+              onChange={(e) => setTelegramUsername(e.target.value)}
+              placeholder="Ví dụ: @chipcoin_vip"
+              className="form-input"
+              style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem' }}
+            />
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              className="nav-btn"
+              style={{
+                width: '100%',
+                padding: '11px',
+                background: 'linear-gradient(135deg, #0088cc 0%, #006699 100%)',
+                color: '#ffffff',
+                border: 'none',
+                fontWeight: 700,
+                fontSize: '0.9rem',
+              }}
+            >
+              Lưu Liên Kết Telegram
+            </button>
+          </div>
+        </form>
+
+        {currentUser?.telegramUserId && (
+          <div style={{ marginTop: '12px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+            Đang liên kết với: <b style={{ color: '#ffffff' }}>{currentUser.telegramUserId}</b>{' '}
+            {currentUser.telegramUsername && <span style={{ color: '#38bdf8' }}>({`@${currentUser.telegramUsername}`})</span>}
+          </div>
+        )}
+      </section>
 
       {/* Security Timelock Notice Box */}
       <section

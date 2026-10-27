@@ -238,6 +238,23 @@ export const DICTIONARIES: Record<SupportedLanguage, Record<string, string>> = {
     ton_timelock_title: 'LƯU Ý BẢO MẬT & TIMELOCK 7 NGÀY',
     ton_timelock_desc: 'Sau khi liên kết, tài khoản sẽ tự động kích hoạt cơ chế khóa an toàn 7 ngày (Security Timelock) đối với mọi yêu cầu thay đổi địa chỉ ví để bảo vệ số dư tài sản của bạn khỏi nguy cơ bị chiếm đoạt.',
     ton_balance_sync: 'Sẵn sàng nạp/rút CHIP qua mạng The Open Network khi đạt từ hạng CHIP PLATINUM trở lên.',
+
+    // Wallet Sub-tabs & Features
+    tab_overview: 'Tổng Quan Số Dư',
+    tab_convert: 'Quy Đổi CHIP ↔ USDT',
+    tab_deposit: 'Nạp USDT (TON)',
+    tab_withdraw: 'Rút USDT (TON)',
+    tab_connect: 'Liên Kết TON / Telegram',
+    rate_badge: 'TỶ GIÁ CỐ ĐỊNH CHÍNH THỨC',
+    rate_ratio: '1 USDT = 5,000,000 CHIP',
+    rate_sub: '1 micro-USDT = 5 CHIP | Hạch toán sổ cái kép minh bạch',
+    convert_title: 'Quy Đổi Hai Chiều CHIP ↔ USDT',
+    convert_desc: 'Hoán đổi tức thì giữa điểm thưởng CHIP và USDT nội bộ theo tỷ giá cố định 1 USDT = 5,000,000 CHIP.',
+    deposit_title: 'Nạp USDT Vào Hệ Thống (Mạng TON & Telegram Wallet)',
+    deposit_desc: 'Nạp USDT chuẩn TON Jetton qua địa chỉ Master Treasury hoặc chuyển trực tiếp từ Telegram Wallet.',
+    withdraw_title: 'Rút USDT Về Ví TON / Telegram Wallet',
+    withdraw_desc: 'Chuyển USDT nội bộ sang ví cá nhân trên blockchain TON. Yêu cầu hạng CHIP PLATINUM trở lên.',
+    withdraw_locked_msg: 'Chức năng rút tài sản chỉ mở cho hội viên từ hạng CHIP PLATINUM trở lên. Hãy tích luỹ đủ 5M CHIP và giới thiệu 10 thành viên xác thực để mở khóa!',
   },
 
   en: {
@@ -444,6 +461,23 @@ export const DICTIONARIES: Record<SupportedLanguage, Record<string, string>> = {
     ton_timelock_title: 'SECURITY TIMELOCK & 7-DAY COOLDOWN',
     ton_timelock_desc: 'Once bound, a mandatory 7-day security cooldown timelock applies to any address changes to safeguard assets.',
     ton_balance_sync: 'Ready for CHIP bridging via The Open Network once CHIP PLATINUM or above is reached.',
+
+    // Wallet Sub-tabs & Features
+    tab_overview: 'Balance Overview',
+    tab_convert: 'Convert CHIP ↔ USDT',
+    tab_deposit: 'Deposit USDT (TON)',
+    tab_withdraw: 'Withdraw USDT (TON)',
+    tab_connect: 'TON / Telegram Connect',
+    rate_badge: 'OFFICIAL FIXED RATE',
+    rate_ratio: '1 USDT = 5,000,000 CHIP',
+    rate_sub: '1 micro-USDT = 5 CHIP | Transparent double-entry ledger',
+    convert_title: 'Two-Way Conversion CHIP ↔ USDT',
+    convert_desc: 'Instantly swap between CHIP reward points and internal USDT at the fixed rate of 1 USDT = 5,000,000 CHIP.',
+    deposit_title: 'Deposit USDT via TON Network & Telegram Wallet',
+    deposit_desc: 'Deposit standard TON Jetton USDT via Master Treasury address or directly from Telegram Wallet.',
+    withdraw_title: 'Withdraw USDT to TON / Telegram Wallet',
+    withdraw_desc: 'Transfer internal USDT to personal TON blockchain wallet. Requires CHIP PLATINUM or above.',
+    withdraw_locked_msg: 'Withdrawal is exclusively unlocked for CHIP PLATINUM tier and above. Accumulate 5M CHIP & 10 verified referrals to unlock!',
   },
 
   zh: {
@@ -650,6 +684,23 @@ export const DICTIONARIES: Record<SupportedLanguage, Record<string, string>> = {
     ton_timelock_title: '安全提示与 7 天冷却时间锁',
     ton_timelock_desc: '绑定成功后，对任何更换钱包地址的请求系统将启动强制性 7 天安全时间锁（Security Timelock），以确保资产不受侵害。',
     ton_balance_sync: '达到 CHIP PLATINUM 级及以上即可开启通过 TON 网络充提 CHIP。',
+
+    // Wallet Sub-tabs & Features
+    tab_overview: '资产总览',
+    tab_convert: '兑换 CHIP ↔ USDT',
+    tab_deposit: '充值 USDT (TON)',
+    tab_withdraw: '提现 USDT (TON)',
+    tab_connect: '绑定 TON / Telegram',
+    rate_badge: '官方固定兑换汇率',
+    rate_ratio: '1 USDT = 5,000,000 CHIP',
+    rate_sub: '1 micro-USDT = 5 CHIP | 双式记账透明保障',
+    convert_title: 'CHIP ↔ USDT 双向兑换',
+    convert_desc: '根据 1 USDT = 5,000,000 CHIP 的固定汇率即时兑换内部积分与 USDT。',
+    deposit_title: '通过 TON 网络与 Telegram 钱包充值 USDT',
+    deposit_desc: '通过主金库地址或直接从 Telegram 钱包充值标准 TON Jetton USDT。',
+    withdraw_title: '提现 USDT 到 TON / Telegram 钱包',
+    withdraw_desc: '将内部 USDT 转出到个人 TON 链上钱包。要求达到 CHIP PLATINUM 或以上级别。',
+    withdraw_locked_msg: '提现功能仅对 CHIP PLATINUM 及以上级别会员开放。累积 5M CHIP 并推荐 10 位完成邮箱认证的好友即可解锁！',
   },
 
   fr: {
@@ -856,6 +907,23 @@ export const DICTIONARIES: Record<SupportedLanguage, Record<string, string>> = {
     ton_timelock_title: 'VERROUILLAGE DE SÉCURITÉ TIMELOCK (7 JOURS)',
     ton_timelock_desc: 'Une fois lié, un délai de sécurité de 7 jours s’applique avant toute modification d’adresse pour protéger vos avoirs.',
     ton_balance_sync: 'Disponible pour les dépôts/retraits dès le rang CHIP PLATINUM atteint.',
+
+    // Wallet Sub-tabs & Features
+    tab_overview: 'Aperçu du Solde',
+    tab_convert: 'Conversion CHIP ↔ USDT',
+    tab_deposit: 'Dépôt USDT (TON)',
+    tab_withdraw: 'Retrait USDT (TON)',
+    tab_connect: 'Liaison TON / Telegram',
+    rate_badge: 'TAUX FIXE OFFICIEL',
+    rate_ratio: '1 USDT = 5,000,000 CHIP',
+    rate_sub: '1 micro-USDT = 5 CHIP | Grand livre en partie double transparent',
+    convert_title: 'Conversion Bilatérale CHIP ↔ USDT',
+    convert_desc: 'Échangez instantanément entre points CHIP et USDT interne au taux fixe de 1 USDT = 5 000 000 CHIP.',
+    deposit_title: 'Déposer des USDT via le réseau TON & Telegram Wallet',
+    deposit_desc: 'Déposez des USDT TON Jetton via l’adresse du trésor ou directement depuis Telegram Wallet.',
+    withdraw_title: 'Retirer des USDT vers le portefeuille TON / Telegram',
+    withdraw_desc: 'Transférez des USDT internes vers votre portefeuille TON. Nécessite le rang CHIP PLATINUM ou supérieur.',
+    withdraw_locked_msg: 'Le retrait est réservé aux membres CHIP PLATINUM ou supérieur. Atteignez 5M de CHIP et 10 filleuls vérifiés pour débloquer !',
   },
 
   es: {
@@ -1062,6 +1130,23 @@ export const DICTIONARIES: Record<SupportedLanguage, Record<string, string>> = {
     ton_timelock_title: 'BLOQUEO DE SEGURIDAD TIMELOCK DE 7 DÍAS',
     ton_timelock_desc: 'Una vez vinculada, se aplicará un timelock obligatorio de 7 días antes de poder modificar la dirección para salvaguardar sus fondos.',
     ton_balance_sync: 'Habilitado para depósitos y retiros en TON a partir del nivel CHIP PLATINUM.',
+
+    // Wallet Sub-tabs & Features
+    tab_overview: 'Resumen de Saldo',
+    tab_convert: 'Convertir CHIP ↔ USDT',
+    tab_deposit: 'Depositar USDT (TON)',
+    tab_withdraw: 'Retirar USDT (TON)',
+    tab_connect: 'Vincular TON / Telegram',
+    rate_badge: 'TIPO DE CAMBIO FIJO OFICIAL',
+    rate_ratio: '1 USDT = 5,000,000 CHIP',
+    rate_sub: '1 micro-USDT = 5 CHIP | Libro contable por partida doble',
+    convert_title: 'Conversión Bidireccional CHIP ↔ USDT',
+    convert_desc: 'Intercambia al instante entre puntos CHIP y USDT interno a la tasa fija de 1 USDT = 5,000,000 CHIP.',
+    deposit_title: 'Depositar USDT vía Red TON & Telegram Wallet',
+    deposit_desc: 'Deposita USDT Jetton en TON vía la dirección de tesorería o directamente desde Telegram Wallet.',
+    withdraw_title: 'Retirar USDT a Billetera TON / Telegram',
+    withdraw_desc: 'Transfiere USDT interno a tu billetera TON. Requiere nivel CHIP PLATINUM o superior.',
+    withdraw_locked_msg: 'El retiro es exclusivo para miembros con nivel CHIP PLATINUM o superior. ¡Acumula 5M de CHIP y 10 referidos verificados para desbloquear!',
   },
 
   ar: {
@@ -1268,6 +1353,23 @@ export const DICTIONARIES: Record<SupportedLanguage, Record<string, string>> = {
     ton_timelock_title: 'تنبيه أمني وقفل التجميد الزمني (7 أيام)',
     ton_timelock_desc: 'بعد إتمام الربط، يطبق النظام قفلاً أمنياً لمدة 7 أيام يمنع تغيير العنوان وذلك لحماية رصيدك من الاختراق.',
     ton_balance_sync: 'جاهز لعمليات التحويل والسحب عبر شبكة TON بمجرد بلوغ رتبة CHIP PLATINUM فأعلى.',
+
+    // Wallet Sub-tabs & Features
+    tab_overview: 'نظرة عامة على الرصيد',
+    tab_convert: 'تحويل CHIP ↔ USDT',
+    tab_deposit: 'إيداع USDT (TON)',
+    tab_withdraw: 'سحب USDT (TON)',
+    tab_connect: 'ربط محفظة TON / Telegram',
+    rate_badge: 'سعر الصرف الثابت الرسمي',
+    rate_ratio: '1 USDT = 5,000,000 CHIP',
+    rate_sub: '1 micro-USDT = 5 CHIP | دفتر أستاذ محاسبي مزدوج وشفاف',
+    convert_title: 'تحويل ثنائي الاتجاه بين CHIP وUSDT',
+    convert_desc: 'تحويل فوري بين نقاط CHIP وUSDT الداخلي وفق السعر الثابت 1 USDT = 5,000,000 CHIP.',
+    deposit_title: 'إيداع USDT عبر شبكة TON ومحفظة تيليجرام',
+    deposit_desc: 'إيداع USDT عبر عنوان الخزينة الرئيسية أو مباشرة من محفظة تيليجرام.',
+    withdraw_title: 'سحب USDT إلى محفظة TON أو تيليجرام',
+    withdraw_desc: 'سحب USDT الداخلي إلى محفظتك الشخصية على بلوكشين TON. يتطلب رتبة CHIP PLATINUM فما فوق.',
+    withdraw_locked_msg: 'خاصية السحب متاحة حصرياً لرتبة CHIP PLATINUM وما فوق. اجمع 5 ملايين CHIP مع 10 إحالات موثقة لفتح الخاصية!',
   },
 };
 

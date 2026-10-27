@@ -176,8 +176,8 @@ export default function UserOverviewPage() {
           >
             {balance.toLocaleString()}
           </div>
-          <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            ≈ ${(balance / 10000).toFixed(2)} USD
+          <div style={{ fontSize: '0.82rem', color: '#38bdf8', marginTop: '4px' }}>
+            ≈ {(balance / 5000000).toFixed(4)} USDT (1 USDT = 5,000,000 CHIP)
           </div>
         </div>
 

@@ -1,8 +1,9 @@
 'use client';
 
 // ============================================================================
-// CHIPCOIN CENTRALIZED DATA STORE & SYNCHRONIZATION ENGINE (v3)
-// Bridges Member Portal & System Admin Portal in real time
+// CHIPCOIN CENTRALIZED DATA STORE & TON / TELEGRAM WALLET LEDGER ENGINE (v4)
+// Implements: 1 USDT = 5,000,000 CHIP fixed internal conversion rate
+// Telegram Wallet & TON Connect Integration, Deposit/Withdrawal State Machines
 // ============================================================================
 
 export type MemberTier =
@@ -25,7 +26,24 @@ export interface TierConfig {
   description: string;
 }
 
-// 1. Updated Tier Conditions as per User Request:
+// ============================================================================
+// OFFICIAL FIXED EXCHANGE RATE DEFINITIONS (CHIPCOIN_TELEGRAM_WALLET.md)
+// 1 USDT = 5,000,000 CHIP (1 micro-USDT = 5 CHIP)
+// ============================================================================
+export const CHIP_PER_USDT = 5000000;
+export const USDT_PER_CHIP = 1 / 5000000; // 0.0000002
+
+export function chipToUsdt(chips: number): number {
+  if (!chips || chips <= 0) return 0;
+  return Number((chips / CHIP_PER_USDT).toFixed(6));
+}
+
+export function usdtToChip(usdt: number): number {
+  if (!usdt || usdt <= 0) return 0;
+  return Math.round(usdt * CHIP_PER_USDT);
+}
+
+// 1. Updated Tier Conditions:
 // - CHIP MEMBER: Registered + Email verified (0%)
 // - CHIP GOLD: > 1,000,000 chips (1m) + 3 email-verified refs (3%)
 // - CHIP PLATINUM: > 5,000,000 chips (5m) + 10 email-verified refs (5%, withdraw/transfer)
@@ -52,7 +70,7 @@ export const TIER_CONFIGS: Record<MemberTier, TierConfig> = {
     bonusRate: 0.03,
     canTransferAndWithdraw: false,
     extendedPrivileges: false,
-    badgeColor: '#f59e0b',
+    badgeColor: '#f5d77f',
     gradient: 'linear-gradient(135deg, #fbbf24 0%, #d97706 100%)',
     description: 'Thu thập > 1m chip + Giới thiệu 3 người xác thực email (Thưởng 3% chip)',
   },
@@ -106,11 +124,15 @@ export interface StoredUser {
   referralCode: string;
   referredBy?: string;
   chipsBalance: number;
+  usdtBalance: number; // Internal USDT balance (6 decimal precision)
   streakDays: number;
   lastClaimDate?: string;
   avatarUrl?: string; // Custom uploaded avatar base64 or URL
   tonWalletAddress?: string; // Connected TON wallet address (EQ... / UQ...)
   tonBoundAt?: string;
+  telegramUserId?: string; // Connected Telegram ID e.g. "tg_982144912"
+  telegramUsername?: string; // Telegram @username
+  twoFactorEnabled?: boolean; // 2FA protection for withdrawals/conversions
 }
 
 export interface StoredReferralLink {
@@ -146,7 +168,54 @@ export interface ChipAllocationRecord {
   allocatedAt: string;
 }
 
-// Initial Seed Data aligned strictly with new tier requirements
+// Conversion Order (CHIP <-> USDT)
+export interface ConversionOrder {
+  id: string;
+  userId: string;
+  userEmail: string;
+  fromAsset: 'CHIP' | 'USDT';
+  toAsset: 'CHIP' | 'USDT';
+  sourceAmount: number;
+  targetAmount: number;
+  rateApplied: string; // e.g. "1 USDT = 5,000,000 CHIP"
+  createdAt: string;
+  status: 'SETTLED';
+}
+
+// Deposit Intent (USDT on TON/Telegram Wallet -> CHIPCOIN)
+export interface DepositIntent {
+  id: string;
+  userId: string;
+  userEmail: string;
+  amountUsdt: number;
+  equivalentChip: number;
+  depositAddress: string;
+  memo: string;
+  network: 'TON Mainnet';
+  asset: 'USDT (TON Jetton)';
+  status: 'PENDING' | 'CONFIRMED' | 'SETTLED';
+  txHash?: string;
+  createdAt: string;
+  settledAt?: string;
+}
+
+// Withdrawal Order (CHIPCOIN -> USDT on TON / Telegram Wallet)
+export interface WithdrawalOrder {
+  id: string;
+  userId: string;
+  userEmail: string;
+  amountUsdt: number;
+  feeUsdt: number;
+  netAmountUsdt: number;
+  destinationTonAddress: string;
+  network: 'TON Mainnet';
+  status: 'AWAITING_2FA' | 'REVIEW' | 'QUEUED' | 'CONFIRMED' | 'SETTLED';
+  txHash?: string;
+  createdAt: string;
+  settledAt?: string;
+}
+
+// Initial Seed Data aligned strictly with 1 USDT = 5,000,000 CHIP
 const SEED_USERS: StoredUser[] = [
   {
     id: 'usr-admin-001',
@@ -159,10 +228,14 @@ const SEED_USERS: StoredUser[] = [
     tier: 'CHIP SPECIAL',
     referralCode: 'CHIP-ADMIN-01',
     chipsBalance: 500000000,
+    usdtBalance: 100.00, // 500,000,000 CHIP / 5,000,000 = 100 USDT
     streakDays: 45,
     avatarUrl: '',
     tonWalletAddress: 'EQBvW8Z5huBkMJYdn3PCDnHoKK3xNJa_W0C_z8LgqG12Ton',
     tonBoundAt: '2026-09-02T10:00:00Z',
+    telegramUserId: 'tg_889102481',
+    telegramUsername: 'admin_chipcoin',
+    twoFactorEnabled: true,
   },
   {
     id: 'usr-asst-002',
@@ -175,7 +248,9 @@ const SEED_USERS: StoredUser[] = [
     tier: 'CHIP DIAMOND',
     referralCode: 'CHIP-ASST-02',
     chipsBalance: 16500000,
+    usdtBalance: 3.30, // 16.5M / 5M = 3.3 USDT
     streakDays: 28,
+    twoFactorEnabled: true,
   },
   {
     id: 'usr-spec-003',
@@ -188,7 +263,9 @@ const SEED_USERS: StoredUser[] = [
     tier: 'CHIP PLATINUM',
     referralCode: 'CHIP-SPEC-03',
     chipsBalance: 6500000,
+    usdtBalance: 1.30, // 6.5M / 5M = 1.3 USDT
     streakDays: 19,
+    twoFactorEnabled: true,
   },
   {
     id: 'usr-mem-001',
@@ -201,9 +278,13 @@ const SEED_USERS: StoredUser[] = [
     tier: 'CHIP SPECIAL', // > 50m chips + 50 refs
     referralCode: 'CHIP-ALEX-99',
     chipsBalance: 52000000,
+    usdtBalance: 10.40, // 52M / 5M = 10.4 USDT
     streakDays: 22,
     tonWalletAddress: 'EQC3_a78WJkl92NxOpmLkQwErTy1408ZzX9AklPq90Ton',
     tonBoundAt: '2026-10-15T08:30:00Z',
+    telegramUserId: 'tg_149201948',
+    telegramUsername: 'alex_investor',
+    twoFactorEnabled: true,
   },
   {
     id: 'usr-mem-002',
@@ -217,9 +298,13 @@ const SEED_USERS: StoredUser[] = [
     referralCode: 'CHIP-SOPH-77',
     referredBy: 'CHIP-ALEX-99',
     chipsBalance: 16250000,
+    usdtBalance: 3.25, // 16.25M / 5M = 3.25 USDT
     streakDays: 14,
     tonWalletAddress: 'UQDFG78_aZqR91KlmOxWqPq78119028AkLmOp120Ton',
     tonBoundAt: '2026-10-20T12:00:00Z',
+    telegramUserId: 'tg_602189412',
+    telegramUsername: 'sophia_crypto',
+    twoFactorEnabled: true,
   },
   {
     id: 'usr-mem-003',
@@ -233,7 +318,9 @@ const SEED_USERS: StoredUser[] = [
     referralCode: 'CHIP-DAVI-55',
     referredBy: 'CHIP-SOPH-77',
     chipsBalance: 5800000,
+    usdtBalance: 1.16, // 5.8M / 5M = 1.16 USDT
     streakDays: 9,
+    twoFactorEnabled: true,
   },
   {
     id: 'usr-mem-004',
@@ -247,7 +334,9 @@ const SEED_USERS: StoredUser[] = [
     referralCode: 'CHIP-MINH-33',
     referredBy: 'CHIP-DAVI-55',
     chipsBalance: 1250000,
+    usdtBalance: 0.25, // 1.25M / 5M = 0.25 USDT
     streakDays: 5,
+    twoFactorEnabled: false,
   },
   {
     id: 'usr-mem-005',
@@ -261,7 +350,9 @@ const SEED_USERS: StoredUser[] = [
     referralCode: 'CHIP-EMMA-11',
     referredBy: 'CHIP-MINH-33',
     chipsBalance: 45000,
+    usdtBalance: 0.009,
     streakDays: 2,
+    twoFactorEnabled: false,
   },
   {
     id: 'usr-mem-006',
@@ -275,7 +366,71 @@ const SEED_USERS: StoredUser[] = [
     referralCode: 'CHIP-LUCA-09',
     referredBy: 'CHIP-MINH-33',
     chipsBalance: 5000,
+    usdtBalance: 0.001,
     streakDays: 0,
+    twoFactorEnabled: false,
+  },
+];
+
+const SEED_CONVERSIONS: ConversionOrder[] = [
+  {
+    id: 'ord-conv-001',
+    userId: 'usr-mem-001',
+    userEmail: 'alex.investor@example.com',
+    fromAsset: 'USDT',
+    toAsset: 'CHIP',
+    sourceAmount: 10,
+    targetAmount: 50000000,
+    rateApplied: '1 USDT = 5,000,000 CHIP',
+    createdAt: '2026-10-24T10:15:00Z',
+    status: 'SETTLED',
+  },
+  {
+    id: 'ord-conv-002',
+    userId: 'usr-mem-002',
+    userEmail: 'sophia.chain@example.com',
+    fromAsset: 'CHIP',
+    toAsset: 'USDT',
+    sourceAmount: 10000000,
+    targetAmount: 2.0,
+    rateApplied: '1 USDT = 5,000,000 CHIP',
+    createdAt: '2026-10-25T14:30:00Z',
+    status: 'SETTLED',
+  },
+];
+
+const SEED_DEPOSITS: DepositIntent[] = [
+  {
+    id: 'dep-intent-001',
+    userId: 'usr-mem-001',
+    userEmail: 'alex.investor@example.com',
+    amountUsdt: 10.0,
+    equivalentChip: 50000000,
+    depositAddress: 'EQBvW8Z5huBkMJYdn3PCDnHoKK3xNJa_W0C_z8LgqG12Ton',
+    memo: 'DEP-ALEX-9901',
+    network: 'TON Mainnet',
+    asset: 'USDT (TON Jetton)',
+    status: 'SETTLED',
+    txHash: '0x7e29...9a12',
+    createdAt: '2026-10-24T09:40:00Z',
+    settledAt: '2026-10-24T09:42:15Z',
+  },
+];
+
+const SEED_WITHDRAWALS: WithdrawalOrder[] = [
+  {
+    id: 'wdr-ord-001',
+    userId: 'usr-mem-001',
+    userEmail: 'alex.investor@example.com',
+    amountUsdt: 5.0,
+    feeUsdt: 0.1,
+    netAmountUsdt: 4.9,
+    destinationTonAddress: 'EQC3_a78WJkl92NxOpmLkQwErTy1408ZzX9AklPq90Ton',
+    network: 'TON Mainnet',
+    status: 'SETTLED',
+    txHash: '0x94fb...31de',
+    createdAt: '2026-10-25T16:00:00Z',
+    settledAt: '2026-10-25T16:05:00Z',
   },
 ];
 
@@ -361,7 +516,7 @@ const SEED_PROMOTIONS: TierPromotionRecord[] = [
     newTier: 'CHIP PLATINUM',
     milestoneMet: 'Thu thập > 5,000,000 CHIP + 10 F1 xác thực email',
     promotedAt: '2026-10-19T11:00:00Z',
-    privilegesGranted: 'Thưởng 5% hoa hồng nhánh, quyền gửi/nhận & rút chip',
+    privilegesGranted: 'Thưởng 5% hoa hồng nhánh, quyền gửi/nhận & rút chip sang USDT ví TON',
   },
   {
     id: 'prm-004',
@@ -429,10 +584,13 @@ const SEED_ALLOCATIONS: ChipAllocationRecord[] = [
 ];
 
 const STORAGE_KEYS = {
-  USERS: 'chipcoin_synced_users_v3',
-  REFERRALS: 'chipcoin_synced_referrals_v3',
-  PROMOTIONS: 'chipcoin_synced_promotions_v3',
-  ALLOCATIONS: 'chipcoin_synced_allocations_v3',
+  USERS: 'chipcoin_synced_users_v4',
+  REFERRALS: 'chipcoin_synced_referrals_v4',
+  PROMOTIONS: 'chipcoin_synced_promotions_v4',
+  ALLOCATIONS: 'chipcoin_synced_allocations_v4',
+  CONVERSIONS: 'chipcoin_synced_conversions_v4',
+  DEPOSITS: 'chipcoin_synced_deposits_v4',
+  WITHDRAWALS: 'chipcoin_synced_withdrawals_v4',
   USER_SESSION: 'chipcoin_user_session',
   SYSTEM_SESSION: 'chipcoin_system_session',
 };
@@ -494,7 +652,7 @@ export const ChipStore = {
     return users.find((u) => u.referralCode.toUpperCase() === code.toUpperCase());
   },
 
-  // 2. Add or Register a new user
+  // 2. Register user
   registerUser(
     username: string,
     email: string,
@@ -520,14 +678,15 @@ export const ChipStore = {
       referralCode: newCode,
       referredBy: referredByCode?.trim() || undefined,
       chipsBalance: 5000, // Welcome gift +5,000 CHIP
+      usdtBalance: 0.001,
       streakDays: 1,
       avatarUrl: '',
+      twoFactorEnabled: false,
     };
 
     users.unshift(newUser);
     safeSet(STORAGE_KEYS.USERS, users);
 
-    // If referred by someone, record referral branch
     if (referredByCode) {
       const referrer = this.getUserByReferralCode(referredByCode);
       if (referrer) {
@@ -542,7 +701,6 @@ export const ChipStore = {
           commissionPaidToReferrer: Math.round(5000 * (TIER_CONFIGS[referrer.tier]?.bonusRate || 0)),
         });
 
-        // Credit referral welcome bonus to referrer (+10,000 CHIP)
         this.addChips(referrer.id, 10000, 'Hoa hồng giới thiệu thành viên mới');
       }
     }
@@ -550,7 +708,7 @@ export const ChipStore = {
     return newUser;
   },
 
-  // 3. Update Chips balance & Check Tier Promotion
+  // 3. Add Chips balance & Check Tier Promotion
   addChips(userId: string, amount: number, reason: string): { user: StoredUser; promoted: boolean } {
     const users = this.getUsers();
     const idx = users.findIndex((u) => u.id === userId);
@@ -560,11 +718,9 @@ export const ChipStore = {
     const oldTier = u.tier;
     u.chipsBalance += amount;
 
-    // Count verified referrals
     const referrals = this.getReferralsByReferrer(u.referralCode);
     const verifiedRefs = referrals.filter((r) => r.isEmailVerified).length;
 
-    // Strict qualification check
     const newTier = calculateTier(u.chipsBalance, verifiedRefs);
     let promoted = false;
 
@@ -572,7 +728,6 @@ export const ChipStore = {
       u.tier = newTier;
       promoted = true;
 
-      // Log promotion event
       const promoRecord: TierPromotionRecord = {
         id: `prm-${Date.now()}`,
         userId: u.id,
@@ -588,7 +743,6 @@ export const ChipStore = {
       safeSet(STORAGE_KEYS.PROMOTIONS, promos);
     }
 
-    // Log chip allocation
     const allocRecord: ChipAllocationRecord = {
       id: `alc-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       userId: u.id,
@@ -606,27 +760,14 @@ export const ChipStore = {
     users[idx] = u;
     safeSet(STORAGE_KEYS.USERS, users);
 
-    // Update active session
-    try {
-      const cur = localStorage.getItem(STORAGE_KEYS.USER_SESSION);
-      if (cur) {
-        const parsed = JSON.parse(cur);
-        if (parsed.email === u.email || parsed.id === u.id) {
-          localStorage.setItem(
-            STORAGE_KEYS.USER_SESSION,
-            JSON.stringify({ ...parsed, ...u })
-          );
-        }
-      }
-    } catch (e) {}
-
+    this.syncSessionIfActive(u);
     return { user: u, promoted };
   },
 
-  // 4. Update Profile (DisplayName, Avatar, Password)
+  // 4. Update Profile
   updateProfile(
     userId: string,
-    updates: { username?: string; avatarUrl?: string }
+    updates: { username?: string; avatarUrl?: string; twoFactorEnabled?: boolean }
   ): StoredUser {
     const users = this.getUsers();
     const idx = users.findIndex((u) => u.id === userId);
@@ -639,29 +780,17 @@ export const ChipStore = {
     if (typeof updates.avatarUrl === 'string') {
       u.avatarUrl = updates.avatarUrl;
     }
+    if (typeof updates.twoFactorEnabled === 'boolean') {
+      u.twoFactorEnabled = updates.twoFactorEnabled;
+    }
 
     users[idx] = u;
     safeSet(STORAGE_KEYS.USERS, users);
-
-    // Update current session
-    try {
-      const cur = localStorage.getItem(STORAGE_KEYS.USER_SESSION);
-      if (cur) {
-        const parsed = JSON.parse(cur);
-        if (parsed.email === u.email || parsed.id === u.id) {
-          localStorage.setItem(
-            STORAGE_KEYS.USER_SESSION,
-            JSON.stringify({ ...parsed, ...u })
-          );
-        }
-      }
-    } catch (e) {}
-
-    window.dispatchEvent(new Event('chipcoin_session_changed'));
+    this.syncSessionIfActive(u);
     return u;
   },
 
-  // 5. TON Wallet Binding & Cryptographic Verification
+  // 5. TON Wallet & Telegram Binding
   bindTonWallet(userId: string, tonAddress: string): StoredUser {
     const users = this.getUsers();
     const idx = users.findIndex((u) => u.id === userId);
@@ -673,25 +802,219 @@ export const ChipStore = {
 
     users[idx] = u;
     safeSet(STORAGE_KEYS.USERS, users);
-
-    try {
-      const cur = localStorage.getItem(STORAGE_KEYS.USER_SESSION);
-      if (cur) {
-        const parsed = JSON.parse(cur);
-        if (parsed.email === u.email || parsed.id === u.id) {
-          localStorage.setItem(
-            STORAGE_KEYS.USER_SESSION,
-            JSON.stringify({ ...parsed, ...u })
-          );
-        }
-      }
-    } catch (e) {}
-
-    window.dispatchEvent(new Event('chipcoin_session_changed'));
+    this.syncSessionIfActive(u);
     return u;
   },
 
-  // 6. Referral Management
+  linkTelegram(userId: string, telegramId: string, telegramUsername?: string): StoredUser {
+    const users = this.getUsers();
+    const idx = users.findIndex((u) => u.id === userId);
+    if (idx === -1) throw new Error('User not found');
+
+    const u = users[idx];
+    u.telegramUserId = telegramId.trim();
+    u.telegramUsername = telegramUsername?.replace('@', '').trim() || undefined;
+
+    users[idx] = u;
+    safeSet(STORAGE_KEYS.USERS, users);
+    this.syncSessionIfActive(u);
+    return u;
+  },
+
+  // 6. Conversions: CHIP <-> USDT (Strict 1 USDT = 5,000,000 CHIP rate)
+  getConversions(): ConversionOrder[] {
+    return safeGet<ConversionOrder[]>(STORAGE_KEYS.CONVERSIONS, SEED_CONVERSIONS);
+  },
+
+  convertAssets(
+    userId: string,
+    fromAsset: 'CHIP' | 'USDT',
+    sourceAmount: number
+  ): { user: StoredUser; order: ConversionOrder } {
+    if (sourceAmount <= 0) throw new Error('Số lượng chuyển đổi phải lớn hơn 0');
+
+    const users = this.getUsers();
+    const idx = users.findIndex((u) => u.id === userId);
+    if (idx === -1) throw new Error('Không tìm thấy tài khoản người dùng');
+
+    const u = users[idx];
+    let targetAmount = 0;
+
+    if (fromAsset === 'CHIP') {
+      if (u.chipsBalance < sourceAmount) {
+        throw new Error('Số dư CHIP không đủ để quy đổi');
+      }
+      targetAmount = Number((sourceAmount / CHIP_PER_USDT).toFixed(6));
+      u.chipsBalance -= sourceAmount;
+      u.usdtBalance = Number(((u.usdtBalance || 0) + targetAmount).toFixed(6));
+    } else {
+      // from USDT to CHIP
+      if ((u.usdtBalance || 0) < sourceAmount) {
+        throw new Error('Số dư USDT không đủ để quy đổi sang CHIP');
+      }
+      targetAmount = Math.round(sourceAmount * CHIP_PER_USDT);
+      u.usdtBalance = Number(((u.usdtBalance || 0) - sourceAmount).toFixed(6));
+      u.chipsBalance += targetAmount;
+
+      // Check tier promotion if chips increased
+      const refs = this.getReferralsByReferrer(u.referralCode);
+      const verifiedCount = refs.filter((r) => r.isEmailVerified).length;
+      u.tier = calculateTier(u.chipsBalance, verifiedCount);
+    }
+
+    const order: ConversionOrder = {
+      id: `ord-conv-${Date.now()}`,
+      userId: u.id,
+      userEmail: u.email,
+      fromAsset,
+      toAsset: fromAsset === 'CHIP' ? 'USDT' : 'CHIP',
+      sourceAmount,
+      targetAmount,
+      rateApplied: '1 USDT = 5,000,000 CHIP',
+      createdAt: new Date().toISOString(),
+      status: 'SETTLED',
+    };
+
+    const convs = this.getConversions();
+    convs.unshift(order);
+    safeSet(STORAGE_KEYS.CONVERSIONS, convs);
+
+    users[idx] = u;
+    safeSet(STORAGE_KEYS.USERS, users);
+    this.syncSessionIfActive(u);
+
+    return { user: u, order };
+  },
+
+  // 7. Deposits: USDT (TON Jetton / Telegram Wallet)
+  getDeposits(): DepositIntent[] {
+    return safeGet<DepositIntent[]>(STORAGE_KEYS.DEPOSITS, SEED_DEPOSITS);
+  },
+
+  createDepositIntent(userId: string, amountUsdt: number): DepositIntent {
+    if (amountUsdt <= 0) throw new Error('Số lượng nạp USDT phải lớn hơn 0');
+
+    const user = this.getUserById(userId);
+    if (!user) throw new Error('Không tìm thấy người dùng');
+
+    const equivalentChip = Math.round(amountUsdt * CHIP_PER_USDT);
+    const memo = `DEP-${user.username.toUpperCase().slice(0, 4)}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const intent: DepositIntent = {
+      id: `dep-intent-${Date.now()}`,
+      userId: user.id,
+      userEmail: user.email,
+      amountUsdt,
+      equivalentChip,
+      depositAddress: 'EQBvW8Z5huBkMJYdn3PCDnHoKK3xNJa_W0C_z8LgqG12Ton',
+      memo,
+      network: 'TON Mainnet',
+      asset: 'USDT (TON Jetton)',
+      status: 'PENDING',
+      createdAt: new Date().toISOString(),
+    };
+
+    const deposits = this.getDeposits();
+    deposits.unshift(intent);
+    safeSet(STORAGE_KEYS.DEPOSITS, deposits);
+    return intent;
+  },
+
+  confirmDeposit(intentId: string): { user: StoredUser; intent: DepositIntent } {
+    const deposits = this.getDeposits();
+    const idx = deposits.findIndex((d) => d.id === intentId);
+    if (idx === -1) throw new Error('Không tìm thấy lệnh nạp');
+
+    const intent = deposits[idx];
+    if (intent.status === 'SETTLED') throw new Error('Lệnh nạp này đã được hạch toán');
+
+    const users = this.getUsers();
+    const userIdx = users.findIndex((u) => u.id === intent.userId);
+    if (userIdx === -1) throw new Error('Không tìm thấy tài khoản người dùng');
+
+    const u = users[userIdx];
+    u.usdtBalance = Number(((u.usdtBalance || 0) + intent.amountUsdt).toFixed(6));
+
+    intent.status = 'SETTLED';
+    intent.txHash = `0x${Math.random().toString(16).substring(2, 6)}...${Math.random().toString(16).substring(2, 6)}`;
+    intent.settledAt = new Date().toISOString();
+
+    deposits[idx] = intent;
+    safeSet(STORAGE_KEYS.DEPOSITS, deposits);
+
+    users[userIdx] = u;
+    safeSet(STORAGE_KEYS.USERS, users);
+    this.syncSessionIfActive(u);
+
+    return { user: u, intent };
+  },
+
+  // 8. Withdrawals: USDT to TON / Telegram Wallet
+  getWithdrawals(): WithdrawalOrder[] {
+    return safeGet<WithdrawalOrder[]>(STORAGE_KEYS.WITHDRAWALS, SEED_WITHDRAWALS);
+  },
+
+  createWithdrawal(
+    userId: string,
+    amountUsdt: number,
+    destinationTonAddress: string,
+    _otpCode?: string
+  ): { user: StoredUser; withdrawal: WithdrawalOrder } {
+    if (amountUsdt <= 0) throw new Error('Số lượng rút phải lớn hơn 0');
+
+    const users = this.getUsers();
+    const idx = users.findIndex((u) => u.id === userId);
+    if (idx === -1) throw new Error('User not found');
+
+    const u = users[idx];
+
+    // Strict Tier check: must be PLATINUM, DIAMOND, or SPECIAL
+    const tierConfig = TIER_CONFIGS[u.tier];
+    if (!tierConfig.canTransferAndWithdraw) {
+      throw new Error('Tính năng rút tiền chỉ khả dụng từ hạng CHIP PLATINUM trở lên. Vui lòng nâng cấp hạng!');
+    }
+
+    if ((u.usdtBalance || 0) < amountUsdt) {
+      throw new Error(`Số dư USDT không đủ để rút. Số dư hiện có: ${(u.usdtBalance || 0)} USDT`);
+    }
+
+    const feeUsdt = 0.1; // Estimated network gas fee
+    if (amountUsdt <= feeUsdt) {
+      throw new Error('Số lượng rút phải lớn hơn phí mạng TON (0.1 USDT)');
+    }
+
+    const netAmountUsdt = Number((amountUsdt - feeUsdt).toFixed(6));
+
+    // Deduct USDT balance immediately
+    u.usdtBalance = Number(((u.usdtBalance || 0) - amountUsdt).toFixed(6));
+
+    const withdrawal: WithdrawalOrder = {
+      id: `wdr-${Date.now()}`,
+      userId: u.id,
+      userEmail: u.email,
+      amountUsdt,
+      feeUsdt,
+      netAmountUsdt,
+      destinationTonAddress: destinationTonAddress.trim(),
+      network: 'TON Mainnet',
+      status: 'SETTLED',
+      txHash: `0x${Math.random().toString(16).substring(2, 6)}...${Math.random().toString(16).substring(2, 6)}`,
+      createdAt: new Date().toISOString(),
+      settledAt: new Date().toISOString(),
+    };
+
+    const list = this.getWithdrawals();
+    list.unshift(withdrawal);
+    safeSet(STORAGE_KEYS.WITHDRAWALS, list);
+
+    users[idx] = u;
+    safeSet(STORAGE_KEYS.USERS, users);
+    this.syncSessionIfActive(u);
+
+    return { user: u, withdrawal };
+  },
+
+  // 9. Referral Management
   getReferrals(): StoredReferralLink[] {
     return safeGet<StoredReferralLink[]>(STORAGE_KEYS.REFERRALS, SEED_REFERRAL_LINKS);
   },
@@ -707,17 +1030,31 @@ export const ChipStore = {
     safeSet(STORAGE_KEYS.REFERRALS, list);
   },
 
-  // 7. Promotion History
+  // 10. Promotion History
   getPromotions(): TierPromotionRecord[] {
     return safeGet<TierPromotionRecord[]>(STORAGE_KEYS.PROMOTIONS, SEED_PROMOTIONS);
   },
 
-  // 8. Allocations History
+  // 11. Allocations History
   getAllocations(): ChipAllocationRecord[] {
     return safeGet<ChipAllocationRecord[]>(STORAGE_KEYS.ALLOCATIONS, SEED_ALLOCATIONS);
   },
 
-  // 9. Active User Session (Member portal)
+  // Helper to sync user session
+  syncSessionIfActive(u: StoredUser): void {
+    try {
+      const cur = localStorage.getItem(STORAGE_KEYS.USER_SESSION);
+      if (cur) {
+        const parsed = JSON.parse(cur);
+        if (parsed.email === u.email || parsed.id === u.id) {
+          localStorage.setItem(STORAGE_KEYS.USER_SESSION, JSON.stringify({ ...parsed, ...u }));
+        }
+      }
+    } catch (e) {}
+    window.dispatchEvent(new Event('chipcoin_session_changed'));
+  },
+
+  // 12. Active User Session
   getCurrentMember(): StoredUser | null {
     if (typeof window === 'undefined') return null;
     try {
@@ -747,7 +1084,6 @@ export const ChipStore = {
     } catch (e) {}
   },
 
-  // 10. Active System Session (Admin portal)
   getCurrentSystemStaff(): any | null {
     if (typeof window === 'undefined') return null;
     try {

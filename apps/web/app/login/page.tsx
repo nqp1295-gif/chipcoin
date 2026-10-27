@@ -52,6 +52,7 @@ export default function LoginPage() {
           tier: 'CHIP GOLD',
           referralCode: `CHIP-${cleanEmail.split('@')[0].toUpperCase().slice(0, 4)}-7721`,
           chipsBalance: 1250000,
+          usdtBalance: 0.25,
           streakDays: 5,
         };
       }
@@ -77,6 +78,7 @@ export default function LoginPage() {
           tier: 'CHIP GOLD',
           referralCode: `CHIP-${cleanEmail.split('@')[0].toUpperCase().slice(0, 4)}-7721`,
           chipsBalance: 1250000,
+          usdtBalance: 0.25,
           streakDays: 5,
         };
       }

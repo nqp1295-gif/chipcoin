@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useI18n } from '../lib/i18n';
-import { ChipStore, StoredUser, TIER_CONFIGS } from '../lib/store';
+import { ChipStore, StoredUser, TIER_CONFIGS, chipToUsdt } from '../lib/store';
+import WalletNavTabs from './components/WalletNavTabs';
 
 interface LedgerTransaction {
   id: string;
@@ -150,6 +151,9 @@ export default function WalletPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      {/* Wallet Sub Navigation Tabs */}
+      <WalletNavTabs currentUser={currentUser} />
+
       {/* Header Bar */}
       <div
         style={{
@@ -194,6 +198,10 @@ export default function WalletPage() {
             {simulating ? 'Đang hạch toán...' : t('wallet_btn_bonus')}
           </button>
 
+          <Link href="/wallet/convert" className="btn-secondary" style={{ fontSize: '0.88rem', padding: '8px 16px' }}>
+            🔄 {t('tab_convert')}
+          </Link>
+
           <Link href="/ton-wallet" className="btn-secondary" style={{ fontSize: '0.88rem', padding: '8px 16px' }}>
             💎 {t('nav_ton_wallet')}
           </Link>
@@ -207,7 +215,7 @@ export default function WalletPage() {
         </div>
       )}
 
-      {/* Luxury Metallic Wallet Card */}
+      {/* Luxury Metallic Wallet Cards (Dual Balances: CHIP & USDT) */}
       <div
         style={{
           display: 'grid',
@@ -215,7 +223,7 @@ export default function WalletPage() {
           gap: '1.5rem',
         }}
       >
-        {/* Main VIP Balance Card */}
+        {/* 1. Main CHIP Balance Card */}
         <div
           className="glass-card"
           style={{
@@ -237,7 +245,7 @@ export default function WalletPage() {
                 textTransform: 'uppercase',
               }}
             >
-              {t('wallet_total_balance')}
+              {t('wallet_total_balance')} (CHIP)
             </span>
             <span
               style={{
@@ -255,10 +263,10 @@ export default function WalletPage() {
 
           <div
             style={{
-              fontSize: '2.8rem',
+              fontSize: '2.5rem',
               fontWeight: 800,
               color: '#ffffff',
-              margin: '14px 0 6px 0',
+              margin: '14px 0 4px 0',
               fontFamily: 'Outfit, sans-serif',
               letterSpacing: '-0.02em',
               display: 'flex',
@@ -269,7 +277,7 @@ export default function WalletPage() {
             <span>{balance.toLocaleString()}</span>
             <span
               style={{
-                fontSize: '1.3rem',
+                fontSize: '1.2rem',
                 fontWeight: 700,
                 background: 'var(--gradient-bronze)',
                 WebkitBackgroundClip: 'text',
@@ -280,38 +288,132 @@ export default function WalletPage() {
             </span>
           </div>
 
+          <div style={{ fontSize: '0.84rem', color: '#38bdf8', marginBottom: '12px' }}>
+            ≈ {chipToUsdt(balance).toFixed(4)} USDT (Tỷ giá 1 USDT = 5,000,000 CHIP)
+          </div>
+
           <div
             style={{
               display: 'flex',
-              gap: '24px',
-              paddingTop: '14px',
+              gap: '20px',
+              paddingTop: '12px',
               borderTop: '1px solid var(--border-bronze)',
-              marginTop: '14px',
               flexWrap: 'wrap',
             }}
           >
             <div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('wallet_available')}</div>
-              <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#34d399' }}>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{t('wallet_available')}</div>
+              <div style={{ fontSize: '0.98rem', fontWeight: 700, color: '#34d399' }}>
                 {(balance - escrow).toLocaleString()} CHIP
               </div>
             </div>
             <div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('wallet_escrow')}</div>
-              <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#fbbf24' }}>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{t('wallet_escrow')}</div>
+              <div style={{ fontSize: '0.98rem', fontWeight: 700, color: '#fbbf24' }}>
                 {escrow.toLocaleString()} CHIP
               </div>
             </div>
             <div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('wallet_standard')}</div>
-              <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--accent-bronze-light)' }}>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Hạch toán</div>
+              <div style={{ fontSize: '0.98rem', fontWeight: 700, color: 'var(--accent-bronze-light)' }}>
                 Double-Entry
               </div>
             </div>
           </div>
         </div>
 
-        {/* Wallet Address & Status Card */}
+        {/* 2. Internal USDT Balance Card */}
+        <div
+          className="glass-card"
+          style={{
+            background:
+              'linear-gradient(135deg, rgba(14, 23, 28, 0.95) 0%, rgba(18, 20, 24, 0.95) 50%, rgba(10, 22, 28, 0.95) 100%)',
+            border: '1.5px solid rgba(0, 152, 234, 0.4)',
+            boxShadow: '0 16px 48px rgba(0, 152, 234, 0.15)',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span
+              style={{
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                color: '#38bdf8',
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+              }}
+            >
+              SỐ DƯ USDT NỘI BỘ (TON NETWORK)
+            </span>
+            <span
+              style={{
+                padding: '3px 10px',
+                borderRadius: '999px',
+                fontSize: '0.72rem',
+                fontWeight: 800,
+                background: 'rgba(56, 189, 248, 0.2)',
+                color: '#38bdf8',
+                border: '1px solid rgba(56, 189, 248, 0.4)',
+              }}
+            >
+              💎 TON JETTON
+            </span>
+          </div>
+
+          <div
+            style={{
+              fontSize: '2.5rem',
+              fontWeight: 800,
+              color: '#ffffff',
+              margin: '14px 0 4px 0',
+              fontFamily: 'Outfit, sans-serif',
+              letterSpacing: '-0.02em',
+              display: 'flex',
+              alignItems: 'baseline',
+              gap: '10px',
+            }}
+          >
+            <span>{(currentUser?.usdtBalance || 0).toFixed(4)}</span>
+            <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#38bdf8' }}>
+              USDT
+            </span>
+          </div>
+
+          <div style={{ fontSize: '0.84rem', color: '#f5d77f', marginBottom: '12px' }}>
+            ≈ {Math.round((currentUser?.usdtBalance || 0) * 5000000).toLocaleString()} CHIP
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              gap: '14px',
+              paddingTop: '12px',
+              borderTop: '1px solid rgba(0, 152, 234, 0.2)',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+            }}
+          >
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Ví TON liên kết:</div>
+              <div style={{ fontSize: '0.82rem', fontFamily: 'JetBrains Mono, monospace', color: currentUser?.tonWalletAddress ? '#34d399' : '#fbbf24' }}>
+                {currentUser?.tonWalletAddress
+                  ? `${currentUser.tonWalletAddress.slice(0, 8)}...${currentUser.tonWalletAddress.slice(-6)}`
+                  : 'Chưa liên kết ví TON'}
+              </div>
+            </div>
+
+            <Link
+              href="/wallet/deposit"
+              className="nav-btn"
+              style={{ fontSize: '0.78rem', padding: '6px 12px' }}
+            >
+              + Nạp USDT
+            </Link>
+          </div>
+        </div>
+
+        {/* 3. Action Center & Double-Entry Card */}
         <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div>
             <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '6px' }}>
@@ -370,9 +472,45 @@ export default function WalletPage() {
 
             <div style={{ marginTop: '8px', fontSize: '0.8rem', color: canWithdraw ? '#34d399' : '#fbbf24', fontWeight: 600 }}>
               {canWithdraw
-                ? '✓ Hạng hiện tại cho phép gửi/nhận và rút CHIP sang mạng TON'
-                : '🔒 Rút CHIP yêu cầu đạt từ hạng CHIP PLATINUM trở lên'}
+                ? '✓ Hạng hiện tại cho phép gửi/nhận và rút USDT sang mạng TON'
+                : '🔒 Rút USDT yêu cầu đạt từ hạng CHIP PLATINUM trở lên'}
             </div>
+          </div>
+
+          {/* Quick Hub Links */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '12px' }}>
+            <Link
+              href="/wallet/convert"
+              style={{
+                textAlign: 'center',
+                padding: '8px',
+                background: 'rgba(212, 175, 55, 0.12)',
+                border: '1px solid var(--border-bronze)',
+                borderRadius: '6px',
+                color: '#f5d77f',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                textDecoration: 'none',
+              }}
+            >
+              🔄 Đổi CHIP ↔ USDT
+            </Link>
+            <Link
+              href="/wallet/withdraw"
+              style={{
+                textAlign: 'center',
+                padding: '8px',
+                background: canWithdraw ? 'rgba(52, 211, 153, 0.12)' : 'rgba(255,255,255,0.05)',
+                border: `1px solid ${canWithdraw ? 'rgba(52, 211, 153, 0.3)' : 'var(--border-medium)'}`,
+                borderRadius: '6px',
+                color: canWithdraw ? '#34d399' : 'var(--text-muted)',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                textDecoration: 'none',
+              }}
+            >
+              📤 Rút USDT (TON)
+            </Link>
           </div>
         </div>
       </div>
