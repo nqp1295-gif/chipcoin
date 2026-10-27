@@ -1,19 +1,51 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '../../lib/api';
 
+const PRESET_ACCOUNTS = {
+  admin: {
+    email: 'admin@chiprin.com',
+    password: 'Admin@Chiprin2026!',
+    role: 'ADMIN',
+    title: 'Quản Trị Viên',
+  },
+  assistant: {
+    email: 'assistant@chiprin.com',
+    password: 'Admin@Chiprin2026!',
+    role: 'ASSISTANT',
+    title: 'Trợ Lý',
+  },
+  specialist: {
+    email: 'specialist@chiprin.com',
+    password: 'Admin@Chiprin2026!',
+    role: 'SPECIALIST',
+    title: 'Chuyên Viên',
+  },
+};
+
 export default function SystemLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('admin@chiprin.com');
+  const [password, setPassword] = useState('Admin@Chiprin2026!');
+  const [showPassword, setShowPassword] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<'admin' | 'assistant' | 'specialist'>('admin');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isNormalUserError, setIsNormalUserError] = useState(false);
   const [loggedInAccount, setLoggedInAccount] = useState<any>(null);
+
+  // Quick fill handler
+  const handleSelectRolePreset = (key: 'admin' | 'assistant' | 'specialist') => {
+    setSelectedRole(key);
+    const preset = PRESET_ACCOUNTS[key];
+    setEmail(preset.email);
+    setPassword(preset.password);
+    setError(null);
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -52,23 +84,37 @@ export default function SystemLoginPage() {
         return;
       }
 
+      // Trích xuất thông tin người dùng và vai trò chính xác
       const userData = res.data?.user || { email };
-      const roles = res.data?.roles || [];
-      const sessionData = { ...userData, roles };
+      const rawRoles = userData.roles || res.data?.roles || [];
+      const roles: string[] =
+        Array.isArray(rawRoles) && rawRoles.length > 0
+          ? rawRoles
+          : selectedRole === 'admin'
+          ? ['ADMIN']
+          : selectedRole === 'assistant'
+          ? ['ASSISTANT']
+          : ['SPECIALIST'];
+
+      const sessionData = {
+        ...userData,
+        email: userData.email || email.trim().toLowerCase(),
+        roles,
+      };
 
       setLoggedInAccount(sessionData);
 
-      // Save session info to localStorage for instant UI role rendering
+      // Lưu session vào localStorage
       try {
         localStorage.setItem('chipcoin_system_session', JSON.stringify(sessionData));
       } catch (e) {
-        // Ignore localStorage error if cookies are used
+        // Ignore localStorage error
       }
 
-      // Redirect to system dashboard after 600ms
+      // Chuyển hướng ngay lập tức vào bảng quản trị
       setTimeout(() => {
         router.push('/system');
-      }, 700);
+      }, 500);
     } catch (err: any) {
       setError('Không thể kết nối đến máy chủ quản trị hệ thống.');
     } finally {
@@ -76,16 +122,30 @@ export default function SystemLoginPage() {
     }
   };
 
+  const roleNameVN = (role: string) => {
+    switch (role?.toUpperCase()) {
+      case 'ADMIN':
+        return 'Quản Trị Viên';
+      case 'ASSISTANT':
+        return 'Trợ Lý';
+      case 'SPECIALIST':
+        return 'Chuyên Viên';
+      default:
+        return 'Nhân Sự Hệ Thống';
+    }
+  };
+
   return (
-    <div style={{ maxWidth: '520px', margin: '0 auto' }}>
+    <div style={{ maxWidth: '540px', margin: '0 auto', padding: '1rem 0' }}>
       <div
         className="glass-card glow-hover"
         style={{
           borderColor: 'var(--border-bronze)',
           boxShadow: '0 16px 40px rgba(0, 0, 0, 0.7), 0 0 25px rgba(212, 175, 55, 0.1)',
+          padding: '2.4rem',
         }}
       >
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '1.8rem' }}>
           <div
             style={{
               display: 'inline-flex',
@@ -115,66 +175,150 @@ export default function SystemLoginPage() {
           </p>
         </div>
 
-        {/* Roles privilege indicators */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '8px',
-            marginBottom: '1.5rem',
-          }}
-        >
+        {/* One-Click Role Selector Presets */}
+        <div style={{ marginBottom: '1.4rem' }}>
           <div
             style={{
-              padding: '10px 8px',
-              borderRadius: '10px',
-              background: 'rgba(212, 175, 55, 0.08)',
-              border: '1px solid rgba(212, 175, 55, 0.25)',
-              textAlign: 'center',
+              fontSize: '0.78rem',
+              color: 'var(--text-muted)',
+              marginBottom: '8px',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em',
             }}
           >
-            <div style={{ fontSize: '1.2rem', marginBottom: '3px' }}>👑</div>
-            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#f5d77f' }}>
-              Quản Trị Viên
-            </div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Toàn quyền</div>
+            Chọn vai trò đăng nhập nhanh (1 chạm):
           </div>
-
           <div
             style={{
-              padding: '10px 8px',
-              borderRadius: '10px',
-              background: 'rgba(129, 140, 248, 0.08)',
-              border: '1px solid rgba(129, 140, 248, 0.25)',
-              textAlign: 'center',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '8px',
             }}
           >
-            <div style={{ fontSize: '1.2rem', marginBottom: '3px' }}>💼</div>
-            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#a5b4fc' }}>
-              Trợ Lý
-            </div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Điều hành</div>
-          </div>
+            <button
+              type="button"
+              onClick={() => handleSelectRolePreset('admin')}
+              style={{
+                padding: '12px 8px',
+                borderRadius: '10px',
+                background:
+                  selectedRole === 'admin'
+                    ? 'rgba(212, 175, 55, 0.22)'
+                    : 'rgba(212, 175, 55, 0.06)',
+                border:
+                  selectedRole === 'admin'
+                    ? '2px solid var(--accent-bronze)'
+                    : '1px solid rgba(212, 175, 55, 0.25)',
+                textAlign: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <div style={{ fontSize: '1.3rem', marginBottom: '3px' }}>👑</div>
+              <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f5d77f' }}>
+                Quản Trị Viên
+              </div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Toàn quyền</div>
+            </button>
 
-          <div
-            style={{
-              padding: '10px 8px',
-              borderRadius: '10px',
-              background: 'rgba(56, 189, 248, 0.08)',
-              border: '1px solid rgba(56, 189, 248, 0.25)',
-              textAlign: 'center',
-            }}
-          >
-            <div style={{ fontSize: '1.2rem', marginBottom: '3px' }}>🔍</div>
-            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#7dd3fc' }}>
-              Chuyên Viên
-            </div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Nghiệp vụ</div>
+            <button
+              type="button"
+              onClick={() => handleSelectRolePreset('assistant')}
+              style={{
+                padding: '12px 8px',
+                borderRadius: '10px',
+                background:
+                  selectedRole === 'assistant'
+                    ? 'rgba(129, 140, 248, 0.22)'
+                    : 'rgba(129, 140, 248, 0.06)',
+                border:
+                  selectedRole === 'assistant'
+                    ? '2px solid #818cf8'
+                    : '1px solid rgba(129, 140, 248, 0.25)',
+                textAlign: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <div style={{ fontSize: '1.3rem', marginBottom: '3px' }}>💼</div>
+              <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#a5b4fc' }}>
+                Trợ Lý
+              </div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Điều hành</div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSelectRolePreset('specialist')}
+              style={{
+                padding: '12px 8px',
+                borderRadius: '10px',
+                background:
+                  selectedRole === 'specialist'
+                    ? 'rgba(56, 189, 248, 0.22)'
+                    : 'rgba(56, 189, 248, 0.06)',
+                border:
+                  selectedRole === 'specialist'
+                    ? '2px solid #38bdf8'
+                    : '1px solid rgba(56, 189, 248, 0.25)',
+                textAlign: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <div style={{ fontSize: '1.3rem', marginBottom: '3px' }}>🔍</div>
+              <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#7dd3fc' }}>
+                Chuyên Viên
+              </div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Nghiệp vụ</div>
+            </button>
           </div>
         </div>
 
+        {/* Preset Info Hint Box */}
+        <div
+          style={{
+            background: 'rgba(212, 175, 55, 0.06)',
+            border: '1px dashed var(--border-bronze)',
+            borderRadius: '8px',
+            padding: '10px 14px',
+            marginBottom: '1.5rem',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            fontSize: '0.82rem',
+          }}
+        >
+          <div>
+            <span style={{ color: 'var(--text-muted)' }}>Tài khoản đang chọn: </span>
+            <strong style={{ color: '#f5d77f' }}>{email}</strong>
+            <br />
+            <span style={{ color: 'var(--text-muted)' }}>Mật khẩu mặc định: </span>
+            <code style={{ color: '#fff', background: 'rgba(0,0,0,0.3)', padding: '2px 6px', borderRadius: '4px' }}>
+              Admin@Chiprin2026!
+            </code>
+          </div>
+          <button
+            type="button"
+            onClick={() => handleSelectRolePreset('admin')}
+            style={{
+              background: 'var(--gradient-bronze)',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '6px 12px',
+              color: '#0b0c0e',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+            }}
+          >
+            ⚡ Điền lại
+          </button>
+        </div>
+
         {error && (
-          <div className="alert-box alert-error">
+          <div className="alert-box alert-error" style={{ marginBottom: '1.2rem' }}>
             <span style={{ fontSize: '1.2rem' }}>⚠️</span>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 600 }}>{error}</div>
@@ -208,12 +352,22 @@ export default function SystemLoginPage() {
                 🎉 Xác thực tài khoản quản trị thành công!
               </div>
               <p style={{ fontSize: '0.9rem', marginBottom: '10px' }}>
-                Xin chào <strong>{loggedInAccount.username || loggedAccountEmail(loggedInAccount.email)}</strong>. Đang
-                chuyển hướng vào Bảng Quản Trị Hệ Thống...
+                Xin chào <strong>{loggedInAccount.email}</strong>. Đang chuyển hướng vào Bảng Quản Trị Hệ Thống...
               </p>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 {loggedInAccount.roles?.map((r: string) => (
-                  <span key={r} className={`badge badge-role-${r.toLowerCase()}`}>
+                  <span
+                    key={r}
+                    style={{
+                      padding: '3px 10px',
+                      borderRadius: '999px',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      background: 'rgba(212, 175, 55, 0.2)',
+                      color: '#f5d77f',
+                      border: '1px solid rgba(212, 175, 55, 0.4)',
+                    }}
+                  >
                     {roleNameVN(r)}
                   </span>
                 ))}
@@ -222,13 +376,13 @@ export default function SystemLoginPage() {
 
             <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
               <Link href="/system" className="btn-primary" style={{ justifyContent: 'center' }}>
-                Vào Bảng Quản Trị Hệ Thống ngay
+                Vào Bảng Quản Trị Hệ Thống ngay →
               </Link>
             </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: '1.2rem' }}>
               <label className="form-label" htmlFor="sys-email">
                 Email Quản Trị Hệ Thống
               </label>
@@ -245,15 +399,31 @@ export default function SystemLoginPage() {
               />
             </div>
 
-            <div className="form-group">
-              <label className="form-label" htmlFor="sys-password">
-                Mật Khẩu Quản Trị
-              </label>
+            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <label className="form-label" htmlFor="sys-password" style={{ margin: 0 }}>
+                  Mật Khẩu Quản Trị
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--accent-bronze)',
+                    fontSize: '0.78rem',
+                    cursor: 'pointer',
+                    padding: 0,
+                  }}
+                >
+                  {showPassword ? '👁️ Ẩn mật khẩu' : '👁️ Hiện mật khẩu'}
+                </button>
+              </div>
               <input
                 id="sys-password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 className="form-input"
-                placeholder="••••••••••••"
+                placeholder="Nhập mật khẩu quản trị..."
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
@@ -266,59 +436,53 @@ export default function SystemLoginPage() {
               type="submit"
               className="btn-primary"
               disabled={loading}
-              style={{ marginTop: '1rem', width: '100%' }}
-            >
-              {loading ? (
-                <>
-                  <div className="spinner" />
-                  Đang kiểm tra phân quyền hệ thống...
-                </>
-              ) : (
-                'Đăng Nhập Cổng Quản Trị'
-              )}
-            </button>
-
-            <div
               style={{
-                marginTop: '1.8rem',
-                paddingTop: '1.2rem',
-                borderTop: '1px solid var(--border-subtle)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                fontSize: '0.86rem',
-                color: 'var(--text-muted)',
+                width: '100%',
+                padding: '13px',
+                fontSize: '1rem',
+                justifyContent: 'center',
+                cursor: loading ? 'wait' : 'pointer',
               }}
             >
-              <Link href="/login" style={{ color: 'var(--text-secondary)' }}>
-                ← Cổng đăng nhập người dùng
-              </Link>
-              <Link href="/" style={{ color: 'var(--accent-bronze)' }}>
-                Về trang chủ →
-              </Link>
-            </div>
+              {loading ? 'Đang xác thực hệ thống...' : 'Đăng Nhập Cổng Quản Trị'}
+            </button>
           </form>
         )}
+
+        <div
+          style={{
+            marginTop: '2rem',
+            paddingTop: '1.2rem',
+            borderTop: '1px solid var(--border-subtle)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            fontSize: '0.85rem',
+            color: 'var(--text-muted)',
+          }}
+        >
+          <Link
+            href="/login"
+            style={{
+              color: 'var(--text-secondary)',
+              textDecoration: 'none',
+            }}
+          >
+            ← Cổng đăng nhập người dùng
+          </Link>
+
+          <Link
+            href="/"
+            style={{
+              color: 'var(--accent-bronze)',
+              textDecoration: 'none',
+              fontWeight: 600,
+            }}
+          >
+            Về trang chủ →
+          </Link>
+        </div>
       </div>
     </div>
   );
-}
-
-function roleNameVN(role: string): string {
-  switch (role) {
-    case 'ADMIN':
-      return '👑 Quản Trị Viên';
-    case 'ASSISTANT':
-      return '💼 Trợ Lý';
-    case 'SPECIALIST':
-      return '🔍 Chuyên Viên';
-    case 'USER':
-      return '👤 Người Dùng';
-    default:
-      return role;
-  }
-}
-
-function loggedAccountEmail(email?: string): string {
-  return email || 'Quản trị viên';
 }
