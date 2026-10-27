@@ -13,13 +13,17 @@ export default function ReferralsPage() {
   const [copiedLink, setCopiedLink] = useState(false);
 
   const loadData = () => {
-    const mem = ChipStore.getCurrentMember();
+    let mem = ChipStore.getCurrentMember();
+    if (!mem) {
+      const users = ChipStore.getUsers();
+      mem = users.find((u) => u.roles.includes('USER')) || users[0];
+      if (mem) ChipStore.setMemberSession(mem);
+    }
     setCurrentUser(mem);
     if (mem) {
       const list = ChipStore.getReferralsByReferrer(mem.referralCode);
       setReferrals(list);
     } else {
-      // Default sample referrals
       const list = ChipStore.getReferrals();
       setReferrals(list.slice(0, 5));
     }
@@ -76,24 +80,23 @@ export default function ReferralsPage() {
       >
         <div style={{ maxWidth: '850px' }}>
           <div style={{ display: 'inline-flex', marginBottom: '0.8rem' }}>
-            <span className="badge badge-gold">🤝 HỆ THỐNG MÃ GIỚI THIỆU &amp; NHÁNH HOA HỒNG</span>
+            <span className="badge badge-gold">{t('ref_badge')}</span>
           </div>
 
           <h1 style={{ fontSize: '2.4rem', lineHeight: 1.25, marginBottom: '0.8rem' }}>
-            Quản Lý Nhánh Giới Thiệu &amp; Phân Bổ CHIP
+            {t('ref_title')}
           </h1>
 
           <p style={{ color: 'var(--text-secondary)', fontSize: '1.02rem', lineHeight: 1.6, marginBottom: '1.6rem' }}>
-            Chia sẻ liên kết của bạn để xây dựng mạng lưới hội viên. Nhận ngay <strong>+10,000 CHIP</strong> khi bạn bè
-            kích hoạt email, cộng thêm từ <strong>3% đến 20%</strong> hoa hồng thụ động trọn đời dựa theo cấp bậc của bạn.
+            {t('ref_desc')}
           </p>
 
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <Link href="/rank" className="nav-btn" style={{ fontSize: '0.92rem', padding: '9px 20px' }}>
-              👑 Xem Điều Kiện Nâng Hạng VIP
+              👑 {t('nav_rank')}
             </Link>
             <Link href="/wallet" className="btn-secondary" style={{ fontSize: '0.92rem', padding: '9px 20px' }}>
-              🪙 Kiểm Tra Số Dư Hoa Hồng
+              🪙 {t('nav_wallet')}
             </Link>
           </div>
         </div>
@@ -108,9 +111,9 @@ export default function ReferralsPage() {
         }}
       >
         <div style={{ marginBottom: '1.5rem' }}>
-          <h2 style={{ fontSize: '1.4rem', marginBottom: '4px' }}>Mã Giới Thiệu &amp; Liên Kết Cá Nhân Của Bạn</h2>
+          <h2 style={{ fontSize: '1.4rem', marginBottom: '4px' }}>{t('ref_box_code_title')} &amp; {t('ref_box_link_title')}</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>
-            Người dùng đăng ký qua mã này sẽ tự động gắn vào nhánh F1 của bạn và ghi nhận điều kiện thăng hạng
+            {t('ref_table_sub')}
           </p>
         </div>
 
@@ -131,7 +134,7 @@ export default function ReferralsPage() {
             }}
           >
             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '8px' }}>
-              MÃ GIỚI THIỆU ĐỘC QUYỀN
+              {t('ref_box_code_title')}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div
@@ -156,7 +159,7 @@ export default function ReferralsPage() {
                 className="nav-btn"
                 style={{ padding: '12px 18px', fontSize: '0.88rem', whiteSpace: 'nowrap' }}
               >
-                {copiedCode ? '✓ Đã Chép!' : '📋 Sao Chép'}
+                {copiedCode ? `✓ ${t('btn_copied')}` : `📋 ${t('btn_copy')}`}
               </button>
             </div>
           </div>
@@ -171,7 +174,7 @@ export default function ReferralsPage() {
             }}
           >
             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '8px' }}>
-              ĐƯỜNG DẪN ĐĂNG KÝ TRỰC TIẾP
+              {t('ref_box_link_title')}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <input
@@ -191,7 +194,7 @@ export default function ReferralsPage() {
                 className="nav-btn"
                 style={{ padding: '12px 18px', fontSize: '0.88rem', whiteSpace: 'nowrap' }}
               >
-                {copiedLink ? '✓ Đã Chép!' : '🔗 Chép Link'}
+                {copiedLink ? `✓ ${t('btn_copied')}` : `🔗 ${t('btn_copy')}`}
               </button>
             </div>
           </div>
@@ -208,49 +211,49 @@ export default function ReferralsPage() {
       >
         <div className="glass-card glow-hover">
           <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-            TỔNG SỐ F1 ĐÃ MỜI
+            {t('ref_stat_total')}
           </div>
           <div style={{ fontSize: '2rem', fontWeight: 800, color: '#ffffff', marginTop: '6px' }}>
             {totalReferrals}
           </div>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            Thành viên đã nhập mã giới thiệu
+            F1 Members
           </div>
         </div>
 
         <div className="glass-card glow-hover">
           <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-            F1 XÁC THỰC EMAIL
+            {t('ref_stat_verified')}
           </div>
           <div style={{ fontSize: '2rem', fontWeight: 800, color: '#34d399', marginTop: '6px' }}>
             {verifiedCount}
           </div>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            Đủ điều kiện tính tiến trình thăng hạng
+            {t('status_verified')}
           </div>
         </div>
 
         <div className="glass-card glow-hover">
           <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-            TỶ LỆ HOA HỒNG HIỆN TẠI
+            {t('ref_stat_rate')}
           </div>
           <div style={{ fontSize: '2rem', fontWeight: 800, color: tierConfig.badgeColor, marginTop: '6px' }}>
             +{tierConfig.bonusRate * 100}%
           </div>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            Theo cấp bậc [{currentTier}]
+            [{currentTier}]
           </div>
         </div>
 
         <div className="glass-card glow-hover">
           <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-            HOA HỒNG ĐÃ NHẬN
+            {t('ref_stat_earned')}
           </div>
           <div style={{ fontSize: '2rem', fontWeight: 800, color: '#f5d77f', marginTop: '6px' }}>
             {totalCommission.toLocaleString()}
           </div>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            CHIP đã chuyển vào sổ cái cá nhân
+            CHIP Credited
           </div>
         </div>
       </section>
@@ -259,14 +262,14 @@ export default function ReferralsPage() {
       <section className="glass-card" style={{ padding: '1.8rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', flexWrap: 'wrap', gap: '10px' }}>
           <div>
-            <h3 style={{ fontSize: '1.3rem' }}>Danh Sách Các Nhánh Giới Thiệu (F1)</h3>
+            <h3 style={{ fontSize: '1.3rem' }}>{t('ref_table_title')}</h3>
             <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-              Theo dõi tình trạng xác thực email và hoa hồng chip phân bổ từ từng thành viên
+              {t('ref_table_sub')}
             </span>
           </div>
 
           <span className="badge badge-gold">
-            {referrals.length} Hội Viên F1
+            {referrals.length} F1
           </span>
         </div>
 
@@ -308,7 +311,7 @@ export default function ReferralsPage() {
                             border: '1px solid rgba(52, 211, 153, 0.35)',
                           }}
                         >
-                          ✓ ĐÃ XÁC THỰC
+                          ✓ {t('status_verified')}
                         </span>
                       ) : (
                         <span
@@ -322,7 +325,7 @@ export default function ReferralsPage() {
                             border: '1px solid rgba(251, 191, 36, 0.35)',
                           }}
                         >
-                          ⏳ CHỜ XÁC THỰC
+                          ⏳ {t('status_pending')}
                         </span>
                       )}
                     </td>
@@ -350,7 +353,7 @@ export default function ReferralsPage() {
         }}
       >
         <div style={{ fontWeight: 700, color: '#f5d77f', fontSize: '1rem', marginBottom: '6px' }}>
-          💡 Quy Chế Phân Bổ Hoa Hồng Theo Cấp Bậc Hội Viên:
+          {t('ref_rules_title')}
         </div>
         <div
           style={{

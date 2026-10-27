@@ -26,7 +26,12 @@ export default function RankPage() {
   const [promotions, setPromotions] = useState<TierPromotionRecord[]>([]);
 
   const loadData = () => {
-    const mem = ChipStore.getCurrentMember();
+    let mem = ChipStore.getCurrentMember();
+    if (!mem) {
+      const users = ChipStore.getUsers();
+      mem = users.find((u) => u.roles.includes('USER')) || users[0];
+      if (mem) ChipStore.setMemberSession(mem);
+    }
     setCurrentUser(mem);
     const allPromos = ChipStore.getPromotions();
     setPromotions(allPromos);
@@ -79,27 +84,26 @@ export default function RankPage() {
       >
         <div style={{ maxWidth: '850px' }}>
           <div style={{ display: 'inline-flex', marginBottom: '0.8rem' }}>
-            <span className="badge badge-gold">👑 CHƯƠNG TRÌNH PHÂN HẠNG HỘI VIÊN CHIPCOIN</span>
+            <span className="badge badge-gold">{t('rank_badge')}</span>
           </div>
 
           <h1 style={{ fontSize: '2.4rem', lineHeight: 1.25, marginBottom: '0.8rem' }}>
-            Hệ Thống Thăng Hạng &amp; Đặc Quyền
+            {t('rank_title')}
           </h1>
 
           <p style={{ color: 'var(--text-secondary)', fontSize: '1.02rem', lineHeight: 1.6, marginBottom: '1.6rem' }}>
-            Cấp bậc hội viên mở khóa các mức thưởng hoa hồng nhánh lên đến 20%, quyền năng rút điểm thưởng
-            và các đặc quyền vận hành hệ thống mở rộng.
+            {t('rank_desc')}
           </p>
 
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <Link href="/activities" className="nav-btn" style={{ fontSize: '0.92rem', padding: '9px 20px' }}>
-              ⭐ Tích Lũy Thêm Điểm Ngay
+              ⭐ {t('nav_activities')}
             </Link>
             <Link href="/referrals" className="btn-secondary" style={{ fontSize: '0.92rem', padding: '9px 20px' }}>
-              🤝 Mời Bạn Bè Gia Tăng F1
+              🤝 {t('nav_referrals')}
             </Link>
             <Link href="/wallet" className="btn-secondary" style={{ fontSize: '0.92rem', padding: '9px 20px' }}>
-              🪙 Kiểm Tra Ví Điểm
+              🪙 {t('nav_wallet')}
             </Link>
           </div>
         </div>
@@ -144,15 +148,15 @@ export default function RankPage() {
             </div>
             <div>
               <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
-                HẠNG HIỆN TẠI CỦA BẠN
+                {t('rank_current_tier')}
               </div>
               <div style={{ fontSize: '1.8rem', fontWeight: 800, color: TIER_CONFIGS[currentTier].badgeColor }}>
                 {currentTier}
               </div>
               <div style={{ fontSize: '0.85rem', color: '#34d399', fontWeight: 600 }}>
                 {TIER_CONFIGS[currentTier].bonusRate > 0
-                  ? `✓ Đang nhận thưởng ${TIER_CONFIGS[currentTier].bonusRate * 100}% từ người được giới thiệu`
-                  : '✓ Tài khoản đã xác thực email'}
+                  ? `✓ +${TIER_CONFIGS[currentTier].bonusRate * 100}% bonus`
+                  : '✓ Email Verified'}
               </div>
             </div>
           </div>
@@ -161,7 +165,7 @@ export default function RankPage() {
           <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                TỔNG ĐIỂM THU THẬP
+                {t('rank_total_chips')}
               </div>
               <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#ffffff' }}>
                 {chips.toLocaleString()} <span style={{ fontSize: '0.9rem', color: 'var(--accent-bronze)' }}>CHIP</span>
@@ -170,10 +174,10 @@ export default function RankPage() {
 
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                F1 XÁC THỰC EMAIL
+                {t('rank_f1_verified')}
               </div>
               <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#ffffff' }}>
-                {verifiedReferrals} <span style={{ fontSize: '0.9rem', color: '#34d399' }}>NGƯỜI</span>
+                {verifiedReferrals} <span style={{ fontSize: '0.9rem', color: '#34d399' }}>F1</span>
               </div>
             </div>
           </div>
@@ -184,10 +188,10 @@ export default function RankPage() {
           <div style={{ marginTop: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
               <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>
-                Tiến trình thăng cấp lên <strong style={{ color: nextTierConfig.badgeColor }}>{nextTierConfig.name}</strong>:
+                {t('rank_progress_to')} <strong style={{ color: nextTierConfig.badgeColor }}>{nextTierConfig.name}</strong>:
               </div>
               <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--accent-bronze)' }}>
-                {overallProgress}% Hoàn Thành
+                {overallProgress}% {t('rank_completed')}
               </div>
             </div>
 
@@ -231,7 +235,7 @@ export default function RankPage() {
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: '4px' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Mục tiêu điểm thu thập:</span>
+                  <span style={{ color: 'var(--text-muted)' }}>{t('rank_target_chips')}</span>
                   <span style={{ fontWeight: 700, color: chipsProgress >= 100 ? '#34d399' : '#ffffff' }}>
                     {chips.toLocaleString()} / {nextTierConfig.minChips.toLocaleString()} CHIP ({chipsProgress}%)
                   </span>
@@ -250,9 +254,9 @@ export default function RankPage() {
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: '4px' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Mục tiêu giới thiệu xác thực email:</span>
+                  <span style={{ color: 'var(--text-muted)' }}>{t('rank_target_f1')}</span>
                   <span style={{ fontWeight: 700, color: refsProgress >= 100 ? '#34d399' : '#ffffff' }}>
-                    {verifiedReferrals} / {nextTierConfig.minVerifiedReferrals} người ({refsProgress}%)
+                    {verifiedReferrals} / {nextTierConfig.minVerifiedReferrals} ({refsProgress}%)
                   </span>
                 </div>
                 <div style={{ height: '6px', background: 'rgba(255,255,255,0.06)', borderRadius: '999px', overflow: 'hidden' }}>
@@ -263,7 +267,7 @@ export default function RankPage() {
           </div>
         ) : (
           <div style={{ marginTop: '1.2rem', color: '#f43f5e', fontWeight: 700, fontSize: '0.95rem' }}>
-            🎉 Bạn đã đạt cấp bậc cao nhất [CHIP SPECIAL]! Bạn đang hưởng tối đa mọi đặc quyền VIP của hệ thống.
+            {t('rank_special_congrats')}
           </div>
         )}
       </section>
@@ -271,9 +275,9 @@ export default function RankPage() {
       {/* 5 Tiers Detailed Cards */}
       <section>
         <div style={{ marginBottom: '1.4rem' }}>
-          <h2 style={{ fontSize: '1.6rem', marginBottom: '4px' }}>Bảng Tiêu Chuẩn &amp; Đặc Quyền 5 Cấp Bậc</h2>
+          <h2 style={{ fontSize: '1.6rem', marginBottom: '4px' }}>{t('rank_table_title')}</h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem' }}>
-            Chi tiết điều kiện cần đạt và các quyền lợi đi kèm cho từng hạng mức
+            {t('rank_table_sub')}
           </p>
         </div>
 
@@ -338,17 +342,17 @@ export default function RankPage() {
                             className="badge badge-gold"
                             style={{ background: 'var(--gradient-bronze)', color: '#0b0c0e' }}
                           >
-                            HẠNG HIỆN TẠI
+                            {t('rank_badge_current')}
                           </span>
                         )}
                         {!isCurrent && isUnlocked && (
                           <span className="badge" style={{ background: 'rgba(52, 211, 153, 0.15)', color: '#34d399' }}>
-                            ✓ ĐÃ ĐẠT
+                            {t('rank_badge_unlocked')}
                           </span>
                         )}
                         {!isUnlocked && (
                           <span className="badge" style={{ background: 'rgba(255, 255, 255, 0.08)', color: 'var(--text-muted)' }}>
-                            🔒 CHƯA MỞ
+                            {t('rank_badge_locked')}
                           </span>
                         )}
                       </div>
@@ -369,7 +373,7 @@ export default function RankPage() {
                     }}
                   >
                     <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>
-                      THƯỞNG HOA HỒNG NHÁNH
+                      {t('rank_commission_bonus')}
                     </div>
                     <div style={{ fontSize: '1.4rem', fontWeight: 800, color: config.bonusRate > 0 ? config.badgeColor : 'var(--text-muted)' }}>
                       {config.bonusRate > 0 ? `+${config.bonusRate * 100}%` : '0%'}
@@ -390,7 +394,7 @@ export default function RankPage() {
                   {/* Requirements */}
                   <div>
                     <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '8px' }}>
-                      📋 ĐIỀU KIỆN ĐẠT CẤP BẬC:
+                      {t('rank_req_title')}
                     </div>
                     <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.88rem' }}>
                       <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -423,7 +427,7 @@ export default function RankPage() {
                   {/* Privileges */}
                   <div>
                     <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '8px' }}>
-                      ✨ ĐẶC QUYỀN ĐƯỢC HƯỞNG:
+                      {t('rank_priv_title')}
                     </div>
                     <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.88rem' }}>
                       <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -469,9 +473,9 @@ export default function RankPage() {
       <section className="glass-card" style={{ padding: '1.8rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', flexWrap: 'wrap', gap: '10px' }}>
           <div>
-            <h3 style={{ fontSize: '1.3rem' }}>Nhật Ký Thăng Cấp Gần Đây</h3>
+            <h3 style={{ fontSize: '1.3rem' }}>{t('rank_history_title')}</h3>
             <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-              Lịch sử ghi nhận thăng hạng của các hội viên trong hệ thống
+              {t('rank_history_sub')}
             </span>
           </div>
           <span className="badge badge-gold">Live Synced</span>

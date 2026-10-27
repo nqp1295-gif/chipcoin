@@ -76,6 +76,8 @@ export default function TopBar({ onOpenMobileMenu }: TopBarProps) {
     if (pathname === '/rank') return t('nav_rank');
     if (pathname === '/referrals') return t('nav_referrals');
     if (pathname === '/wallet') return t('nav_wallet');
+    if (pathname === '/ton-wallet') return t('nav_ton_wallet');
+    if (pathname === '/profile') return t('nav_profile');
     if (pathname === '/resend-verification') return t('nav_resend');
     if (pathname === '/login') return t('nav_login');
     if (pathname === '/register') return t('nav_register');
@@ -275,19 +277,55 @@ export default function TopBar({ onOpenMobileMenu }: TopBarProps) {
                     </span>
                   </Link>
 
+                  {/* Profile Avatar Icon Button */}
+                  <Link
+                    href="/profile"
+                    className="topbar-avatar-btn"
+                    title={t('btn_profile')}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '38px',
+                      height: '38px',
+                      borderRadius: '50%',
+                      background: memberUser.avatarUrl ? 'transparent' : currentTierMeta.gradient,
+                      border: `2px solid ${memberUser.avatarUrl ? '#f5d77f' : currentTierMeta.badgeColor}`,
+                      boxShadow: '0 0 12px rgba(212, 175, 55, 0.4)',
+                      overflow: 'hidden',
+                      cursor: 'pointer',
+                      position: 'relative',
+                      flexShrink: 0,
+                      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    {memberUser.avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={memberUser.avatarUrl}
+                        alt="User Profile"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <span style={{ fontWeight: 800, fontSize: '1rem', color: '#0b0c0e' }}>
+                        {memberUser.username?.charAt(0).toUpperCase() || memberUser.email.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </Link>
+
                   <div className="topbar-user-pill">
-                    <div
-                      className="user-avatar-circle"
-                      style={{ background: currentTierMeta.gradient, color: '#0b0c0e' }}
+                    <Link
+                      href="/profile"
+                      className="user-info-text hide-mobile"
+                      style={{ textDecoration: 'none', cursor: 'pointer' }}
+                      title={t('btn_profile')}
                     >
-                      {memberUser.username?.charAt(0).toUpperCase() || memberUser.email.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="user-info-text hide-mobile">
                       <span className="user-email">{memberUser.username || memberUser.email}</span>
                       <span className="user-role" style={{ color: currentTierMeta.badgeColor }}>
                         {memberUser.tier}
                       </span>
-                    </div>
+                    </Link>
                     <button
                       type="button"
                       className="topbar-logout-btn"
@@ -305,12 +343,38 @@ export default function TopBar({ onOpenMobileMenu }: TopBarProps) {
                     <span className="status-label">1,250,000 CHIP</span>
                   </div>
 
-                  <div className="topbar-auth-links">
+                  <div className="topbar-auth-links" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Link href="/login" className="topbar-link">
                       {t('btn_login')}
                     </Link>
                     <Link href="/register" className="topbar-btn-gold">
                       {t('btn_register')}
+                    </Link>
+
+                    {/* Dedicated Avatar Icon Button next to Register Button */}
+                    <Link
+                      href="/profile"
+                      className="topbar-avatar-btn"
+                      title={t('btn_profile')}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '38px',
+                        height: '38px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #fbbf24 0%, #d97706 100%)',
+                        border: '2px solid #f5d77f',
+                        boxShadow: '0 0 12px rgba(212, 175, 55, 0.45)',
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                        position: 'relative',
+                        flexShrink: 0,
+                        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                        textDecoration: 'none',
+                      }}
+                    >
+                      <span style={{ fontSize: '1.15rem' }}>👤</span>
                     </Link>
                   </div>
                 </>

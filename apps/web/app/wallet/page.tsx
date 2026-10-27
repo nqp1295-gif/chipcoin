@@ -1,6 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useI18n } from '../lib/i18n';
+import { ChipStore, StoredUser, TIER_CONFIGS } from '../lib/store';
 
 interface LedgerTransaction {
   id: string;
@@ -62,6 +65,8 @@ const INITIAL_TRANSACTIONS: LedgerTransaction[] = [
 ];
 
 export default function WalletPage() {
+  const { t } = useI18n();
+  const [currentUser, setCurrentUser] = useState<StoredUser | null>(null);
   const [balance, setBalance] = useState(1250000);
   const [escrow, setEscrow] = useState(70000);
   const [transactions, setTransactions] = useState<LedgerTransaction[]>(INITIAL_TRANSACTIONS);
@@ -69,7 +74,33 @@ export default function WalletPage() {
   const [simulating, setSimulating] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
-  const walletAddress = 'CHIP-ACC-7918-9921-LEDGER';
+  const loadData = () => {
+    let mem = ChipStore.getCurrentMember();
+    if (!mem) {
+      const users = ChipStore.getUsers();
+      mem = users.find((u) => u.roles.includes('USER')) || users[0];
+      if (mem) ChipStore.setMemberSession(mem);
+    }
+    setCurrentUser(mem);
+    if (mem) {
+      setBalance(mem.chipsBalance);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+    const handleUpdate = () => loadData();
+    window.addEventListener('chipcoin_store_updated', handleUpdate);
+    window.addEventListener('chipcoin_session_changed', handleUpdate);
+    return () => {
+      window.removeEventListener('chipcoin_store_updated', handleUpdate);
+      window.removeEventListener('chipcoin_session_changed', handleUpdate);
+    };
+  }, []);
+
+  const walletAddress = currentUser?.id
+    ? `CHIP-${currentUser.id.toUpperCase()}-LEDGER`
+    : 'CHIP-ACC-7918-9921-LEDGER';
 
   const handleCopy = () => {
     navigator.clipboard.writeText(walletAddress);
@@ -83,7 +114,14 @@ export default function WalletPage() {
 
     setTimeout(() => {
       const grantAmount = 5000;
-      const newBal = balance + grantAmount;
+      if (currentUser) {
+        const { user } = ChipStore.addChips(currentUser.id, grantAmount, 'Thưởng trải nghiệm giao dịch mới');
+        setBalance(user.chipsBalance);
+        setCurrentUser(user);
+      } else {
+        setBalance(balance + grantAmount);
+      }
+
       const newTx: LedgerTransaction = {
         id: `TX-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(
           1000 + Math.random() * 9000
@@ -93,19 +131,22 @@ export default function WalletPage() {
         debitAccount: 'SYSTEM_TEST_TREASURY',
         creditAccount: walletAddress,
         amount: grantAmount,
-        balanceAfter: newBal,
+        balanceAfter: balance + grantAmount,
         hash: `0x${Math.random().toString(16).substring(2, 6)}...${Math.random()
           .toString(16)
           .substring(2, 6)}`,
         status: 'SETTLED',
       };
 
-      setBalance(newBal);
       setTransactions([newTx, ...transactions]);
       setSimulating(false);
       setFeedback(`Đã thực hiện giao dịch sổ kép: +${grantAmount.toLocaleString()} CHIP`);
+      setTimeout(() => setFeedback(null), 3500);
     }, 500);
   };
+
+  const currentTierMeta = currentUser?.tier ? TIER_CONFIGS[currentUser.tier] : TIER_CONFIGS['CHIP GOLD'];
+  const canWithdraw = currentTierMeta.canTransferAndWithdraw;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -135,23 +176,27 @@ export default function WalletPage() {
               marginBottom: '4px',
             }}
           >
-            🪙 QUẢN LÝ TÀI SẢN & SỔ CÁI
+            {t('wallet_badge')}
           </div>
-          <h1 style={{ fontSize: '2rem', margin: 0 }}>Ví Điểm Thưởng CHIP</h1>
+          <h1 style={{ fontSize: '2rem', margin: 0 }}>{t('wallet_title')}</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', marginTop: '4px' }}>
-            Hệ thống hạch toán kép (Double-entry Ledger) bảo đảm bất biến số dư điểm thưởng
+            {t('wallet_desc')}
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
           <button
             onClick={handleGrantBonus}
             disabled={simulating}
             className="nav-btn"
             style={{ cursor: 'pointer', border: 'none', gap: '8px' }}
           >
-            {simulating ? 'Đang hạch toán...' : '✨ + Nhận Thưởng 5,000 CHIP'}
+            {simulating ? 'Đang hạch toán...' : t('wallet_btn_bonus')}
           </button>
+
+          <Link href="/ton-wallet" className="btn-secondary" style={{ fontSize: '0.88rem', padding: '8px 16px' }}>
+            💎 {t('nav_ton_wallet')}
+          </Link>
         </div>
       </div>
 
@@ -192,9 +237,20 @@ export default function WalletPage() {
                 textTransform: 'uppercase',
               }}
             >
-              TỔNG SỐ DƯ TÀI KHOẢN
+              {t('wallet_total_balance')}
             </span>
-            <span className="badge badge-draft">HẠCH TOÁN KÉP ACID</span>
+            <span
+              style={{
+                padding: '3px 10px',
+                borderRadius: '999px',
+                fontSize: '0.72rem',
+                fontWeight: 800,
+                background: currentTierMeta.gradient,
+                color: '#0b0c0e',
+              }}
+            >
+              👑 {currentUser?.tier || 'CHIP GOLD'}
+            </span>
           </div>
 
           <div
@@ -231,24 +287,25 @@ export default function WalletPage() {
               paddingTop: '14px',
               borderTop: '1px solid var(--border-bronze)',
               marginTop: '14px',
+              flexWrap: 'wrap',
             }}
           >
             <div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Khả dụng</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('wallet_available')}</div>
               <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#34d399' }}>
                 {(balance - escrow).toLocaleString()} CHIP
               </div>
             </div>
             <div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Tạm giữ (Escrow)</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('wallet_escrow')}</div>
               <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#fbbf24' }}>
                 {escrow.toLocaleString()} CHIP
               </div>
             </div>
             <div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Quy chuẩn</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('wallet_standard')}</div>
               <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--accent-bronze-light)' }}>
-                Điểm nội bộ
+                Double-Entry
               </div>
             </div>
           </div>
@@ -258,7 +315,7 @@ export default function WalletPage() {
         <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div>
             <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '6px' }}>
-              MÃ ĐỊNH DANH VÍ SỔ CÁI
+              {t('wallet_addr_title')}
             </div>
             <div
               style={{
@@ -290,7 +347,7 @@ export default function WalletPage() {
                   fontWeight: 600,
                 }}
               >
-                {copied ? '✓ Đã chép' : 'Sao chép'}
+                {copied ? `✓ ${t('btn_copied')}` : t('btn_copy')}
               </button>
             </div>
           </div>
@@ -305,11 +362,16 @@ export default function WalletPage() {
             }}
           >
             <div style={{ fontWeight: 600, color: '#f5d77f', fontSize: '0.88rem', marginBottom: '4px' }}>
-              🛡️ Cam kết sổ cái bất biến (Double-Entry)
+              {t('wallet_immutable_title')}
             </div>
             <div style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', lineHeight: 1.5 }}>
-              Mọi giao dịch cấp hoặc trừ điểm CHIP đều có tài khoản đối ứng (Debit/Credit).
-              Tổng dư nợ toàn hệ thống luôn tuyệt đối bằng 0.
+              {t('wallet_immutable_desc')}
+            </div>
+
+            <div style={{ marginTop: '8px', fontSize: '0.8rem', color: canWithdraw ? '#34d399' : '#fbbf24', fontWeight: 600 }}>
+              {canWithdraw
+                ? '✓ Hạng hiện tại cho phép gửi/nhận và rút CHIP sang mạng TON'
+                : '🔒 Rút CHIP yêu cầu đạt từ hạng CHIP PLATINUM trở lên'}
             </div>
           </div>
         </div>
@@ -323,12 +385,14 @@ export default function WalletPage() {
             justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: '1.2rem',
+            flexWrap: 'wrap',
+            gap: '10px',
           }}
         >
           <div>
-            <h3 style={{ fontSize: '1.15rem' }}>Lịch Sử Nhật Ký Sổ Cái Kép</h3>
+            <h3 style={{ fontSize: '1.15rem' }}>{t('wallet_ledger_history_title')}</h3>
             <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-              Danh sách các bút toán đã được ghi nhận vào PostgreSQL Ledger
+              {t('wallet_ledger_history_sub')}
             </span>
           </div>
 

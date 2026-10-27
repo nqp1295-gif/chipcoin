@@ -166,6 +166,31 @@ export const USER_MENU_GROUPS: MenuGroup[] = [
           </svg>
         ),
       },
+      {
+        nameKey: 'nav_ton_wallet',
+        defaultName: 'Liên Kết Ví TON',
+        href: '/ton-wallet',
+        badge: 'TON',
+        badgeType: 'pulse',
+        descKey: 'nav_ton_wallet_desc',
+        defaultDesc: 'Kết nối ví The Open Network & bảo mật OTP',
+        icon: ({ active }) => (
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={active ? '#38bdf8' : 'currentColor'}
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polygon points="12 2 2 9 12 22 22 9 12 2" />
+            <polyline points="2 9 12 14 22 9" />
+            <line x1="12" y1="2" x2="12" y2="14" />
+          </svg>
+        ),
+      },
     ],
   },
   {
@@ -173,6 +198,30 @@ export const USER_MENU_GROUPS: MenuGroup[] = [
     titleKey: 'group_account_security',
     defaultTitle: 'TÀI KHOẢN & BẢO MẬT',
     items: [
+      {
+        nameKey: 'nav_profile',
+        defaultName: 'Hồ Sơ Cá Nhân',
+        href: '/profile',
+        badge: 'VIP',
+        badgeType: 'gold',
+        descKey: 'nav_profile_desc',
+        defaultDesc: 'Xem thông tin, đổi tên hiển thị, mật khẩu & avatar',
+        icon: ({ active }) => (
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={active ? '#f5d77f' : 'currentColor'}
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+        ),
+      },
       {
         nameKey: 'nav_resend',
         defaultName: 'Kích Hoạt / Gửi Lại Email',

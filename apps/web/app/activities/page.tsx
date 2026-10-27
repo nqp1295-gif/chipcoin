@@ -71,8 +71,8 @@ const TASKS: ActivityTask[] = [
     rewardText: '+20,000 CHIP',
     category: 'ONE_TIME',
     description: 'Bảo vệ tài khoản tích lũy bằng xác thực hai lớp (2FA) và ghi nhận thông tin chủ sở hữu ví điểm.',
-    actionText: 'Kích hoạt bảo mật',
-    canClaimDirectly: true,
+    actionUrl: '/profile',
+    actionText: 'Mở trang hồ sơ cá nhân',
   },
   {
     id: 'task_ledger_test',
@@ -94,7 +94,12 @@ export default function ActivitiesPage() {
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'info' } | null>(null);
 
   const loadMember = () => {
-    const mem = ChipStore.getCurrentMember();
+    let mem = ChipStore.getCurrentMember();
+    if (!mem) {
+      const users = ChipStore.getUsers();
+      mem = users.find((u) => u.roles.includes('USER')) || users[0];
+      if (mem) ChipStore.setMemberSession(mem);
+    }
     setCurrentUser(mem);
   };
 
@@ -166,27 +171,26 @@ export default function ActivitiesPage() {
       >
         <div style={{ maxWidth: '850px' }}>
           <div style={{ display: 'inline-flex', marginBottom: '0.8rem' }}>
-            <span className="badge badge-gold">⭐ TRUNG TÂM HOẠT ĐỘNG &amp; NHIỆM VỤ</span>
+            <span className="badge badge-gold">{t('act_badge')}</span>
           </div>
 
           <h1 style={{ fontSize: '2.4rem', lineHeight: 1.25, marginBottom: '0.8rem' }}>
-            Hoạt Động Tích Lũy Điểm Thưởng
+            {t('act_title')}
           </h1>
 
           <p style={{ color: 'var(--text-secondary)', fontSize: '1.02rem', lineHeight: 1.6, marginBottom: '1.6rem' }}>
-            Khám phá các nhiệm vụ điểm danh hàng ngày, mở rộng mạng lưới giới thiệu và hoàn tất hoạt động cộng đồng
-            để thu thập điểm thưởng CHIP và gia tăng tiến trình thăng hạng VIP.
+            {t('act_desc')}
           </p>
 
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <Link href="/rank" className="nav-btn" style={{ fontSize: '0.92rem', padding: '9px 20px' }}>
-              👑 Xem Điều Kiện Thăng Hạng →
+              👑 {t('nav_rank')}
             </Link>
             <Link href="/referrals" className="btn-secondary" style={{ fontSize: '0.92rem', padding: '9px 20px' }}>
-              🤝 Nhận Link &amp; Mã Giới Thiệu
+              🤝 {t('nav_referrals')}
             </Link>
             <Link href="/wallet" className="btn-secondary" style={{ fontSize: '0.92rem', padding: '9px 20px' }}>
-              🪙 Mở Ví Cá Nhân
+              🪙 {t('nav_wallet')}
             </Link>
           </div>
         </div>
@@ -209,10 +213,10 @@ export default function ActivitiesPage() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '1.4rem' }}>🔥</span>
-              <h2 style={{ fontSize: '1.4rem' }}>Chuỗi Điểm Danh Hàng Ngày</h2>
+              <h2 style={{ fontSize: '1.4rem' }}>{t('act_streak_title')}</h2>
             </div>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginTop: '2px' }}>
-              Duy trì chuỗi điểm danh 7 ngày liên tục để nhận thưởng Hòm Bí Mật lên đến +5,000 CHIP
+              {t('act_streak_desc')}
             </p>
           </div>
 
@@ -228,7 +232,7 @@ export default function ActivitiesPage() {
               cursor: claimedTasks['task_daily_streak'] ? 'default' : 'pointer',
             }}
           >
-            {claimedTasks['task_daily_streak'] ? '✓ Đã Điểm Danh Hôm Nay' : '🎁 Điểm Danh Nhận +250 CHIP'}
+            {claimedTasks['task_daily_streak'] ? t('act_streak_done') : t('act_streak_btn')}
           </button>
         </div>
 
@@ -265,7 +269,7 @@ export default function ActivitiesPage() {
                 }}
               >
                 <div style={{ fontSize: '0.75rem', color: isCompleted ? 'var(--accent-bronze-light)' : 'var(--text-muted)', fontWeight: 700 }}>
-                  NGÀY {day}
+                  {t('act_day')} {day}
                 </div>
                 <div style={{ fontSize: '1.5rem', margin: '6px 0' }}>
                   {day === 7 ? '🎁' : isCompleted ? '✓' : '🪙'}
@@ -282,9 +286,9 @@ export default function ActivitiesPage() {
       {/* Full Task Grid */}
       <section>
         <div style={{ marginBottom: '1.2rem' }}>
-          <h2 style={{ fontSize: '1.6rem', marginBottom: '4px' }}>Tất Cả Nhiệm Vụ &amp; Hoạt Động</h2>
+          <h2 style={{ fontSize: '1.6rem', marginBottom: '4px' }}>{t('act_all_title')}</h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem' }}>
-            Hoàn tất các mục tiêu dưới đây để tự động cộng điểm thưởng vào tài khoản
+            {t('act_all_desc')}
           </p>
         </div>
 
@@ -313,7 +317,7 @@ export default function ActivitiesPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                     <span style={{ fontSize: '2rem' }}>{task.icon}</span>
                     <span className={`badge ${isClaimed ? 'badge-pulse' : 'badge-gold'}`}>
-                      {isClaimed ? '✓ ĐÃ NHẬN' : task.rewardText}
+                      {isClaimed ? t('act_claimed') : task.rewardText}
                     </span>
                   </div>
 
@@ -349,7 +353,7 @@ export default function ActivitiesPage() {
                         transition: 'all 0.2s ease',
                       }}
                     >
-                      {isClaimed ? '✓ Đã nhận thưởng' : 'Nhấn nhận thưởng ngay →'}
+                      {isClaimed ? t('act_claimed') : t('act_claim_btn')}
                     </button>
                   ) : (
                     <Link
