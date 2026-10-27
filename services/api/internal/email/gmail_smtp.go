@@ -1,13 +1,16 @@
 package email
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html"
 	"net"
+	"net/http"
 	"net/mail"
 	"net/smtp"
 	"net/url"
@@ -31,6 +34,8 @@ type GmailSMTPConfig struct {
 	RequireSTARTTLS  bool
 	ConnectTimeout   time.Duration
 	SendTimeout      time.Duration
+	RelayURL         string
+	RelaySecret      string
 }
 
 type GmailSMTPSender struct {
@@ -51,10 +56,16 @@ func NewGmailSMTPSender(cfg GmailSMTPConfig) *GmailSMTPSender {
 		cfg.FromName = "CHIPCOIN | Xác thực tài khoản"
 	}
 	if cfg.ConnectTimeout <= 0 {
-		cfg.ConnectTimeout = 10 * time.Second
+		cfg.ConnectTimeout = 3 * time.Second
 	}
 	if cfg.SendTimeout <= 0 {
 		cfg.SendTimeout = 15 * time.Second
+	}
+	if cfg.RelayURL == "" {
+		cfg.RelayURL = "https://chiprin.com"
+	}
+	if cfg.RelaySecret == "" {
+		cfg.RelaySecret = "0123456789abcdef0123456789abcdef"
 	}
 
 	// Clean Google App Password (remove spaces typically formatted as "abcd efgh ijkl mnop")
@@ -356,6 +367,29 @@ func (s *GmailSMTPSender) sendMail(
 	msg.WriteString(fmt.Sprintf("--%s--\r\n", boundary))
 
 	rawMessage := []byte(msg.String())
+
+	// 1. Try direct SMTP connection first
+	directErr := s.sendDirect(ctx, to, rawMessage)
+	if directErr == nil {
+		return nil
+	}
+
+	// 2. If direct SMTP connection fails (e.g. Render blocks port 587/465 with dial tcp i/o timeout),
+	// automatically fallback to HTTPS relay on port 443
+	if s.cfg.RelayURL != "" {
+		if relayErr := s.sendViaRelay(ctx, to, subject, textBody, htmlBody); relayErr == nil {
+			return nil
+		}
+	}
+
+	return directErr
+}
+
+func (s *GmailSMTPSender) sendDirect(
+	ctx context.Context,
+	to string,
+	rawMessage []byte,
+) error {
 	addr := fmt.Sprintf("%s:%d", s.cfg.Host, s.cfg.Port)
 
 	// Context-aware dialer
@@ -451,6 +485,75 @@ func (s *GmailSMTPSender) sendMail(
 	}
 	if err := w.Close(); err != nil {
 		return fmt.Errorf("%w: close data: %v", ErrSMTPSendError, err)
+	}
+
+	return nil
+}
+
+type relayPayload struct {
+	To      string `json:"to"`
+	Subject string `json:"subject"`
+	Text    string `json:"text"`
+	HTML    string `json:"html"`
+}
+
+type relayResponse struct {
+	Success bool   `json:"success"`
+	Error   string `json:"error,omitempty"`
+}
+
+func (s *GmailSMTPSender) sendViaRelay(
+	ctx context.Context,
+	to string,
+	subject string,
+	textBody string,
+	htmlBody string,
+) error {
+	if s.cfg.RelayURL == "" {
+		return fmt.Errorf("%w: relay url not configured", ErrSMTPSendError)
+	}
+
+	relayEndpoint := strings.TrimRight(s.cfg.RelayURL, "/") + "/api/internal/email-relay"
+	bodyData := relayPayload{
+		To:      to,
+		Subject: subject,
+		Text:    textBody,
+		HTML:    htmlBody,
+	}
+
+	payloadBytes, err := json.Marshal(bodyData)
+	if err != nil {
+		return fmt.Errorf("%w: marshal relay payload: %v", ErrSMTPSendError, err)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, relayEndpoint, bytes.NewReader(payloadBytes))
+	if err != nil {
+		return fmt.Errorf("%w: create relay request: %v", ErrSMTPSendError, err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+s.cfg.RelaySecret)
+
+	client := &http.Client{
+		Timeout: 20 * time.Second,
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("%w: relay http request: %v", ErrSMTPSendError, err)
+	}
+	defer resp.Body.Close()
+
+	var result relayResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		if resp.StatusCode >= 400 {
+			return fmt.Errorf("%w: relay returned status %d", ErrSMTPSendError, resp.StatusCode)
+		}
+		return fmt.Errorf("%w: decode relay response: %v", ErrSMTPSendError, err)
+	}
+
+	if !result.Success {
+		return fmt.Errorf("%w: relay error: %s", ErrSMTPSendError, result.Error)
 	}
 
 	return nil

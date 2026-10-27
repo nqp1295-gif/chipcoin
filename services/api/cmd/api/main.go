@@ -442,6 +442,7 @@ func main() {
 				FromEmail:       emailCfg.SMTPFromEmail,
 				FromName:        emailCfg.SMTPFromName,
 				RequireSTARTTLS: emailCfg.SMTPRequireTLS,
+				RelayURL:        emailCfg.PublicURL,
 			})
 			log.Printf("Gmail SMTP sender configured (%s:%d as %s)", emailCfg.SMTPHost, emailCfg.SMTPPort, emailCfg.SMTPUsername)
 		} else {
