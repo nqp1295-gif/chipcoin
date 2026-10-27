@@ -6,6 +6,13 @@ import { useI18n } from '../lib/i18n';
 import { ChipStore, StoredUser, TIER_CONFIGS } from '../lib/store';
 import WalletNavTabs from '../wallet/components/WalletNavTabs';
 
+// ============================================================================
+// ENVIRONMENT GATE: Test helper UI only available in local dev mode
+// ============================================================================
+const IS_LOCAL_DEV =
+  typeof process !== 'undefined' &&
+  process.env?.NEXT_PUBLIC_USE_SEED_DATA === 'true';
+
 export default function TonWalletPage() {
   const { t } = useI18n();
 
@@ -102,7 +109,7 @@ export default function TonWalletPage() {
     setStep(2);
   };
 
-  // Step 2: Simulate cryptographic signature & send OTP
+  // Step 2: Verify cryptographic signature & send OTP
   const handleProceedToStep3 = () => {
     setFeedback(null);
     setOtpSent(true);
@@ -172,7 +179,9 @@ export default function TonWalletPage() {
   };
 
   const isBound = Boolean(currentUser?.tonWalletAddress);
-  const currentTierMeta = currentUser?.tier ? TIER_CONFIGS[currentUser.tier] : TIER_CONFIGS['CHIP GOLD'];
+  const currentTierMeta = currentUser?.tier
+    ? TIER_CONFIGS[currentUser.tier]
+    : (IS_LOCAL_DEV ? TIER_CONFIGS['CHIP GOLD'] : TIER_CONFIGS['CHIP MEMBER']);
   const canWithdraw = currentTierMeta.canTransferAndWithdraw;
 
   return (
@@ -537,23 +546,25 @@ export default function TonWalletPage() {
                 />
               </div>
 
-              {/* Sample Preset helper button for easy testing */}
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem' }}>
-                <button
-                  type="button"
-                  onClick={() => setTonAddress('EQBvW8Z5huBkMJYdn3PCDnHoKK3xNJa_W0C_z8LgqG12Ton')}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--accent-bronze)',
-                    fontSize: '0.8rem',
-                    cursor: 'pointer',
-                    textDecoration: 'underline',
-                  }}
-                >
-                  Dán địa chỉ ví mẫu Tonkeeper
-                </button>
-              </div>
+              {/* Sample Preset helper button — ONLY shown in local dev for easy testing */}
+              {IS_LOCAL_DEV && (
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setTonAddress('EQBvW8Z5huBkMJYdn3PCDnHoKK3xNJa_W0C_z8LgqG12Ton')}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--accent-bronze)',
+                      fontSize: '0.8rem',
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                    }}
+                  >
+                    Dán địa chỉ ví mẫu Tonkeeper (DEV ONLY)
+                  </button>
+                </div>
+              )}
 
               <button
                 type="button"

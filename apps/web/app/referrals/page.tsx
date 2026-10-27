@@ -44,7 +44,7 @@ export default function ReferralsPage() {
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://chipcoin.io';
   const referralUrl = `${origin}/register?ref=${referralCode}`;
 
-  const currentTier = currentUser?.tier || 'CHIP GOLD';
+  const currentTier = currentUser?.tier || 'CHIP MEMBER';
   const tierConfig = TIER_CONFIGS[currentTier];
 
   const totalReferrals = referrals.length;

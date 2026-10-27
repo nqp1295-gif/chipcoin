@@ -3,6 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { apiRequest } from '../../lib/api';
 
+// ============================================================================
+// ENVIRONMENT GATE: Mock email logs only loaded in local dev mode
+// ============================================================================
+const IS_LOCAL_DEV =
+  typeof process !== 'undefined' &&
+  process.env?.NEXT_PUBLIC_USE_SEED_DATA === 'true';
+
 interface EmailStatusData {
   provider: string;
   smtp_host: string;
@@ -36,7 +43,7 @@ interface OutboxLog {
   note: string;
 }
 
-const INITIAL_LOGS: OutboxLog[] = [
+const _RAW_INITIAL_LOGS: OutboxLog[] = [
   {
     id: 'EM-902144',
     template: 'Mẫu A (Xác Thực Email)',
@@ -88,6 +95,9 @@ const INITIAL_LOGS: OutboxLog[] = [
     note: 'Single-use token, outbox worker tự động hạch toán',
   },
 ];
+
+// Only load mock logs in local dev, production starts empty
+const INITIAL_LOGS: OutboxLog[] = IS_LOCAL_DEV ? _RAW_INITIAL_LOGS : [];
 
 export default function SystemEmailMonitoringPage() {
   const [statusData, setStatusData] = useState<EmailStatusData | null>(null);

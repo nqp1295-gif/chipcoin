@@ -11,12 +11,19 @@ import {
 } from '../../lib/store';
 import WalletNavTabs from '../components/WalletNavTabs';
 
+// ============================================================================
+// ENVIRONMENT GATE: Simulation presets only enabled in local dev mode
+// ============================================================================
+const IS_LOCAL_DEV =
+  typeof process !== 'undefined' &&
+  process.env?.NEXT_PUBLIC_USE_SEED_DATA === 'true';
+
 export default function WithdrawPage() {
   const { t } = useI18n();
   const [currentUser, setCurrentUser] = useState<StoredUser | null>(null);
 
   const [destAddress, setDestAddress] = useState('');
-  const [amountUsdt, setAmountUsdt] = useState<string>('2.0');
+  const [amountUsdt, setAmountUsdt] = useState<string>(IS_LOCAL_DEV ? '2.0' : '');
   const [otpCode, setOtpCode] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [otpTimer, setOtpTimer] = useState(0);
@@ -60,7 +67,8 @@ export default function WithdrawPage() {
   const gasFee = 0.10;
   const netAmount = numUsdt > gasFee ? Number((numUsdt - gasFee).toFixed(4)) : 0;
 
-  const currentTierMeta = currentUser?.tier ? TIER_CONFIGS[currentUser.tier] : TIER_CONFIGS['CHIP GOLD'];
+  const defaultTier = IS_LOCAL_DEV ? 'CHIP GOLD' : 'CHIP MEMBER';
+  const currentTierMeta = currentUser?.tier ? TIER_CONFIGS[currentUser.tier] : TIER_CONFIGS[defaultTier];
   const canWithdraw = currentTierMeta.canTransferAndWithdraw;
 
   const handleSendOtp = () => {
@@ -228,7 +236,7 @@ export default function WithdrawPage() {
                 color: '#0b0c0e',
               }}
             >
-              {currentUser?.tier || 'CHIP GOLD'}
+              {currentUser?.tier || defaultTier}
             </span>
           </div>
 
@@ -439,7 +447,7 @@ export default function WithdrawPage() {
                   {canWithdraw ? 'Quyền Rút Tiền Đang Mở' : 'Quyền Rút Tiền Đang Khóa'}
                 </h4>
                 <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                  Hạng hiện tại: <b>{currentUser?.tier || 'CHIP GOLD'}</b>
+                  Hạng hiện tại: <b>{currentUser?.tier || defaultTier}</b>
                 </span>
               </div>
             </div>

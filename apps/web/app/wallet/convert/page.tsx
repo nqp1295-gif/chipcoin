@@ -13,13 +13,20 @@ import {
 } from '../../lib/store';
 import WalletNavTabs from '../components/WalletNavTabs';
 
+// ============================================================================
+// ENVIRONMENT GATE: Preset simulation input only loaded in local dev mode
+// ============================================================================
+const IS_LOCAL_DEV =
+  typeof process !== 'undefined' &&
+  process.env?.NEXT_PUBLIC_USE_SEED_DATA === 'true';
+
 export default function ConvertPage() {
   const { t } = useI18n();
   const [currentUser, setCurrentUser] = useState<StoredUser | null>(null);
 
   // Direction: 'CHIP_TO_USDT' or 'USDT_TO_CHIP'
   const [direction, setDirection] = useState<'CHIP_TO_USDT' | 'USDT_TO_CHIP'>('CHIP_TO_USDT');
-  const [sourceInput, setSourceInput] = useState<string>('5000000');
+  const [sourceInput, setSourceInput] = useState<string>(IS_LOCAL_DEV ? '5000000' : '');
   const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [isConverting, setIsConverting] = useState(false);
   const [showTwoFactorModal, setShowTwoFactorModal] = useState(false);

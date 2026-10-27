@@ -215,8 +215,17 @@ export interface WithdrawalOrder {
   settledAt?: string;
 }
 
+// ============================================================================
+// ENVIRONMENT GATE: Seed data is ONLY used when NEXT_PUBLIC_USE_SEED_DATA=true
+// In production, all seed arrays are empty — real data comes from the backend API.
+// ============================================================================
+const IS_LOCAL_DEV =
+  typeof process !== 'undefined' &&
+  process.env?.NEXT_PUBLIC_USE_SEED_DATA === 'true';
+
 // Initial Seed Data aligned strictly with 1 USDT = 5,000,000 CHIP
-const SEED_USERS: StoredUser[] = [
+// These are ONLY loaded in local dev mode (NEXT_PUBLIC_USE_SEED_DATA=true)
+const _RAW_SEED_USERS: StoredUser[] = [
   {
     id: 'usr-admin-001',
     username: 'admin_master',
@@ -371,8 +380,9 @@ const SEED_USERS: StoredUser[] = [
     twoFactorEnabled: false,
   },
 ];
+const SEED_USERS: StoredUser[] = IS_LOCAL_DEV ? _RAW_SEED_USERS : [];
 
-const SEED_CONVERSIONS: ConversionOrder[] = [
+const _RAW_SEED_CONVERSIONS: ConversionOrder[] = [
   {
     id: 'ord-conv-001',
     userId: 'usr-mem-001',
@@ -398,8 +408,9 @@ const SEED_CONVERSIONS: ConversionOrder[] = [
     status: 'SETTLED',
   },
 ];
+const SEED_CONVERSIONS: ConversionOrder[] = IS_LOCAL_DEV ? _RAW_SEED_CONVERSIONS : [];
 
-const SEED_DEPOSITS: DepositIntent[] = [
+const _RAW_SEED_DEPOSITS: DepositIntent[] = [
   {
     id: 'dep-intent-001',
     userId: 'usr-mem-001',
@@ -416,8 +427,9 @@ const SEED_DEPOSITS: DepositIntent[] = [
     settledAt: '2026-10-24T09:42:15Z',
   },
 ];
+const SEED_DEPOSITS: DepositIntent[] = IS_LOCAL_DEV ? _RAW_SEED_DEPOSITS : [];
 
-const SEED_WITHDRAWALS: WithdrawalOrder[] = [
+const _RAW_SEED_WITHDRAWALS: WithdrawalOrder[] = [
   {
     id: 'wdr-ord-001',
     userId: 'usr-mem-001',
@@ -433,8 +445,9 @@ const SEED_WITHDRAWALS: WithdrawalOrder[] = [
     settledAt: '2026-10-25T16:05:00Z',
   },
 ];
+const SEED_WITHDRAWALS: WithdrawalOrder[] = IS_LOCAL_DEV ? _RAW_SEED_WITHDRAWALS : [];
 
-const SEED_REFERRAL_LINKS: StoredReferralLink[] = [
+const _RAW_SEED_REFERRAL_LINKS: StoredReferralLink[] = [
   {
     id: 'ref-001',
     referrerCode: 'CHIP-ALEX-99',
@@ -486,8 +499,9 @@ const SEED_REFERRAL_LINKS: StoredReferralLink[] = [
     commissionPaidToReferrer: 0,
   },
 ];
+const SEED_REFERRAL_LINKS: StoredReferralLink[] = IS_LOCAL_DEV ? _RAW_SEED_REFERRAL_LINKS : [];
 
-const SEED_PROMOTIONS: TierPromotionRecord[] = [
+const _RAW_SEED_PROMOTIONS: TierPromotionRecord[] = [
   {
     id: 'prm-001',
     userId: 'usr-mem-001',
@@ -529,8 +543,9 @@ const SEED_PROMOTIONS: TierPromotionRecord[] = [
     privilegesGranted: 'Thưởng 3% hoa hồng nhánh từ người được giới thiệu',
   },
 ];
+const SEED_PROMOTIONS: TierPromotionRecord[] = IS_LOCAL_DEV ? _RAW_SEED_PROMOTIONS : [];
 
-const SEED_ALLOCATIONS: ChipAllocationRecord[] = [
+const _RAW_SEED_ALLOCATIONS: ChipAllocationRecord[] = [
   {
     id: 'alc-001',
     userId: 'usr-mem-001',
@@ -582,6 +597,7 @@ const SEED_ALLOCATIONS: ChipAllocationRecord[] = [
     allocatedAt: '2026-10-24T19:25:00Z',
   },
 ];
+const SEED_ALLOCATIONS: ChipAllocationRecord[] = IS_LOCAL_DEV ? _RAW_SEED_ALLOCATIONS : [];
 
 const STORAGE_KEYS = {
   USERS: 'chipcoin_synced_users_v4',

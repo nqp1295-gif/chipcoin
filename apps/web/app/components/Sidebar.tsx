@@ -570,9 +570,16 @@ export default function Sidebar({
     return pathname === item.href || pathname.startsWith(`${item.href}/`);
   };
 
+  const IS_LOCAL_DEV =
+    typeof process !== 'undefined' &&
+    process.env?.NEXT_PUBLIC_USE_SEED_DATA === 'true';
+
+  const defaultTier = IS_LOCAL_DEV ? 'CHIP GOLD' : 'CHIP MEMBER';
+  const defaultBalance = IS_LOCAL_DEV ? 1250000 : 0;
+
   const memberTierMeta = memberUser?.tier
     ? TIER_CONFIGS[memberUser.tier]
-    : TIER_CONFIGS['CHIP GOLD'];
+    : TIER_CONFIGS[defaultTier];
 
   return (
     <>
@@ -694,11 +701,11 @@ export default function Sidebar({
               </div>
               <div className="glance-balance-row">
                 <span className="glance-amount" style={{ fontSize: '1.25rem', color: '#ffffff' }}>
-                  {staffSession?.email ? staffSession.email.split('@')[0] : 'admin_sec'}
+                  {staffSession?.email ? staffSession.email.split('@')[0] : (IS_LOCAL_DEV ? 'admin_sec' : 'Chưa đăng nhập')}
                 </span>
               </div>
               <div className="glance-subtext">
-                <span>Kho Quỹ: 500M CHIP Vault</span>
+                <span>{IS_LOCAL_DEV ? 'Kho Quỹ: 500M CHIP Vault' : 'Sổ Cái Kép Toàn Hệ Thống'}</span>
                 <Link href="/system/wallet" className="glance-link" onClick={onCloseMobile}>
                   Kho quỹ →
                 </Link>
@@ -718,18 +725,18 @@ export default function Sidebar({
                       background: 'rgba(0,0,0,0.3)',
                     }}
                   >
-                    {memberUser?.tier || 'CHIP GOLD'}
+                    {memberUser?.tier || defaultTier}
                   </span>
                 </Link>
               </div>
               <div className="glance-balance-row">
                 <span className="glance-amount">
-                  {(memberUser?.chipsBalance ?? 1250000).toLocaleString()}
+                  {(memberUser?.chipsBalance ?? defaultBalance).toLocaleString()}
                 </span>
                 <span className="glance-unit">CHIP</span>
               </div>
               <div className="glance-subtext">
-                <span>≈ ${(((memberUser?.chipsBalance ?? 1250000)) / 10000).toFixed(2)} USD</span>
+                <span>≈ ${(((memberUser?.chipsBalance ?? defaultBalance)) / 10000).toFixed(2)} USD</span>
                 <Link href="/wallet" className="glance-link" onClick={onCloseMobile}>
                   Ví của tôi →
                 </Link>
@@ -742,7 +749,7 @@ export default function Sidebar({
             title={
               isSystemRoute
                 ? `Nhân sự quản trị: ${staffSession?.email || 'Admin Staff'}`
-                : `Số dư cá nhân: ${(memberUser?.chipsBalance ?? 1250000).toLocaleString()} CHIP (${memberUser?.tier || 'VIP'})`
+                : `Số dư cá nhân: ${(memberUser?.chipsBalance ?? defaultBalance).toLocaleString()} CHIP (${memberUser?.tier || defaultTier})`
             }
           >
             <Link

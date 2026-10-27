@@ -93,7 +93,7 @@ export default function TopBar({ onOpenMobileMenu }: TopBarProps) {
     return isSystemRoute ? t('brand_system_title') : t('brand_member_title');
   };
 
-  const currentTierMeta = memberUser?.tier ? TIER_CONFIGS[memberUser.tier] : TIER_CONFIGS['CHIP GOLD'];
+  const currentTierMeta = memberUser?.tier ? TIER_CONFIGS[memberUser.tier] : TIER_CONFIGS['CHIP MEMBER'];
 
   return (
     <header className={`app-topbar ${isSystemRoute ? 'topbar-system' : 'topbar-user'}`}>

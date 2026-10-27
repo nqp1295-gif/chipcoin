@@ -2,6 +2,13 @@
 
 import React, { useState } from 'react';
 
+// ============================================================================
+// ENVIRONMENT GATE: Mock outbox events only loaded in local dev mode
+// ============================================================================
+const IS_LOCAL_DEV =
+  typeof process !== 'undefined' &&
+  process.env?.NEXT_PUBLIC_USE_SEED_DATA === 'true';
+
 interface OutboxEvent {
   id: string;
   eventType: string;
@@ -13,7 +20,7 @@ interface OutboxEvent {
   processedAt: string;
 }
 
-const INITIAL_EVENTS: OutboxEvent[] = [
+const _RAW_INITIAL_EVENTS: OutboxEvent[] = [
   {
     id: 'OB-982104',
     eventType: 'AUTH_EMAIL_VERIFICATION',
@@ -65,6 +72,9 @@ const INITIAL_EVENTS: OutboxEvent[] = [
     processedAt: '2026-10-26 21:30:01',
   },
 ];
+
+// Only load mock events in local dev, production starts empty
+const INITIAL_EVENTS: OutboxEvent[] = IS_LOCAL_DEV ? _RAW_INITIAL_EVENTS : [];
 
 export default function SystemTrackingPage() {
   const [events, setEvents] = useState<OutboxEvent[]>(INITIAL_EVENTS);

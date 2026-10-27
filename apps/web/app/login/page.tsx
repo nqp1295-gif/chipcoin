@@ -6,10 +6,18 @@ import { useRouter } from 'next/navigation';
 import { apiRequest } from '../lib/api';
 import { ChipStore } from '../lib/store';
 
+// ============================================================================
+// ENVIRONMENT GATE: Auto-fill demo credentials only in local dev mode
+// In production, input fields start completely blank.
+// ============================================================================
+const IS_LOCAL_DEV =
+  typeof process !== 'undefined' &&
+  process.env?.NEXT_PUBLIC_USE_SEED_DATA === 'true';
+
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('sophia.chain@example.com');
-  const [password, setPassword] = useState('Member@Chiprin2026!');
+  const [email, setEmail] = useState(IS_LOCAL_DEV ? 'sophia.chain@example.com' : '');
+  const [password, setPassword] = useState(IS_LOCAL_DEV ? 'Member@Chiprin2026!' : '');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

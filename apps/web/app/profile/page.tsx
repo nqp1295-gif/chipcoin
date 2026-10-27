@@ -124,7 +124,7 @@ export default function ProfilePage() {
     }, 400);
   };
 
-  const currentTierMeta = currentUser?.tier ? TIER_CONFIGS[currentUser.tier] : TIER_CONFIGS['CHIP GOLD'];
+  const currentTierMeta = currentUser?.tier ? TIER_CONFIGS[currentUser.tier] : TIER_CONFIGS['CHIP MEMBER'];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '1000px', margin: '0 auto', width: '100%' }}>
@@ -421,7 +421,7 @@ export default function ProfilePage() {
                       color: '#0b0c0e',
                     }}
                   >
-                    👑 {currentUser?.tier || 'CHIP GOLD'}
+                    👑 {currentUser?.tier || 'CHIP MEMBER'}
                   </span>
                   <span style={{ fontSize: '0.82rem', color: '#34d399', fontWeight: 600 }}>
                     {currentTierMeta.bonusRate > 0 ? `+${currentTierMeta.bonusRate * 100}% bonus` : 'Active'}

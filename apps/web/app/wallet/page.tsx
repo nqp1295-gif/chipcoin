@@ -6,6 +6,13 @@ import { useI18n } from '../lib/i18n';
 import { ChipStore, StoredUser, TIER_CONFIGS, chipToUsdt } from '../lib/store';
 import WalletNavTabs from './components/WalletNavTabs';
 
+// ============================================================================
+// ENVIRONMENT GATE: Hardcoded transaction data only shown in local dev mode
+// ============================================================================
+const IS_LOCAL_DEV =
+  typeof process !== 'undefined' &&
+  process.env?.NEXT_PUBLIC_USE_SEED_DATA === 'true';
+
 interface LedgerTransaction {
   id: string;
   timestamp: string;
@@ -18,7 +25,7 @@ interface LedgerTransaction {
   status: 'SETTLED' | 'PENDING';
 }
 
-const INITIAL_TRANSACTIONS: LedgerTransaction[] = [
+const _RAW_INITIAL_TRANSACTIONS: LedgerTransaction[] = [
   {
     id: 'TX-20261026-9041',
     timestamp: '2026-10-26 21:40:12',
@@ -65,11 +72,14 @@ const INITIAL_TRANSACTIONS: LedgerTransaction[] = [
   },
 ];
 
+// Only load seed transactions in local dev, production starts empty
+const INITIAL_TRANSACTIONS: LedgerTransaction[] = IS_LOCAL_DEV ? _RAW_INITIAL_TRANSACTIONS : [];
+
 export default function WalletPage() {
   const { t } = useI18n();
   const [currentUser, setCurrentUser] = useState<StoredUser | null>(null);
-  const [balance, setBalance] = useState(1250000);
-  const [escrow, setEscrow] = useState(70000);
+  const [balance, setBalance] = useState(0);
+  const [escrow, setEscrow] = useState(0);
   const [transactions, setTransactions] = useState<LedgerTransaction[]>(INITIAL_TRANSACTIONS);
   const [copied, setCopied] = useState(false);
   const [simulating, setSimulating] = useState(false);
@@ -109,6 +119,7 @@ export default function WalletPage() {
     setTimeout(() => setCopied(false), 1800);
   };
 
+  // Simulate bonus — ONLY available in local dev mode
   const handleGrantBonus = () => {
     setSimulating(true);
     setFeedback(null);
@@ -129,7 +140,7 @@ export default function WalletPage() {
         )}`,
         timestamp: new Date().toLocaleString('sv-SE').replace('T', ' '),
         type: 'Thưởng trải nghiệm giao dịch mới',
-        debitAccount: 'SYSTEM_TEST_TREASURY',
+        debitAccount: 'SYSTEM_DEV_TREASURY',
         creditAccount: walletAddress,
         amount: grantAmount,
         balanceAfter: balance + grantAmount,
@@ -146,7 +157,8 @@ export default function WalletPage() {
     }, 500);
   };
 
-  const currentTierMeta = currentUser?.tier ? TIER_CONFIGS[currentUser.tier] : TIER_CONFIGS['CHIP GOLD'];
+  const defaultTier = IS_LOCAL_DEV ? 'CHIP GOLD' : 'CHIP MEMBER';
+  const currentTierMeta = currentUser?.tier ? TIER_CONFIGS[currentUser.tier] : TIER_CONFIGS[defaultTier];
   const canWithdraw = currentTierMeta.canTransferAndWithdraw;
 
   return (
@@ -189,14 +201,17 @@ export default function WalletPage() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          <button
-            onClick={handleGrantBonus}
-            disabled={simulating}
-            className="nav-btn"
-            style={{ cursor: 'pointer', border: 'none', gap: '8px' }}
-          >
-            {simulating ? 'Đang hạch toán...' : t('wallet_btn_bonus')}
-          </button>
+          {/* Simulate bonus button — ONLY shown in local dev mode */}
+          {IS_LOCAL_DEV && (
+            <button
+              onClick={handleGrantBonus}
+              disabled={simulating}
+              className="nav-btn"
+              style={{ cursor: 'pointer', border: 'none', gap: '8px' }}
+            >
+              {simulating ? 'Đang hạch toán...' : t('wallet_btn_bonus')}
+            </button>
+          )}
 
           <Link href="/wallet/convert" className="btn-secondary" style={{ fontSize: '0.88rem', padding: '8px 16px' }}>
             🔄 {t('tab_convert')}
@@ -257,7 +272,7 @@ export default function WalletPage() {
                 color: '#0b0c0e',
               }}
             >
-              👑 {currentUser?.tier || 'CHIP GOLD'}
+              👑 {currentUser?.tier || defaultTier}
             </span>
           </div>
 

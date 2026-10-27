@@ -5,6 +5,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '../../lib/api';
 
+// ============================================================================
+// ENVIRONMENT GATE: Preset accounts only enabled in local dev mode
+// ============================================================================
+const IS_LOCAL_DEV =
+  typeof process !== 'undefined' &&
+  process.env?.NEXT_PUBLIC_USE_SEED_DATA === 'true';
+
 const PRESET_ACCOUNTS = {
   admin: {
     email: 'admin@chiprin.com',
@@ -28,8 +35,8 @@ const PRESET_ACCOUNTS = {
 
 export default function SystemLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('admin@chiprin.com');
-  const [password, setPassword] = useState('Admin@Chiprin2026!');
+  const [email, setEmail] = useState(IS_LOCAL_DEV ? 'admin@chiprin.com' : '');
+  const [password, setPassword] = useState(IS_LOCAL_DEV ? 'Admin@Chiprin2026!' : '');
   const [showPassword, setShowPassword] = useState(false);
   const [selectedRole, setSelectedRole] = useState<'admin' | 'assistant' | 'specialist'>('admin');
 
@@ -175,147 +182,151 @@ export default function SystemLoginPage() {
           </p>
         </div>
 
-        {/* One-Click Role Selector Presets */}
-        <div style={{ marginBottom: '1.4rem' }}>
-          <div
-            style={{
-              fontSize: '0.78rem',
-              color: 'var(--text-muted)',
-              marginBottom: '8px',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.04em',
-            }}
-          >
-            Chọn vai trò đăng nhập nhanh (1 chạm):
-          </div>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '8px',
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => handleSelectRolePreset('admin')}
+        {/* One-Click Role Selector Presets & Test Credentials — LOCAL DEV ONLY */}
+        {IS_LOCAL_DEV && (
+          <>
+            <div style={{ marginBottom: '1.4rem' }}>
+              <div
+                style={{
+                  fontSize: '0.78rem',
+                  color: 'var(--text-muted)',
+                  marginBottom: '8px',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                🧪 Chọn vai trò đăng nhập nhanh (Chế độ Test Local):
+              </div>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gap: '8px',
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => handleSelectRolePreset('admin')}
+                  style={{
+                    padding: '12px 8px',
+                    borderRadius: '10px',
+                    background:
+                      selectedRole === 'admin'
+                        ? 'rgba(212, 175, 55, 0.22)'
+                        : 'rgba(212, 175, 55, 0.06)',
+                    border:
+                      selectedRole === 'admin'
+                        ? '2px solid var(--accent-bronze)'
+                        : '1px solid rgba(212, 175, 55, 0.25)',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <div style={{ fontSize: '1.3rem', marginBottom: '3px' }}>👑</div>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f5d77f' }}>
+                    Quản Trị Viên
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Toàn quyền</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleSelectRolePreset('assistant')}
+                  style={{
+                    padding: '12px 8px',
+                    borderRadius: '10px',
+                    background:
+                      selectedRole === 'assistant'
+                        ? 'rgba(129, 140, 248, 0.22)'
+                        : 'rgba(129, 140, 248, 0.06)',
+                    border:
+                      selectedRole === 'assistant'
+                        ? '2px solid #818cf8'
+                        : '1px solid rgba(129, 140, 248, 0.25)',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <div style={{ fontSize: '1.3rem', marginBottom: '3px' }}>💼</div>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#a5b4fc' }}>
+                    Trợ Lý
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Điều hành</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleSelectRolePreset('specialist')}
+                  style={{
+                    padding: '12px 8px',
+                    borderRadius: '10px',
+                    background:
+                      selectedRole === 'specialist'
+                        ? 'rgba(56, 189, 248, 0.22)'
+                        : 'rgba(56, 189, 248, 0.06)',
+                    border:
+                      selectedRole === 'specialist'
+                        ? '2px solid #38bdf8'
+                        : '1px solid rgba(56, 189, 248, 0.25)',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <div style={{ fontSize: '1.3rem', marginBottom: '3px' }}>🔍</div>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#7dd3fc' }}>
+                    Chuyên Viên
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Nghiệp vụ</div>
+                </button>
+              </div>
+            </div>
+
+            {/* Preset Info Hint Box */}
+            <div
               style={{
-                padding: '12px 8px',
-                borderRadius: '10px',
-                background:
-                  selectedRole === 'admin'
-                    ? 'rgba(212, 175, 55, 0.22)'
-                    : 'rgba(212, 175, 55, 0.06)',
-                border:
-                  selectedRole === 'admin'
-                    ? '2px solid var(--accent-bronze)'
-                    : '1px solid rgba(212, 175, 55, 0.25)',
-                textAlign: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
+                background: 'rgba(212, 175, 55, 0.06)',
+                border: '1px dashed var(--border-bronze)',
+                borderRadius: '8px',
+                padding: '10px 14px',
+                marginBottom: '1.5rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                fontSize: '0.82rem',
               }}
             >
-              <div style={{ fontSize: '1.3rem', marginBottom: '3px' }}>👑</div>
-              <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f5d77f' }}>
-                Quản Trị Viên
+              <div>
+                <span style={{ color: 'var(--text-muted)' }}>Tài khoản đang chọn: </span>
+                <strong style={{ color: '#f5d77f' }}>{email}</strong>
+                <br />
+                <span style={{ color: 'var(--text-muted)' }}>Mật khẩu mặc định: </span>
+                <code style={{ color: '#fff', background: 'rgba(0,0,0,0.3)', padding: '2px 6px', borderRadius: '4px' }}>
+                  Admin@Chiprin2026!
+                </code>
               </div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Toàn quyền</div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleSelectRolePreset('assistant')}
-              style={{
-                padding: '12px 8px',
-                borderRadius: '10px',
-                background:
-                  selectedRole === 'assistant'
-                    ? 'rgba(129, 140, 248, 0.22)'
-                    : 'rgba(129, 140, 248, 0.06)',
-                border:
-                  selectedRole === 'assistant'
-                    ? '2px solid #818cf8'
-                    : '1px solid rgba(129, 140, 248, 0.25)',
-                textAlign: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-              }}
-            >
-              <div style={{ fontSize: '1.3rem', marginBottom: '3px' }}>💼</div>
-              <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#a5b4fc' }}>
-                Trợ Lý
-              </div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Điều hành</div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleSelectRolePreset('specialist')}
-              style={{
-                padding: '12px 8px',
-                borderRadius: '10px',
-                background:
-                  selectedRole === 'specialist'
-                    ? 'rgba(56, 189, 248, 0.22)'
-                    : 'rgba(56, 189, 248, 0.06)',
-                border:
-                  selectedRole === 'specialist'
-                    ? '2px solid #38bdf8'
-                    : '1px solid rgba(56, 189, 248, 0.25)',
-                textAlign: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-              }}
-            >
-              <div style={{ fontSize: '1.3rem', marginBottom: '3px' }}>🔍</div>
-              <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#7dd3fc' }}>
-                Chuyên Viên
-              </div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Nghiệp vụ</div>
-            </button>
-          </div>
-        </div>
-
-        {/* Preset Info Hint Box */}
-        <div
-          style={{
-            background: 'rgba(212, 175, 55, 0.06)',
-            border: '1px dashed var(--border-bronze)',
-            borderRadius: '8px',
-            padding: '10px 14px',
-            marginBottom: '1.5rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            fontSize: '0.82rem',
-          }}
-        >
-          <div>
-            <span style={{ color: 'var(--text-muted)' }}>Tài khoản đang chọn: </span>
-            <strong style={{ color: '#f5d77f' }}>{email}</strong>
-            <br />
-            <span style={{ color: 'var(--text-muted)' }}>Mật khẩu mặc định: </span>
-            <code style={{ color: '#fff', background: 'rgba(0,0,0,0.3)', padding: '2px 6px', borderRadius: '4px' }}>
-              Admin@Chiprin2026!
-            </code>
-          </div>
-          <button
-            type="button"
-            onClick={() => handleSelectRolePreset('admin')}
-            style={{
-              background: 'var(--gradient-bronze)',
-              border: 'none',
-              borderRadius: '6px',
-              padding: '6px 12px',
-              color: '#0b0c0e',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-            }}
-          >
-            ⚡ Điền lại
-          </button>
-        </div>
+              <button
+                type="button"
+                onClick={() => handleSelectRolePreset('admin')}
+                style={{
+                  background: 'var(--gradient-bronze)',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '6px 12px',
+                  color: '#0b0c0e',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                ⚡ Điền lại
+              </button>
+            </div>
+          </>
+        )}
 
         {error && (
           <div className="alert-box alert-error" style={{ marginBottom: '1.2rem' }}>

@@ -13,7 +13,7 @@ export default function SystemSettingsPage() {
   const [resendCooldownSeconds, setResendCooldownSeconds] = useState(60);
   const [workerPollingIntervalMs, setWorkerPollingIntervalMs] = useState(2000);
   const [maxOutboxRetries, setMaxOutboxRetries] = useState(5);
-  const [senderEmail, setSenderEmail] = useState('onboarding@resend.dev');
+  const [senderEmail, setSenderEmail] = useState('jinofc.ytb@gmail.com');
 
   const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);

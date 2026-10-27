@@ -20,6 +20,13 @@ const TIERS_ORDER: MemberTier[] = [
   'CHIP SPECIAL',
 ];
 
+// ============================================================================
+// ENVIRONMENT GATE: Mock fallback preview data only loaded in local dev mode
+// ============================================================================
+const IS_LOCAL_DEV =
+  typeof process !== 'undefined' &&
+  process.env?.NEXT_PUBLIC_USE_SEED_DATA === 'true';
+
 export default function RankPage() {
   const { t } = useI18n();
   const [currentUser, setCurrentUser] = useState<StoredUser | null>(null);
@@ -48,8 +55,8 @@ export default function RankPage() {
     };
   }, []);
 
-  const chips = currentUser?.chipsBalance ?? 1250000;
-  const currentTier: MemberTier = currentUser?.tier ?? 'CHIP GOLD';
+  const chips = currentUser?.chipsBalance ?? (IS_LOCAL_DEV ? 1250000 : 0);
+  const currentTier: MemberTier = currentUser?.tier ?? (IS_LOCAL_DEV ? 'CHIP GOLD' : 'CHIP MEMBER');
   const referrals = currentUser ? ChipStore.getReferralsByReferrer(currentUser.referralCode) : [];
   const verifiedReferrals = referrals.filter((r) => r.isEmailVerified).length;
 

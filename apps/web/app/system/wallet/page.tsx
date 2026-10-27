@@ -2,6 +2,14 @@
 
 import React, { useState } from 'react';
 
+// ============================================================================
+// ENVIRONMENT GATE: System mock data only loaded in local dev mode
+// In production, treasury balance starts at 0 and transactions start empty.
+// ============================================================================
+const IS_LOCAL_DEV =
+  typeof process !== 'undefined' &&
+  process.env?.NEXT_PUBLIC_USE_SEED_DATA === 'true';
+
 interface LedgerTransaction {
   id: string;
   timestamp: string;
@@ -14,7 +22,7 @@ interface LedgerTransaction {
   status: 'SETTLED' | 'PENDING';
 }
 
-const SYSTEM_TRANSACTIONS: LedgerTransaction[] = [
+const _RAW_SYSTEM_TRANSACTIONS: LedgerTransaction[] = [
   {
     id: 'TX-SYS-20261026-9041',
     timestamp: '2026-10-26 21:40:12',
@@ -61,8 +69,10 @@ const SYSTEM_TRANSACTIONS: LedgerTransaction[] = [
   },
 ];
 
+const SYSTEM_TRANSACTIONS: LedgerTransaction[] = IS_LOCAL_DEV ? _RAW_SYSTEM_TRANSACTIONS : [];
+
 export default function SystemWalletPage() {
-  const [treasuryBalance, setTreasuryBalance] = useState(499985000);
+  const [treasuryBalance, setTreasuryBalance] = useState(IS_LOCAL_DEV ? 499985000 : 0);
   const [transactions, setTransactions] = useState<LedgerTransaction[]>(SYSTEM_TRANSACTIONS);
   const [simulating, setSimulating] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -133,16 +143,19 @@ export default function SystemWalletPage() {
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <button
-            onClick={handleAllocateTreasury}
-            disabled={simulating}
-            className="nav-btn"
-            style={{ cursor: 'pointer', border: 'none', gap: '8px' }}
-          >
-            {simulating ? 'Đang hạch toán...' : '⚖️ Điều Chuyển 100,000 CHIP'}
-          </button>
-        </div>
+        {/* Allocate test button — ONLY shown in local dev mode */}
+        {IS_LOCAL_DEV && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <button
+              onClick={handleAllocateTreasury}
+              disabled={simulating}
+              className="nav-btn"
+              style={{ cursor: 'pointer', border: 'none', gap: '8px' }}
+            >
+              {simulating ? 'Đang hạch toán...' : '🧪 Mô phỏng điều chuyển 100,000 CHIP'}
+            </button>
+          </div>
+        )}
       </div>
 
       {feedback && (
@@ -229,30 +242,36 @@ export default function SystemWalletPage() {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '4px' }}>
                 <span>Quỹ Kích Hoạt (Welcome Pool)</span>
-                <span style={{ color: '#34d399', fontWeight: 600 }}>25,000,000 CHIP</span>
+                <span style={{ color: '#34d399', fontWeight: 600 }}>
+                  {(IS_LOCAL_DEV ? 25000000 : 0).toLocaleString()} CHIP
+                </span>
               </div>
               <div style={{ height: '6px', background: 'rgba(255,255,255,0.06)', borderRadius: '3px' }}>
-                <div style={{ width: '40%', height: '100%', background: '#34d399', borderRadius: '3px' }} />
+                <div style={{ width: IS_LOCAL_DEV ? '40%' : '0%', height: '100%', background: '#34d399', borderRadius: '3px' }} />
               </div>
             </div>
 
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '4px' }}>
-                <span>Quỹ Nhiệm Vụ & Streak (Missions Pool)</span>
-                <span style={{ color: 'var(--accent-bronze)', fontWeight: 600 }}>60,000,000 CHIP</span>
+                <span>Quỹ Nhiệm Vụ &amp; Streak (Missions Pool)</span>
+                <span style={{ color: 'var(--accent-bronze)', fontWeight: 600 }}>
+                  {(IS_LOCAL_DEV ? 60000000 : 0).toLocaleString()} CHIP
+                </span>
               </div>
               <div style={{ height: '6px', background: 'rgba(255,255,255,0.06)', borderRadius: '3px' }}>
-                <div style={{ width: '65%', height: '100%', background: 'var(--gradient-bronze)', borderRadius: '3px' }} />
+                <div style={{ width: IS_LOCAL_DEV ? '65%' : '0%', height: '100%', background: 'var(--gradient-bronze)', borderRadius: '3px' }} />
               </div>
             </div>
 
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '4px' }}>
                 <span>Quỹ Dự Phòng Hệ Thống (Reserve Pool)</span>
-                <span style={{ color: '#818cf8', fontWeight: 600 }}>414,985,000 CHIP</span>
+                <span style={{ color: '#818cf8', fontWeight: 600 }}>
+                  {(IS_LOCAL_DEV ? 414985000 : 0).toLocaleString()} CHIP
+                </span>
               </div>
               <div style={{ height: '6px', background: 'rgba(255,255,255,0.06)', borderRadius: '3px' }}>
-                <div style={{ width: '85%', height: '100%', background: '#818cf8', borderRadius: '3px' }} />
+                <div style={{ width: IS_LOCAL_DEV ? '85%' : '0%', height: '100%', background: '#818cf8', borderRadius: '3px' }} />
               </div>
             </div>
           </div>
@@ -277,39 +296,47 @@ export default function SystemWalletPage() {
               </tr>
             </thead>
             <tbody>
-              {transactions.map((tx) => (
-                <tr key={tx.id}>
-                  <td style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 600, color: '#ffffff' }}>
-                    {tx.id}
-                  </td>
-                  <td style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{tx.timestamp}</td>
-                  <td style={{ fontWeight: 500, color: '#ffffff' }}>{tx.type}</td>
-                  <td style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.8rem', color: '#f87171' }}>
-                    {tx.debitAccount}
-                  </td>
-                  <td style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.8rem', color: '#34d399' }}>
-                    {tx.creditAccount}
-                  </td>
-                  <td style={{ fontWeight: 700, color: 'var(--accent-bronze)' }}>
-                    {tx.amount.toLocaleString()} CHIP
-                  </td>
-                  <td>
-                    <span
-                      style={{
-                        padding: '2px 8px',
-                        borderRadius: '999px',
-                        fontSize: '0.72rem',
-                        fontWeight: 700,
-                        background: 'rgba(52, 211, 153, 0.15)',
-                        color: '#34d399',
-                        border: '1px solid rgba(52, 211, 153, 0.35)',
-                      }}
-                    >
-                      ✓ SETTLED
-                    </span>
+              {transactions.length === 0 ? (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-muted)' }}>
+                    Chưa có giao dịch hạch toán nào trong sổ cái hệ thống.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                transactions.map((tx) => (
+                  <tr key={tx.id}>
+                    <td style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 600, color: '#ffffff' }}>
+                      {tx.id}
+                    </td>
+                    <td style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{tx.timestamp}</td>
+                    <td style={{ fontWeight: 500, color: '#ffffff' }}>{tx.type}</td>
+                    <td style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.8rem', color: '#f87171' }}>
+                      {tx.debitAccount}
+                    </td>
+                    <td style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.8rem', color: '#34d399' }}>
+                      {tx.creditAccount}
+                    </td>
+                    <td style={{ fontWeight: 700, color: 'var(--accent-bronze)' }}>
+                      {tx.amount.toLocaleString()} CHIP
+                    </td>
+                    <td>
+                      <span
+                        style={{
+                          padding: '2px 8px',
+                          borderRadius: '999px',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          background: 'rgba(52, 211, 153, 0.15)',
+                          color: '#34d399',
+                          border: '1px solid rgba(52, 211, 153, 0.35)',
+                        }}
+                      >
+                        ✓ SETTLED
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

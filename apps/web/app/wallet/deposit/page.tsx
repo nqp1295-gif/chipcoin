@@ -11,6 +11,13 @@ import {
 } from '../../lib/store';
 import WalletNavTabs from '../components/WalletNavTabs';
 
+// ============================================================================
+// ENVIRONMENT GATE: Simulation features only available in local dev mode
+// ============================================================================
+const IS_LOCAL_DEV =
+  typeof process !== 'undefined' &&
+  process.env?.NEXT_PUBLIC_USE_SEED_DATA === 'true';
+
 export default function DepositPage() {
   const { t } = useI18n();
   const [currentUser, setCurrentUser] = useState<StoredUser | null>(null);
@@ -457,7 +464,7 @@ export default function DepositPage() {
                   ✈️ Mở Telegram Wallet Để Chuyển USDT ↗
                 </a>
 
-                {activeIntent.status !== 'SETTLED' && (
+                {IS_LOCAL_DEV && activeIntent.status !== 'SETTLED' && (
                   <button
                     onClick={() => handleSimulateOnChainPayment(activeIntent.id)}
                     disabled={isSimulating}
@@ -472,7 +479,7 @@ export default function DepositPage() {
                       cursor: 'pointer',
                     }}
                   >
-                    {isSimulating ? 'Đang lắng nghe sự kiện on-chain...' : '🧪 Mô phỏng xác nhận nạp tiền on-chain'}
+                    {isSimulating ? 'Đang lắng nghe sự kiện on-chain...' : '🧪 Mô phỏng xác nhận nạp tiền on-chain (DEV ONLY)'}
                   </button>
                 )}
               </div>

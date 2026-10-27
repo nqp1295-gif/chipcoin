@@ -5,6 +5,13 @@ import Link from 'next/link';
 import { useI18n } from './lib/i18n';
 import { ChipStore, StoredUser, TIER_CONFIGS } from './lib/store';
 
+// ============================================================================
+// ENVIRONMENT GATE: Hardcoded preview data only shown in local dev mode
+// ============================================================================
+const IS_LOCAL_DEV =
+  typeof process !== 'undefined' &&
+  process.env?.NEXT_PUBLIC_USE_SEED_DATA === 'true';
+
 export default function UserOverviewPage() {
   const { t } = useI18n();
   const [currentUser, setCurrentUser] = useState<StoredUser | null>(null);
@@ -26,9 +33,9 @@ export default function UserOverviewPage() {
     };
   }, []);
 
-  const balance = currentUser?.chipsBalance ?? 1250000;
-  const streakDays = currentUser?.streakDays ?? 5;
-  const currentTier = currentUser?.tier ?? 'CHIP GOLD';
+  const balance = currentUser?.chipsBalance ?? 0;
+  const streakDays = currentUser?.streakDays ?? 0;
+  const currentTier = currentUser?.tier ?? 'CHIP MEMBER';
   const tierMeta = TIER_CONFIGS[currentTier];
 
   const handleQuickCheckin = () => {
@@ -361,6 +368,8 @@ export default function UserOverviewPage() {
               </tr>
             </thead>
             <tbody>
+              {IS_LOCAL_DEV ? (
+                <>
               <tr>
                 <td style={{ fontFamily: 'var(--font-mono)', color: '#ffffff', fontWeight: 600 }}>
                   TX-20261026-9041
@@ -430,6 +439,14 @@ export default function UserOverviewPage() {
                   </span>
                 </td>
               </tr>
+                </>
+              ) : (
+                <tr>
+                  <td colSpan={5} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '24px' }}>
+                    Chưa có giao dịch nào. Hãy đăng nhập để xem lịch sử giao dịch của bạn.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
