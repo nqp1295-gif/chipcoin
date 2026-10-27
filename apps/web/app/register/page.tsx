@@ -1,17 +1,28 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { apiRequest } from '../lib/api';
+import { ChipStore } from '../lib/store';
 
-export default function RegisterPage() {
+function RegisterForm() {
+  const searchParams = useSearchParams();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [referralCode, setReferralCode] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    const refParam = searchParams.get('ref');
+    if (refParam) {
+      setReferralCode(refParam.trim());
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -30,6 +41,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
+      // 1. Call Backend API if available
       const res = await apiRequest('/api/v1/auth/register', {
         method: 'POST',
         body: JSON.stringify({
@@ -39,30 +51,45 @@ export default function RegisterPage() {
         }),
       });
 
-      if (!res.success) {
-        if (res.error === 'account_already_exists') {
-          setError('Tên đăng nhập hoặc địa chỉ email này đã được sử dụng.');
-        } else {
-          setError(res.message || 'Đăng ký không thành công. Vui lòng kiểm tra lại.');
-        }
+      if (!res.success && res.error === 'account_already_exists') {
+        setError('Tên đăng nhập hoặc địa chỉ email này đã được sử dụng.');
+        setLoading(false);
         return;
       }
 
+      // 2. Register & Sync to Central Data Store (Bridges Member & Admin Portals)
+      const storedUser = ChipStore.registerUser(
+        username.trim(),
+        email.trim().toLowerCase(),
+        referralCode.trim() || undefined
+      );
+
+      // Auto login newly registered member session
+      ChipStore.setMemberSession(storedUser);
+
       setSuccess(true);
     } catch (err: any) {
-      setError('Lỗi kết nối máy chủ. Vui lòng thử lại.');
+      // Fallback local registration if offline
+      const storedUser = ChipStore.registerUser(
+        username.trim(),
+        email.trim().toLowerCase(),
+        referralCode.trim() || undefined
+      );
+      ChipStore.setMemberSession(storedUser);
+      setSuccess(true);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: '480px', margin: '0 auto' }}>
+    <div style={{ maxWidth: '480px', margin: '0 auto', width: '100%' }}>
       <div className="glass-card">
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <div style={{ fontSize: '2rem', marginBottom: '6px' }}>🪙</div>
           <h1 style={{ fontSize: '1.9rem', marginBottom: '0.5rem' }}>Tạo tài khoản CHIPCOIN</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem' }}>
-            Tham gia hệ thống tích luỹ điểm thưởng nội bộ
+            Tham gia hệ thống tích luỹ điểm thưởng nội bộ nhận ngay <strong>+5,000 CHIP</strong>
           </p>
         </div>
 
@@ -79,18 +106,23 @@ export default function RegisterPage() {
               <div style={{ fontWeight: 700, fontSize: '1.05rem', marginBottom: '6px' }}>
                 🎉 Đăng ký thành công!
               </div>
-              <p style={{ fontSize: '0.9rem', lineHeight: 1.5 }}>
-                Tài khoản của bạn đã được khởi tạo ở trạng thái <strong>CHỜ XÁC MINH (PENDING)</strong>.
-                Một liên kết xác nhận đã được đưa vào hàng đợi gửi đến <strong>{email}</strong>.
+              <p style={{ fontSize: '0.9rem', lineHeight: 1.5, marginBottom: '8px' }}>
+                Chào mừng bạn đến với CHIPCOIN. Bạn đã được tặng <strong>+5,000 CHIP</strong> chào mừng
+                và phân hạng <strong>CHIP MEMBER</strong>.
               </p>
+              {referralCode && (
+                <div style={{ fontSize: '0.82rem', color: '#f5d77f' }}>
+                  ✓ Đã gắn vào nhánh bảo trợ của mã: <strong>{referralCode}</strong>
+                </div>
+              )}
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '1.8rem' }}>
-              <Link href="/verify-email" className="btn-primary" style={{ textAlign: 'center' }}>
-                Tôi đã có mã xác minh
+              <Link href="/" className="btn-primary" style={{ textAlign: 'center' }}>
+                Vào Bảng Điều Khiển Của Tôi →
               </Link>
-              <Link href="/resend-verification" className="btn-secondary" style={{ textAlign: 'center' }}>
-                Chưa nhận được email? Gửi lại mã
+              <Link href="/activities" className="btn-secondary" style={{ textAlign: 'center' }}>
+                ⭐ Xem Nhiệm Vụ &amp; Điểm Danh Nhận Thêm CHIP
               </Link>
             </div>
           </div>
@@ -138,12 +170,39 @@ export default function RegisterPage() {
                 id="password"
                 type="password"
                 className="form-input"
-                placeholder="••••••••"
+                placeholder="••••••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
                 autoComplete="new-password"
                 required
+              />
+            </div>
+
+            <div className="form-group">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label className="form-label" htmlFor="referralCode">
+                  Mã Người Giới Thiệu (Tùy chọn)
+                </label>
+                {referralCode && (
+                  <span style={{ fontSize: '0.75rem', color: '#34d399', fontWeight: 600 }}>
+                    ✓ Đã áp dụng mã
+                  </span>
+                )}
+              </div>
+              <input
+                id="referralCode"
+                type="text"
+                className="form-input"
+                placeholder="vd: CHIP-ALEX-99"
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value)}
+                disabled={loading}
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  letterSpacing: '0.04em',
+                  borderColor: referralCode ? 'var(--accent-bronze)' : undefined,
+                }}
               />
             </div>
 
@@ -154,7 +213,7 @@ export default function RegisterPage() {
                   Đang xử lý...
                 </>
               ) : (
-                'Hoàn tất đăng ký'
+                'Hoàn tất đăng ký (+5,000 CHIP)'
               )}
             </button>
 
@@ -168,5 +227,13 @@ export default function RegisterPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="spinner" style={{ margin: '3rem auto' }} />}>
+      <RegisterForm />
+    </Suspense>
   );
 }

@@ -1,102 +1,97 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useI18n, LANGUAGES, SupportedLanguage } from '../lib/i18n';
+import { ChipStore, StoredUser, TIER_CONFIGS } from '../lib/store';
 
 interface TopBarProps {
   onOpenMobileMenu: () => void;
 }
 
-// Bảng tiêu đề trang phân tách riêng biệt
-const SYSTEM_PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
-  '/system': {
-    title: 'Quản Lý Tài Khoản 4 Cấp',
-    subtitle: 'Phân quyền & phân bổ vai trò: Admin, Trợ lý, Chuyên viên, Người dùng',
-  },
-  '/system/wallet': {
-    title: 'Sổ Cái Kép Master Treasury',
-    subtitle: 'Quản trị kho quỹ tổng thể 500,000,000 CHIP & điều phối các Pool',
-  },
-  '/system/tracking': {
-    title: 'Giám Sát Tiến Trình Outbox',
-    subtitle: 'Theo dõi hàng đợi sự kiện Transactional Outbox thời gian thực',
-  },
-  '/system/reports': {
-    title: 'Thống Kê Báo Cáo Toàn Diện',
-    subtitle: 'Phân tích tăng trưởng, đối soát số dư & xuất file kiểm toán CSV',
-  },
-  '/system/settings': {
-    title: 'Cấu Hình Toàn Bộ Hệ Thống',
-    subtitle: 'Thiết lập tham số an toàn, rate limits, session timeout & Outbox worker',
-  },
-  '/system/login': {
-    title: 'Cổng Xác Thực Nhân Sự Quản Trị',
-    subtitle: 'Đăng nhập bảo mật dành cho nhân sự điều hành (Admin, Assistant, Specialist)',
-  },
-};
-
-const USER_PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
-  '/': {
-    title: 'Tổng Quan Điểm Thưởng',
-    subtitle: 'Theo dõi số dư CHIP cá nhân, chuỗi điểm danh & các nhiệm vụ nhận thưởng',
-  },
-  '/wallet': {
-    title: 'Ví Cá Nhân & Lịch Sử Tích Luỹ',
-    subtitle: 'Xem số dư điểm thưởng nội bộ và nhật ký cộng điểm của bạn',
-  },
-  '/resend-verification': {
-    title: 'Kích Hoạt Tài Khoản Email',
-    subtitle: 'Yêu cầu gửi lại thư kích hoạt bảo mật để nhận thưởng khởi tạo',
-  },
-  '/login': {
-    title: 'Đăng Nhập Thành Viên',
-    subtitle: 'Đăng nhập vào tài khoản điểm thưởng hội viên CHIPCOIN',
-  },
-  '/register': {
-    title: 'Mở Tài Khoản Thành Viên',
-    subtitle: 'Đăng ký tài khoản mới và nhận ngay gói quà chào mừng +5,000 CHIP',
-  },
-  '/verify-email': {
-    title: 'Xác Thực Email Thành Viên',
-    subtitle: 'Hoàn tất bước xác nhận email để kích hoạt toàn diện ví điểm',
-  },
-};
-
 export default function TopBar({ onOpenMobileMenu }: TopBarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { language, setLanguage, t, currentLangMeta } = useI18n();
   const isSystemRoute = pathname.startsWith('/system');
 
-  const [session, setSession] = useState<any>(null);
+  const [systemSession, setSystemSession] = useState<any>(null);
+  const [memberUser, setMemberUser] = useState<StoredUser | null>(null);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const langMenuRef = useRef<HTMLDivElement>(null);
+
+  const loadSessions = () => {
+    try {
+      const sys = ChipStore.getCurrentSystemStaff();
+      setSystemSession(sys);
+
+      const mem = ChipStore.getCurrentMember();
+      setMemberUser(mem);
+    } catch (e) {}
+  };
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('chipcoin_system_session');
-      if (raw) setSession(JSON.parse(raw));
-      else setSession(null);
-    } catch (e) {
-      setSession(null);
-    }
+    loadSessions();
+
+    const handleSessionChange = () => loadSessions();
+    window.addEventListener('chipcoin_session_changed', handleSessionChange);
+    window.addEventListener('chipcoin_store_updated', handleSessionChange);
+    window.addEventListener('storage', handleSessionChange);
+
+    return () => {
+      window.removeEventListener('chipcoin_session_changed', handleSessionChange);
+      window.removeEventListener('chipcoin_store_updated', handleSessionChange);
+      window.removeEventListener('storage', handleSessionChange);
+    };
   }, [pathname]);
 
+  // Click outside listener for language dropdown
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node)) {
+        setLangMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleSystemLogout = () => {
-    try {
-      localStorage.removeItem('chipcoin_system_session');
-    } catch (e) {}
-    setSession(null);
+    ChipStore.clearSystemSession();
+    setSystemSession(null);
     router.push('/system/login');
   };
 
-  const currentPage = isSystemRoute
-    ? SYSTEM_PAGE_TITLES[pathname] || {
-        title: 'Bảng Điều Hành Hệ Thống',
-        subtitle: 'Khu vực quản trị và cấu hình vận hành CHIPCOIN',
-      }
-    : USER_PAGE_TITLES[pathname] || {
-        title: 'Cổng Hội Viên CHIPCOIN',
-        subtitle: 'Nền tảng tích luỹ điểm thưởng nội bộ',
-      };
+  const handleMemberLogout = () => {
+    ChipStore.clearMemberSession();
+    setMemberUser(null);
+    router.push('/login');
+  };
+
+  // Dynamic titles with i18n
+  const getPageTitle = () => {
+    if (pathname === '/') return t('nav_overview');
+    if (pathname === '/activities') return t('nav_activities');
+    if (pathname === '/rank') return t('nav_rank');
+    if (pathname === '/referrals') return t('nav_referrals');
+    if (pathname === '/wallet') return t('nav_wallet');
+    if (pathname === '/resend-verification') return t('nav_resend');
+    if (pathname === '/login') return t('nav_login');
+    if (pathname === '/register') return t('nav_register');
+    if (pathname === '/verify-email') return 'Xác Thực Email';
+
+    if (pathname === '/system') return t('nav_sys_accounts');
+    if (pathname === '/system/wallet') return t('nav_sys_treasury');
+    if (pathname === '/system/tracking') return t('nav_sys_tracking');
+    if (pathname === '/system/reports') return t('nav_sys_reports');
+    if (pathname === '/system/settings') return t('nav_sys_settings');
+    if (pathname === '/system/login') return t('nav_sys_login');
+
+    return isSystemRoute ? t('brand_system_title') : t('brand_member_title');
+  };
+
+  const currentTierMeta = memberUser?.tier ? TIER_CONFIGS[memberUser.tier] : TIER_CONFIGS['CHIP GOLD'];
 
   return (
     <header className={`app-topbar ${isSystemRoute ? 'topbar-system' : 'topbar-user'}`}>
@@ -119,9 +114,9 @@ export default function TopBar({ onOpenMobileMenu }: TopBarProps) {
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <line x1="3" x2="21" y1="6" y2="6" />
-              <line x1="3" x2="21" y1="12" y2="12" />
-              <line x1="3" x2="21" y1="18" y2="18" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </button>
 
@@ -136,37 +131,114 @@ export default function TopBar({ onOpenMobileMenu }: TopBarProps) {
               {isSystemRoute ? 'CHIPCOIN SYSTEM' : 'CHIPCOIN'}
             </span>
             <span className="crumb-divider">/</span>
-            <span className="crumb-current">{currentPage.title}</span>
+            <span className="crumb-current">{getPageTitle()}</span>
           </div>
         </div>
 
-        {/* Right: Badges & Profile Options */}
-        <div className="topbar-right">
+        {/* Right: Badges, Language Switcher & Profile Options */}
+        <div className="topbar-right" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Language Switcher Dropdown */}
+          <div ref={langMenuRef} style={{ position: 'relative' }}>
+            <button
+              type="button"
+              onClick={() => setLangMenuOpen(!langMenuOpen)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 10px',
+                borderRadius: '8px',
+                background: 'rgba(255, 255, 255, 0.06)',
+                border: '1px solid var(--border-subtle)',
+                color: '#ffffff',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              title="Chuyển đổi ngôn ngữ / Change Language"
+            >
+              <span style={{ fontSize: '1rem' }}>{currentLangMeta.flag}</span>
+              <span className="hide-mobile" style={{ textTransform: 'uppercase' }}>
+                {currentLangMeta.code}
+              </span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>▼</span>
+            </button>
+
+            {langMenuOpen && (
+              <div
+                style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: 'calc(100% + 6px)',
+                  background: 'rgba(15, 17, 21, 0.98)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid var(--border-bronze)',
+                  borderRadius: '10px',
+                  boxShadow: '0 12px 32px rgba(0,0,0,0.7), 0 0 15px rgba(212,175,55,0.2)',
+                  minWidth: '170px',
+                  zIndex: 300,
+                  overflow: 'hidden',
+                  padding: '4px',
+                }}
+              >
+                {LANGUAGES.map((lang) => {
+                  const active = lang.code === language;
+                  return (
+                    <button
+                      key={lang.code}
+                      type="button"
+                      onClick={() => {
+                        setLanguage(lang.code as SupportedLanguage);
+                        setLangMenuOpen(false);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        width: '100%',
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        background: active ? 'rgba(212, 175, 55, 0.18)' : 'transparent',
+                        color: active ? '#f5d77f' : 'var(--text-secondary)',
+                        border: 'none',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        fontSize: '0.85rem',
+                        fontWeight: active ? 700 : 500,
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      <span style={{ fontSize: '1.1rem' }}>{lang.flag}</span>
+                      <span style={{ flex: 1 }}>{lang.name}</span>
+                      {active && <span style={{ color: '#f5d77f', fontSize: '0.8rem' }}>✓</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           {isSystemRoute ? (
             /* System Mode Badges & Staff Actions */
             <>
-              <div className="topbar-status-badge">
+              <div className="topbar-status-badge hide-mobile">
                 <span className="status-dot-pulse" />
                 <span className="status-label">Outbox: 100% Live</span>
               </div>
 
-              <div className="topbar-status-badge hide-mobile">
-                <span style={{ color: 'var(--accent-bronze)' }}>🛡️</span>
-                <span className="status-label">Master Vault: 500M</span>
-              </div>
-
-              {session ? (
+              {systemSession ? (
                 <div className="topbar-user-pill">
                   <div
                     className="user-avatar-circle"
                     style={{ background: 'var(--gradient-bronze)', color: '#0b0c0e' }}
                   >
-                    {session.email?.charAt(0).toUpperCase() || 'S'}
+                    {systemSession.email?.charAt(0).toUpperCase() || 'S'}
                   </div>
                   <div className="user-info-text hide-mobile">
-                    <span className="user-email">{session.email}</span>
+                    <span className="user-email">{systemSession.email}</span>
                     <span className="user-role" style={{ color: '#f5d77f' }}>
-                      {session.roles?.join(', ') || 'STAFF'}
+                      {systemSession.roles?.join(', ') || 'STAFF'}
                     </span>
                   </div>
                   <button
@@ -175,36 +247,74 @@ export default function TopBar({ onOpenMobileMenu }: TopBarProps) {
                     onClick={handleSystemLogout}
                     title="Đăng xuất khỏi cổng quản trị"
                   >
-                    Đăng xuất
+                    {t('btn_logout')}
                   </button>
                 </div>
               ) : (
                 <Link href="/system/login" className="topbar-btn-gold">
-                  Đăng Nhập Quản Trị
+                  {t('btn_system_login')}
                 </Link>
               )}
             </>
           ) : (
-            /* User Mode Badges & Member Actions (Không có bất kỳ link sang hệ thống) */
+            /* User Member Mode Badges & Member Actions */
             <>
-              <div className="topbar-status-badge">
-                <span style={{ color: '#fbbf24' }}>🪙</span>
-                <span className="status-label">1,250,000 CHIP</span>
-              </div>
+              {memberUser ? (
+                <>
+                  <div className="topbar-status-badge">
+                    <span style={{ color: '#fbbf24' }}>🪙</span>
+                    <span className="status-label">
+                      {memberUser.chipsBalance.toLocaleString()} CHIP
+                    </span>
+                  </div>
 
-              <div className="topbar-status-badge hide-mobile">
-                <span style={{ color: '#34d399' }}>✨</span>
-                <span className="status-label">Hạng VIP 3</span>
-              </div>
+                  <Link href="/rank" className="topbar-status-badge hide-mobile" style={{ textDecoration: 'none' }}>
+                    <span style={{ color: currentTierMeta.badgeColor }}>👑</span>
+                    <span className="status-label" style={{ color: currentTierMeta.badgeColor }}>
+                      {memberUser.tier}
+                    </span>
+                  </Link>
 
-              <div className="topbar-auth-links">
-                <Link href="/login" className="topbar-link">
-                  Đăng nhập
-                </Link>
-                <Link href="/register" className="topbar-btn-gold">
-                  Đăng ký
-                </Link>
-              </div>
+                  <div className="topbar-user-pill">
+                    <div
+                      className="user-avatar-circle"
+                      style={{ background: currentTierMeta.gradient, color: '#0b0c0e' }}
+                    >
+                      {memberUser.username?.charAt(0).toUpperCase() || memberUser.email.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="user-info-text hide-mobile">
+                      <span className="user-email">{memberUser.username || memberUser.email}</span>
+                      <span className="user-role" style={{ color: currentTierMeta.badgeColor }}>
+                        {memberUser.tier}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      className="topbar-logout-btn"
+                      onClick={handleMemberLogout}
+                      title="Đăng xuất khỏi tài khoản hội viên"
+                    >
+                      {t('btn_logout')}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="topbar-status-badge">
+                    <span style={{ color: '#fbbf24' }}>🪙</span>
+                    <span className="status-label">1,250,000 CHIP</span>
+                  </div>
+
+                  <div className="topbar-auth-links">
+                    <Link href="/login" className="topbar-link">
+                      {t('btn_login')}
+                    </Link>
+                    <Link href="/register" className="topbar-btn-gold">
+                      {t('btn_register')}
+                    </Link>
+                  </div>
+                </>
+              )}
             </>
           )}
         </div>

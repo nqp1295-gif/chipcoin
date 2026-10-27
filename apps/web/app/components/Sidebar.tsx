@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { useI18n } from '../lib/i18n';
+import { ChipStore, StoredUser, TIER_CONFIGS } from '../lib/store';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -13,35 +15,37 @@ interface SidebarProps {
 }
 
 export interface MenuItem {
-  name: string;
+  nameKey: string;
+  defaultName: string;
   href: string;
   badge?: string;
   badgeType?: 'gold' | 'pulse' | 'outline' | 'neutral' | 'red';
-  description?: string;
+  descKey?: string;
+  defaultDesc?: string;
   exact?: boolean;
   icon: (props: { active: boolean }) => React.ReactNode;
 }
 
 export interface MenuGroup {
   id: string;
-  title: string;
+  titleKey: string;
+  defaultTitle: string;
   items: MenuItem[];
 }
 
-// ==========================================
-// 1. MENU CHUYÊN BIỆT CHO NGƯỜI DÙNG (MEMBER PORTAL)
-// Tuyệt đối không có quyền cấu hình & không có link sang hệ thống
-// ==========================================
 export const USER_MENU_GROUPS: MenuGroup[] = [
   {
     id: 'user_core',
-    title: 'TRUNG TÂM HỘI VIÊN',
+    titleKey: 'group_member_center',
+    defaultTitle: 'TRUNG TÂM HỘI VIÊN',
     items: [
       {
-        name: 'Tổng Quan Cá Nhân',
+        nameKey: 'nav_overview',
+        defaultName: 'Tổng Quan Cá Nhân',
         href: '/',
         exact: true,
-        description: 'Bảng chỉ số tích luỹ điểm thưởng & nhiệm vụ',
+        descKey: 'nav_overview_desc',
+        defaultDesc: 'Bảng chỉ số tích luỹ điểm thưởng & nhiệm vụ',
         icon: ({ active }) => (
           <svg
             width="20"
@@ -61,11 +65,90 @@ export const USER_MENU_GROUPS: MenuGroup[] = [
         ),
       },
       {
-        name: 'Ví Điểm Thưởng CHIP',
+        nameKey: 'nav_activities',
+        defaultName: 'Hoạt Động Tích Lũy',
+        href: '/activities',
+        badge: 'Hot',
+        badgeType: 'pulse',
+        descKey: 'nav_activities_desc',
+        defaultDesc: 'Điểm danh hàng ngày, nhiệm vụ nhận điểm CHIP',
+        icon: ({ active }) => (
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={active ? '#f5d77f' : 'currentColor'}
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+        ),
+      },
+      {
+        nameKey: 'nav_rank',
+        defaultName: 'Thăng Hạng Hội Viên',
+        href: '/rank',
+        badge: 'VIP',
+        badgeType: 'gold',
+        descKey: 'nav_rank_desc',
+        defaultDesc: 'Điều kiện thăng cấp & tiến trình nâng hạng',
+        icon: ({ active }) => (
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={active ? '#f5d77f' : 'currentColor'}
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+            <path d="M4 22h16" />
+            <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+            <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+            <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+          </svg>
+        ),
+      },
+      {
+        nameKey: 'nav_referrals',
+        defaultName: 'Hệ Thống Giới Thiệu',
+        href: '/referrals',
+        badge: 'Bonus',
+        badgeType: 'gold',
+        descKey: 'nav_referrals_desc',
+        defaultDesc: 'Quản lý nhánh F1 & hoa hồng chia sẻ',
+        icon: ({ active }) => (
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={active ? '#f5d77f' : 'currentColor'}
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+        ),
+      },
+      {
+        nameKey: 'nav_wallet',
+        defaultName: 'Ví Điểm Thưởng CHIP',
         href: '/wallet',
         badge: 'CHIP',
         badgeType: 'gold',
-        description: 'Số dư cá nhân & lịch sử nhận thưởng',
+        descKey: 'nav_wallet_desc',
+        defaultDesc: 'Số dư cá nhân & lịch sử nhận thưởng',
         icon: ({ active }) => (
           <svg
             width="20"
@@ -87,14 +170,17 @@ export const USER_MENU_GROUPS: MenuGroup[] = [
   },
   {
     id: 'user_auth',
-    title: 'TÀI KHOẢN & BẢO MẬT',
+    titleKey: 'group_account_security',
+    defaultTitle: 'TÀI KHOẢN & BẢO MẬT',
     items: [
       {
-        name: 'Kích Hoạt / Gửi Lại Email',
+        nameKey: 'nav_resend',
+        defaultName: 'Kích Hoạt / Gửi Lại Email',
         href: '/resend-verification',
         badge: 'Token',
         badgeType: 'neutral',
-        description: 'Xác thực địa chỉ email nhận thưởng',
+        descKey: 'nav_resend_desc',
+        defaultDesc: 'Xác thực địa chỉ email nhận thưởng',
         icon: ({ active }) => (
           <svg
             width="20"
@@ -114,9 +200,11 @@ export const USER_MENU_GROUPS: MenuGroup[] = [
         ),
       },
       {
-        name: 'Đăng Nhập Thành Viên',
+        nameKey: 'nav_login',
+        defaultName: 'Đăng Nhập Thành Viên',
         href: '/login',
-        description: 'Đăng nhập vào tài khoản tích luỹ',
+        descKey: 'nav_login_desc',
+        defaultDesc: 'Đăng nhập vào tài khoản tích luỹ',
         icon: ({ active }) => (
           <svg
             width="20"
@@ -135,11 +223,13 @@ export const USER_MENU_GROUPS: MenuGroup[] = [
         ),
       },
       {
-        name: 'Đăng Ký Tài Khoản',
+        nameKey: 'nav_register',
+        defaultName: 'Đăng Ký Tài Khoản',
         href: '/register',
-        badge: 'Mới',
+        badge: '+5,000',
         badgeType: 'gold',
-        description: 'Tạo tài khoản hội viên nhận +5,000 CHIP',
+        descKey: 'nav_register_desc',
+        defaultDesc: 'Tạo tài khoản hội viên nhận +5,000 CHIP',
         icon: ({ active }) => (
           <svg
             width="20"
@@ -162,22 +252,21 @@ export const USER_MENU_GROUPS: MenuGroup[] = [
   },
 ];
 
-// ==========================================
-// 2. MENU CHUYÊN BIỆT CHO QUẢN TRỊ VIÊN (SYSTEM CONSOLE)
-// Toàn bộ tính năng điều hành, tài khoản 4 cấp và cấu hình hệ thống
-// ==========================================
 export const SYSTEM_MENU_GROUPS: MenuGroup[] = [
   {
     id: 'system_core',
-    title: 'ĐIỀU HÀNH & KHO QUỸ',
+    titleKey: 'group_sys_ops',
+    defaultTitle: 'ĐIỀU HÀNH & KHO QUỸ',
     items: [
       {
-        name: 'Quản Lý Tài Khoản 4 Cấp',
+        nameKey: 'nav_sys_accounts',
+        defaultName: 'Quản Lý Tài Khoản 4 Cấp',
         href: '/system',
         exact: true,
         badge: '4 Cấp',
         badgeType: 'gold',
-        description: 'Admin, Trợ lý, Chuyên viên, Người dùng',
+        descKey: 'nav_sys_accounts_desc',
+        defaultDesc: 'Admin, Trợ lý, Chuyên viên, Người dùng',
         icon: ({ active }) => (
           <svg
             width="20"
@@ -197,11 +286,13 @@ export const SYSTEM_MENU_GROUPS: MenuGroup[] = [
         ),
       },
       {
-        name: 'Sổ Cái Kép Master Treasury',
+        nameKey: 'nav_sys_treasury',
+        defaultName: 'Sổ Cái Kép Master Treasury',
         href: '/system/wallet',
         badge: 'Treasury',
         badgeType: 'gold',
-        description: 'Kho quỹ tổng thể 500M CHIP & điều chuyển pool',
+        descKey: 'nav_sys_treasury_desc',
+        defaultDesc: 'Kho quỹ tổng thể 500M CHIP & điều chuyển pool',
         icon: ({ active }) => (
           <svg
             width="20"
@@ -222,14 +313,17 @@ export const SYSTEM_MENU_GROUPS: MenuGroup[] = [
   },
   {
     id: 'system_ops',
-    title: 'GIÁM SÁT & VẬN HÀNH',
+    titleKey: 'group_sys_monitoring',
+    defaultTitle: 'GIÁM SÁT & VẬN HÀNH',
     items: [
       {
-        name: 'Giám Sát Outbox Worker',
+        nameKey: 'nav_sys_tracking',
+        defaultName: 'Giám Sát Outbox Worker',
         href: '/system/tracking',
         badge: 'Live',
         badgeType: 'pulse',
-        description: 'Hàng đợi sự kiện Transactional Outbox thời gian thực',
+        descKey: 'nav_sys_tracking_desc',
+        defaultDesc: 'Hàng đợi sự kiện Transactional Outbox thời gian thực',
         icon: ({ active }) => (
           <svg
             width="20"
@@ -246,11 +340,13 @@ export const SYSTEM_MENU_GROUPS: MenuGroup[] = [
         ),
       },
       {
-        name: 'Thống Kê Báo Cáo & Đối Soát',
+        nameKey: 'nav_sys_reports',
+        defaultName: 'Thống Kê Báo Cáo Hệ Thống',
         href: '/system/reports',
         badge: 'Audit',
         badgeType: 'neutral',
-        description: 'Báo cáo tăng trưởng, phân bổ điểm & xuất CSV',
+        descKey: 'nav_sys_reports_desc',
+        defaultDesc: 'Báo cáo tăng trưởng, phân bổ điểm & xuất CSV',
         icon: ({ active }) => (
           <svg
             width="20"
@@ -273,14 +369,17 @@ export const SYSTEM_MENU_GROUPS: MenuGroup[] = [
   },
   {
     id: 'system_config',
-    title: 'CẤU HÌNH TOÀN HỆ THỐNG',
+    titleKey: 'group_sys_config',
+    defaultTitle: 'CẤU HÌNH TOÀN HỆ THỐNG',
     items: [
       {
-        name: 'Cài Đặt Cấu Hình',
+        nameKey: 'nav_sys_settings',
+        defaultName: 'Cài Đặt Cấu Hình',
         href: '/system/settings',
         badge: 'Config',
         badgeType: 'gold',
-        description: 'Cấu hình tham số, rate limits, session & SMTP',
+        descKey: 'nav_sys_settings_desc',
+        defaultDesc: 'Cấu hình tham số, rate limits, session & SMTP',
         icon: ({ active }) => (
           <svg
             width="20"
@@ -298,11 +397,13 @@ export const SYSTEM_MENU_GROUPS: MenuGroup[] = [
         ),
       },
       {
-        name: 'Cổng Đăng Nhập Quản Trị',
+        nameKey: 'nav_sys_login',
+        defaultName: 'Cổng Đăng Nhập Quản Trị',
         href: '/system/login',
         badge: 'Auth',
         badgeType: 'outline',
-        description: 'Xác thực nhân sự quản trị (Admin, Assistant, Specialist)',
+        descKey: 'nav_sys_login_desc',
+        defaultDesc: 'Xác thực nhân sự quản trị hệ thống',
         icon: ({ active }) => (
           <svg
             width="20"
@@ -330,18 +431,35 @@ export default function Sidebar({
   onCloseMobile,
 }: SidebarProps) {
   const pathname = usePathname();
+  const { t } = useI18n();
   const isSystemRoute = pathname.startsWith('/system');
 
-  const [session, setSession] = useState<{ email?: string; roles?: string[] } | null>(null);
+  const [staffSession, setStaffSession] = useState<{ email?: string; roles?: string[] } | null>(null);
+  const [memberUser, setMemberUser] = useState<StoredUser | null>(null);
+
+  const loadData = () => {
+    try {
+      const sys = ChipStore.getCurrentSystemStaff();
+      setStaffSession(sys);
+
+      const mem = ChipStore.getCurrentMember();
+      setMemberUser(mem);
+    } catch (e) {}
+  };
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('chipcoin_system_session');
-      if (raw) setSession(JSON.parse(raw));
-      else setSession(null);
-    } catch (e) {
-      setSession(null);
-    }
+    loadData();
+
+    const handleChange = () => loadData();
+    window.addEventListener('chipcoin_session_changed', handleChange);
+    window.addEventListener('chipcoin_store_updated', handleChange);
+    window.addEventListener('storage', handleChange);
+
+    return () => {
+      window.removeEventListener('chipcoin_session_changed', handleChange);
+      window.removeEventListener('chipcoin_store_updated', handleChange);
+      window.removeEventListener('storage', handleChange);
+    };
   }, [pathname]);
 
   const activeMenuGroups = isSystemRoute ? SYSTEM_MENU_GROUPS : USER_MENU_GROUPS;
@@ -352,6 +470,10 @@ export default function Sidebar({
     }
     return pathname === item.href || pathname.startsWith(`${item.href}/`);
   };
+
+  const memberTierMeta = memberUser?.tier
+    ? TIER_CONFIGS[memberUser.tier]
+    : TIER_CONFIGS['CHIP GOLD'];
 
   return (
     <>
@@ -390,9 +512,7 @@ export default function Sidebar({
             </div>
             {!isCollapsed && (
               <div className="sidebar-brand-text">
-                <span className="sidebar-brand-title">
-                  {isSystemRoute ? 'CHIPCOIN' : 'CHIPCOIN'}
-                </span>
+                <span className="sidebar-brand-title">CHIPCOIN</span>
                 <span
                   className="sidebar-brand-sub"
                   style={{
@@ -400,7 +520,7 @@ export default function Sidebar({
                     fontWeight: isSystemRoute ? 700 : 500,
                   }}
                 >
-                  {isSystemRoute ? 'Quản Trị Hệ Thống' : 'Cổng Hội Viên'}
+                  {isSystemRoute ? t('brand_system_title') : t('brand_member_title')}
                 </span>
               </div>
             )}
@@ -455,13 +575,13 @@ export default function Sidebar({
           </button>
         </div>
 
-        {/* Glance Widget phân tách rõ ràng */}
+        {/* Glance Widget */}
         {!isCollapsed ? (
           isSystemRoute ? (
             /* System Staff Glance Widget */
             <div className="sidebar-glance-card" style={{ borderColor: 'rgba(212, 175, 55, 0.4)' }}>
               <div className="glance-header">
-                <span className="glance-label">NHÂN SỰ QUẢN TRỊ</span>
+                <span className="glance-label">{t('role_staff')}</span>
                 <span
                   className="glance-tier-badge"
                   style={{
@@ -470,12 +590,12 @@ export default function Sidebar({
                     border: '1px solid rgba(212, 175, 55, 0.4)',
                   }}
                 >
-                  {session?.roles?.[0] ? session.roles[0].toUpperCase() : 'STAFF'}
+                  {staffSession?.roles?.[0] ? staffSession.roles[0].toUpperCase() : 'STAFF'}
                 </span>
               </div>
               <div className="glance-balance-row">
                 <span className="glance-amount" style={{ fontSize: '1.25rem', color: '#ffffff' }}>
-                  {session?.email ? session.email.split('@')[0] : 'admin_sec'}
+                  {staffSession?.email ? staffSession.email.split('@')[0] : 'admin_sec'}
                 </span>
               </div>
               <div className="glance-subtext">
@@ -486,18 +606,31 @@ export default function Sidebar({
               </div>
             </div>
           ) : (
-            /* User Member Glance Widget */
+            /* User Member Glance Widget with live data */
             <div className="sidebar-glance-card">
               <div className="glance-header">
-                <span className="glance-label">SỐ DƯ ĐIỂM THƯỞNG</span>
-                <span className="glance-tier-badge">VIP 3</span>
+                <span className="glance-label">{t('balance_label')}</span>
+                <Link href="/rank" style={{ textDecoration: 'none' }} onClick={onCloseMobile}>
+                  <span
+                    className="glance-tier-badge"
+                    style={{
+                      color: memberTierMeta.badgeColor,
+                      borderColor: memberTierMeta.badgeColor,
+                      background: 'rgba(0,0,0,0.3)',
+                    }}
+                  >
+                    {memberUser?.tier || 'CHIP GOLD'}
+                  </span>
+                </Link>
               </div>
               <div className="glance-balance-row">
-                <span className="glance-amount">1,250,000</span>
+                <span className="glance-amount">
+                  {(memberUser?.chipsBalance ?? 1250000).toLocaleString()}
+                </span>
                 <span className="glance-unit">CHIP</span>
               </div>
               <div className="glance-subtext">
-                <span>≈ $125.00 USD (Nội bộ)</span>
+                <span>≈ ${(((memberUser?.chipsBalance ?? 1250000)) / 10000).toFixed(2)} USD</span>
                 <Link href="/wallet" className="glance-link" onClick={onCloseMobile}>
                   Ví của tôi →
                 </Link>
@@ -509,8 +642,8 @@ export default function Sidebar({
             className="sidebar-collapsed-glance"
             title={
               isSystemRoute
-                ? `Nhân sự quản trị: ${session?.email || 'Admin Staff'}`
-                : 'Số dư cá nhân: 1,250,000 CHIP'
+                ? `Nhân sự quản trị: ${staffSession?.email || 'Admin Staff'}`
+                : `Số dư cá nhân: ${(memberUser?.chipsBalance ?? 1250000).toLocaleString()} CHIP (${memberUser?.tier || 'VIP'})`
             }
           >
             <Link
@@ -525,74 +658,82 @@ export default function Sidebar({
 
         {/* Navigation Menu with Grouped Sections */}
         <nav className="sidebar-nav">
-          {activeMenuGroups.map((group) => (
-            <div key={group.id} className="sidebar-group-block">
-              {!isCollapsed ? (
-                <div className="sidebar-section-title">{group.title}</div>
-              ) : (
-                <div className="sidebar-collapsed-divider" />
-              )}
-              <ul className="sidebar-menu-list">
-                {group.items.map((item) => {
-                  const active = isItemActive(item);
-                  return (
-                    <li key={item.href} className="sidebar-menu-item">
-                      <Link
-                        href={item.href}
-                        className={`sidebar-nav-link ${active ? 'active' : ''}`}
-                        onClick={onCloseMobile}
-                      >
-                        <span className="sidebar-item-icon">
-                          {item.icon({ active })}
-                        </span>
-                        {!isCollapsed && (
-                          <span className="sidebar-item-name">{item.name}</span>
-                        )}
-                        {!isCollapsed && item.badge && (
-                          <span
-                            className={`sidebar-item-badge ${
-                              item.badgeType === 'pulse'
-                                ? 'badge-pulse'
-                                : item.badgeType === 'gold'
-                                ? 'badge-gold'
-                                : item.badgeType === 'outline'
-                                ? 'badge-outline'
-                                : ''
-                            }`}
-                          >
-                            {item.badge}
-                          </span>
-                        )}
+          {activeMenuGroups.map((group) => {
+            const groupTitle = t(group.titleKey, group.defaultTitle);
+            return (
+              <div key={group.id} className="sidebar-group-block">
+                {!isCollapsed ? (
+                  <div className="sidebar-section-title" title={groupTitle}>
+                    {groupTitle}
+                  </div>
+                ) : (
+                  <div className="sidebar-collapsed-divider" />
+                )}
+                <ul className="sidebar-menu-list">
+                  {group.items.map((item) => {
+                    const active = isItemActive(item);
+                    const itemName = t(item.nameKey, item.defaultName);
+                    const itemDesc = item.descKey ? t(item.descKey, item.defaultDesc) : item.defaultDesc;
 
-                        {/* Floating Tooltip in Collapsed Mode */}
-                        {isCollapsed && (
-                          <div className="sidebar-floating-tooltip">
-                            <div className="tooltip-title-row">
-                              <span className="tooltip-title">{item.name}</span>
-                              {item.badge && (
-                                <span className={`tooltip-badge badge-${item.badgeType || 'neutral'}`}>
-                                  {item.badge}
-                                </span>
+                    return (
+                      <li key={item.href} className="sidebar-menu-item">
+                        <Link
+                          href={item.href}
+                          className={`sidebar-nav-link ${active ? 'active' : ''}`}
+                          onClick={onCloseMobile}
+                          title={itemName}
+                        >
+                          <span className="sidebar-item-icon">
+                            {item.icon({ active })}
+                          </span>
+                          {!isCollapsed && (
+                            <span className="sidebar-item-name">{itemName}</span>
+                          )}
+                          {!isCollapsed && item.badge && (
+                            <span
+                              className={`sidebar-item-badge ${
+                                item.badgeType === 'pulse'
+                                  ? 'badge-pulse'
+                                  : item.badgeType === 'gold'
+                                  ? 'badge-gold'
+                                  : item.badgeType === 'outline'
+                                  ? 'badge-outline'
+                                  : ''
+                              }`}
+                            >
+                              {item.badge}
+                            </span>
+                          )}
+
+                          {/* Floating Tooltip in Collapsed Mode */}
+                          {isCollapsed && (
+                            <div className="sidebar-floating-tooltip">
+                              <div className="tooltip-title-row">
+                                <span className="tooltip-title">{itemName}</span>
+                                {item.badge && (
+                                  <span className={`tooltip-badge badge-${item.badgeType || 'neutral'}`}>
+                                    {item.badge}
+                                  </span>
+                                )}
+                              </div>
+                              {itemDesc && (
+                                <span className="tooltip-desc">{itemDesc}</span>
                               )}
                             </div>
-                            {item.description && (
-                              <span className="tooltip-desc">{item.description}</span>
-                            )}
-                          </div>
-                        )}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
+                          )}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            );
+          })}
         </nav>
 
-        {/* Footer Sidebar phân tách riêng */}
+        {/* Footer Sidebar */}
         <div className="sidebar-footer">
           {isSystemRoute ? (
-            /* System Footer: Quản Trị Outbox & Sổ Cái Kép */
             !isCollapsed ? (
               <Link href="/system/tracking" className="sidebar-system-card" onClick={onCloseMobile}>
                 <div className="system-status-indicator">
@@ -600,12 +741,8 @@ export default function Sidebar({
                   <span className="system-status-text">Outbox: 100% Hoạt Động</span>
                   <span className="system-live-chip">LIVE</span>
                 </div>
-                <div className="system-meta-text">
-                  PostgreSQL Worker & Sổ Cái Kép
-                </div>
-                <div className="system-meta-sub">
-                  Chu kỳ quét 2s • 0 bản ghi tồn
-                </div>
+                <div className="system-meta-text">PostgreSQL Worker &amp; Sổ Cái Kép</div>
+                <div className="system-meta-sub">Chu kỳ quét 2s • 0 bản ghi tồn</div>
               </Link>
             ) : (
               <Link
@@ -617,7 +754,6 @@ export default function Sidebar({
               </Link>
             )
           ) : (
-            /* User Footer: Khẳng định hệ thống điểm thưởng nội bộ an toàn (KHÔNG có link quản trị) */
             !isCollapsed ? (
               <div
                 className="sidebar-system-card"
@@ -633,12 +769,8 @@ export default function Sidebar({
                     Sổ Cái Hội Viên Active
                   </span>
                 </div>
-                <div className="system-meta-text">
-                  Tích lũy điểm CHIP nội bộ
-                </div>
-                <div className="system-meta-sub">
-                  An toàn • Không phí • Minh bạch
-                </div>
+                <div className="system-meta-text">Tích lũy điểm CHIP nội bộ</div>
+                <div className="system-meta-sub">An toàn • Minh bạch • Khép kín</div>
               </div>
             ) : (
               <div

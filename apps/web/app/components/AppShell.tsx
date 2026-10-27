@@ -5,21 +5,84 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
+import { useI18n } from '../lib/i18n';
+import { ChipStore } from '../lib/store';
 
 interface AppShellProps {
   children: React.ReactNode;
 }
 
+const AUTH_ROUTES = [
+  '/login',
+  '/system/login',
+  '/register',
+  '/verify-email',
+  '/resend-verification',
+];
+
 export default function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { t } = useI18n();
   const isSystemRoute = pathname.startsWith('/system');
   const isSystemLogin = pathname === '/system/login';
+  const isAuthRoute = AUTH_ROUTES.includes(pathname);
 
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [hasSystemAccess, setHasSystemAccess] = useState(false);
+  const [hasMemberSession, setHasMemberSession] = useState(false);
+
+  // Check sessions
+  const checkSessions = () => {
+    try {
+      const member = ChipStore.getCurrentMember();
+      setHasMemberSession(!!member);
+
+      const sys = ChipStore.getCurrentSystemStaff();
+      if (sys) {
+        const roles: string[] =
+          Array.isArray(sys?.roles) && sys.roles.length > 0
+            ? sys.roles
+            : Array.isArray(sys?.user?.roles) && sys.user.roles.length > 0
+            ? sys.user.roles
+            : [];
+        const email = (sys?.email || sys?.user?.email || '').toLowerCase();
+        const isKnownStaff = [
+          'admin@chiprin.com',
+          'assistant@chiprin.com',
+          'specialist@chiprin.com',
+        ].includes(email);
+        const isStaff =
+          isKnownStaff ||
+          roles.some((r) =>
+            ['ADMIN', 'ASSISTANT', 'SPECIALIST'].includes(r.toUpperCase())
+          );
+        setHasSystemAccess(isStaff);
+      } else {
+        setHasSystemAccess(false);
+      }
+    } catch (e) {
+      setHasMemberSession(false);
+      setHasSystemAccess(false);
+    }
+  };
+
+  useEffect(() => {
+    checkSessions();
+
+    const handleSessionChange = () => {
+      checkSessions();
+    };
+
+    window.addEventListener('chipcoin_session_changed', handleSessionChange);
+    window.addEventListener('storage', handleSessionChange);
+    return () => {
+      window.removeEventListener('chipcoin_session_changed', handleSessionChange);
+      window.removeEventListener('storage', handleSessionChange);
+    };
+  }, []);
 
   // Load sidebar collapsed preference
   useEffect(() => {
@@ -43,19 +106,18 @@ export default function AppShell({ children }: AppShellProps) {
           return;
         }
         const parsed = JSON.parse(raw);
-
-        // Trích xuất vai trò từ nhiều trường hợp lưu trữ khác nhau
         const roles: string[] =
           Array.isArray(parsed?.roles) && parsed.roles.length > 0
             ? parsed.roles
             : Array.isArray(parsed?.user?.roles) && parsed.user.roles.length > 0
             ? parsed.user.roles
             : [];
-
         const email = (parsed?.email || parsed?.user?.email || '').toLowerCase();
-        const isKnownStaff =
-          ['admin@chiprin.com', 'assistant@chiprin.com', 'specialist@chiprin.com'].includes(email);
-
+        const isKnownStaff = [
+          'admin@chiprin.com',
+          'assistant@chiprin.com',
+          'specialist@chiprin.com',
+        ].includes(email);
         const isStaff =
           isKnownStaff ||
           roles.some((r) =>
@@ -78,7 +140,6 @@ export default function AppShell({ children }: AppShellProps) {
       }
     } else {
       setAuthChecked(true);
-      setHasSystemAccess(true);
     }
   }, [pathname, isSystemRoute, isSystemLogin, router]);
 
@@ -91,6 +152,10 @@ export default function AppShell({ children }: AppShellProps) {
       return next;
     });
   };
+
+  // Determine whether Sidebar should be shown
+  // Request: Khi logout (hoặc ở màn login/register) thì KHÔNG hiển thị sidebar
+  const showSidebar = !isAuthRoute && (isSystemRoute ? hasSystemAccess : true);
 
   // Màn hình bảo vệ nếu đang kiểm tra quyền vào hệ thống quản trị
   if (isSystemRoute && !isSystemLogin && !hasSystemAccess && !authChecked) {
@@ -119,18 +184,30 @@ export default function AppShell({ children }: AppShellProps) {
   }
 
   return (
-    <div className={`app-shell ${isSystemRoute ? 'shell-system' : 'shell-user'}`}>
-      {/* Sidebar Navigation */}
-      <Sidebar
-        isCollapsed={isCollapsed}
-        onToggleCollapse={handleToggleCollapse}
-        isMobileOpen={isMobileOpen}
-        onCloseMobile={() => setIsMobileOpen(false)}
-      />
+    <div
+      className={`app-shell ${isSystemRoute ? 'shell-system' : 'shell-user'} ${
+        !showSidebar ? 'shell-no-sidebar' : ''
+      }`}
+    >
+      {/* Sidebar Navigation: Only rendered when user/staff is authenticated and not on auth pages */}
+      {showSidebar && (
+        <Sidebar
+          isCollapsed={isCollapsed}
+          onToggleCollapse={handleToggleCollapse}
+          isMobileOpen={isMobileOpen}
+          onCloseMobile={() => setIsMobileOpen(false)}
+        />
+      )}
 
       {/* Main Layout Area */}
       <div
-        className={`app-main-wrapper ${isCollapsed ? 'sidebar-collapsed' : ''}`}
+        className={`app-main-wrapper ${
+          !showSidebar
+            ? 'no-sidebar'
+            : isCollapsed
+            ? 'sidebar-collapsed'
+            : ''
+        }`}
       >
         <TopBar onOpenMobileMenu={() => setIsMobileOpen(true)} />
 
@@ -154,7 +231,7 @@ export default function AppShell({ children }: AppShellProps) {
                   </span>
                 </div>
                 <div className="footer-copyright">
-                  © 2026 CHIPCOIN System Console. Kiến trúc Transactional Outbox Worker & Double-Entry Ledger.
+                  © 2026 CHIPCOIN System Console. Kiến trúc Transactional Outbox Worker &amp; Double-Entry Ledger.
                 </div>
                 <div className="footer-links">
                   <Link href="/system" className="footer-link">
@@ -170,7 +247,7 @@ export default function AppShell({ children }: AppShellProps) {
                   </Link>
                   <span className="footer-bullet">&bull;</span>
                   <Link href="/system/reports" className="footer-link">
-                    📊 Báo Cáo & Đối Soát
+                    📊 Báo Cáo &amp; Đối Soát
                   </Link>
                   <span className="footer-bullet">&bull;</span>
                   <Link href="/system/settings" className="footer-link">
@@ -179,30 +256,34 @@ export default function AppShell({ children }: AppShellProps) {
                 </div>
               </>
             ) : (
-              /* Footer Chuyên Biệt Cho Web Người Dùng (Không có bất kỳ link sang hệ thống) */
+              /* Footer Chuyên Biệt Cho Web Người Dùng (Đã bỏ dòng "Hệ thống phần thưởng nội bộ — Không blockchain — Chưa hỗ trợ rút tiền") */
               <>
                 <div className="footer-meta">
                   <span className="footer-title">CHIPCOIN Platform</span>
                   <span className="footer-bullet">&bull;</span>
                   <span>
-                    Hệ thống phần thưởng nội bộ (internal points) — Không blockchain — Chưa hỗ trợ rút tiền
+                    Nền tảng tích luỹ điểm thưởng &amp; hạch toán số dư minh bạch
                   </span>
                 </div>
                 <div className="footer-copyright">
-                  © 2026 CHIPCOIN Member Loyalty. Tích luỹ điểm thưởng nội bộ an toàn & minh bạch.
+                  © 2026 CHIPCOIN Member Loyalty. Tích luỹ điểm thưởng an toàn &amp; minh bạch.
                 </div>
                 <div className="footer-links">
                   <Link href="/wallet" className="footer-link">
                     🪙 Ví Điểm Thưởng Của Tôi
                   </Link>
                   <span className="footer-bullet">&bull;</span>
-                  <Link href="/resend-verification" className="footer-link">
-                    ✉️ Kích Hoạt / Gửi Lại Email
+                  <Link href="/activities" className="footer-link">
+                    ⭐ Hoạt Động Tích Lũy
                   </Link>
                   <span className="footer-bullet">&bull;</span>
-                  <span className="footer-link" style={{ cursor: 'default', color: 'var(--text-muted)' }}>
-                    📋 Quy Chế Tích Lũy Điểm Thưởng
-                  </span>
+                  <Link href="/rank" className="footer-link">
+                    👑 Thăng Hạng Hội Viên
+                  </Link>
+                  <span className="footer-bullet">&bull;</span>
+                  <Link href="/referrals" className="footer-link">
+                    🤝 Mời Bạn Bè
+                  </Link>
                 </div>
               </>
             )}

@@ -1,21 +1,51 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useI18n } from './lib/i18n';
+import { ChipStore, StoredUser, TIER_CONFIGS } from './lib/store';
 
 export default function UserOverviewPage() {
-  const [balance, setBalance] = useState(1250000);
-  const [streakDays, setStreakDays] = useState(5);
-  const [claimedToday, setClaimedToday] = useState(false);
+  const { t } = useI18n();
+  const [currentUser, setCurrentUser] = useState<StoredUser | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
 
-  const handleClaimDaily = () => {
-    if (claimedToday) return;
+  const loadData = () => {
+    const mem = ChipStore.getCurrentMember();
+    setCurrentUser(mem);
+  };
+
+  useEffect(() => {
+    loadData();
+    const handleUpdate = () => loadData();
+    window.addEventListener('chipcoin_store_updated', handleUpdate);
+    window.addEventListener('chipcoin_session_changed', handleUpdate);
+    return () => {
+      window.removeEventListener('chipcoin_store_updated', handleUpdate);
+      window.removeEventListener('chipcoin_session_changed', handleUpdate);
+    };
+  }, []);
+
+  const balance = currentUser?.chipsBalance ?? 1250000;
+  const streakDays = currentUser?.streakDays ?? 5;
+  const currentTier = currentUser?.tier ?? 'CHIP GOLD';
+  const tierMeta = TIER_CONFIGS[currentTier];
+
+  const handleQuickCheckin = () => {
+    if (!currentUser) {
+      setFeedback('Vui lòng đăng nhập tài khoản để nhận điểm danh!');
+      setTimeout(() => setFeedback(null), 3500);
+      return;
+    }
     const bonus = 250;
-    setBalance((prev) => prev + bonus);
-    setStreakDays((prev) => prev + 1);
-    setClaimedToday(true);
-    setFeedback(`🎉 Chúc mừng! Bạn đã điểm danh ngày thứ ${streakDays + 1} và nhận +${bonus} CHIP vào ví!`);
+    const { user, promoted } = ChipStore.addChips(currentUser.id, bonus, 'Điểm danh nhanh tại trang tổng quan');
+    setCurrentUser(user);
+
+    if (promoted) {
+      setFeedback(`🎉 Chúc mừng! Bạn đã được thăng hạng lên [${user.tier}]!`);
+    } else {
+      setFeedback(`🎉 Chúc mừng! Bạn đã điểm danh và nhận +${bonus} CHIP vào ví!`);
+    }
     setTimeout(() => setFeedback(null), 4000);
   };
 
@@ -73,37 +103,42 @@ export default function UserOverviewPage() {
 
           <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
             <Link
-              href="/wallet"
+              href="/activities"
               className="nav-btn"
               style={{ fontSize: '0.95rem', padding: '10px 24px' }}
             >
-              🪙 Mở Ví Của Tôi
+              ⭐ Hoạt Động Tích Lũy
             </Link>
 
             <Link
-              href="/resend-verification"
+              href="/rank"
               className="btn-secondary"
               style={{ fontSize: '0.95rem', padding: '10px 24px' }}
             >
-              ✉️ Kích Hoạt / Gửi Mã Email
+              👑 Thăng Hạng Hội Viên
+            </Link>
+
+            <Link
+              href="/wallet"
+              className="btn-secondary"
+              style={{ fontSize: '0.95rem', padding: '10px 24px' }}
+            >
+              🪙 Ví Của Tôi
             </Link>
 
             <button
-              onClick={handleClaimDaily}
-              disabled={claimedToday}
+              onClick={handleQuickCheckin}
               className="nav-btn"
               style={{
                 fontSize: '0.95rem',
                 padding: '10px 24px',
-                background: claimedToday
-                  ? 'rgba(52, 211, 153, 0.2)'
-                  : 'var(--gradient-bronze)',
-                color: claimedToday ? '#34d399' : '#0b0c0e',
-                border: claimedToday ? '1px solid rgba(52, 211, 153, 0.4)' : 'none',
-                cursor: claimedToday ? 'default' : 'pointer',
+                background: 'rgba(212, 175, 55, 0.15)',
+                color: '#f5d77f',
+                border: '1px solid var(--border-bronze)',
+                cursor: 'pointer',
               }}
             >
-              {claimedToday ? '✓ Đã Điểm Danh Hôm Nay' : '🎁 Điểm Danh Nhận +250 CHIP'}
+              🎁 Điểm Danh Hôm Nay (+250)
             </button>
           </div>
         </div>
@@ -138,7 +173,6 @@ export default function UserOverviewPage() {
               fontWeight: 800,
               color: '#ffffff',
               marginTop: '8px',
-              fontFamily: 'Outfit, sans-serif',
             }}
           >
             {balance.toLocaleString()}
@@ -154,21 +188,22 @@ export default function UserOverviewPage() {
             <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>
               HẠNG THÀNH VIÊN
             </span>
-            <span style={{ color: '#f5d77f' }}>👑</span>
+            <span style={{ color: tierMeta.badgeColor }}>👑</span>
           </div>
           <div
             style={{
-              fontSize: '2rem',
+              fontSize: '1.8rem',
               fontWeight: 800,
-              color: '#f5d77f',
+              color: tierMeta.badgeColor,
               marginTop: '8px',
-              fontFamily: 'Outfit, sans-serif',
             }}
           >
-            VIP 3 GOLD
+            {currentTier}
           </div>
           <div style={{ fontSize: '0.82rem', color: '#34d399', marginTop: '4px' }}>
-            +15% thưởng mọi hoạt động
+            {tierMeta.bonusRate > 0
+              ? `+${tierMeta.bonusRate * 100}% thưởng hoa hồng nhánh`
+              : 'Xác thực email thành công'}
           </div>
         </div>
 
@@ -186,13 +221,12 @@ export default function UserOverviewPage() {
               fontWeight: 800,
               color: '#ffffff',
               marginTop: '8px',
-              fontFamily: 'Outfit, sans-serif',
             }}
           >
             {streakDays} / 7 Ngày
           </div>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            Giữ chuỗi để mở Hòm Bí Mật
+            Duy trì chuỗi mở Hòm Bí Mật
           </div>
         </div>
 
@@ -206,111 +240,106 @@ export default function UserOverviewPage() {
           </div>
           <div
             style={{
-              fontSize: '2rem',
+              fontSize: '1.8rem',
               fontWeight: 800,
               color: '#34d399',
               marginTop: '8px',
-              fontFamily: 'Outfit, sans-serif',
             }}
           >
             ĐÃ KÍCH HOẠT
           </div>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            Email bảo mật & Sổ cái Active
+            Email bảo mật &amp; Sổ cái Active
           </div>
         </div>
       </section>
 
-      {/* Member Earning Methods (Tham khảo Cointiply / Labs từ Thamkhao-ui.md) */}
-      <section>
-        <div style={{ marginBottom: '1.2rem' }}>
-          <h2 style={{ fontSize: '1.6rem', marginBottom: '4px' }}>Các Hoạt Động Tích Luỹ Điểm Thưởng</h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem' }}>
-            Hoàn thành các mốc nhiệm vụ nội bộ để nhận thêm điểm thưởng CHIP vào ví cá nhân
-          </p>
-        </div>
-
+      {/* Feature Spotlight: Hoạt Động Tích Lũy & Thăng Hạng */}
+      <section
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+          gap: '1.4rem',
+        }}
+      >
+        {/* Card 1: Hoạt Động Tích Lũy Highlight */}
         <div
+          className="glass-card glow-hover"
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-            gap: '1.4rem',
+            background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.08) 0%, rgba(18, 20, 24, 0.85) 100%)',
+            border: '1px solid var(--border-bronze)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
           }}
         >
-          {/* Nhiệm vụ 1: Kích hoạt email */}
-          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                <span style={{ fontSize: '1.8rem' }}>✉️</span>
-                <span className="badge badge-gold">+5,000 CHIP</span>
-              </div>
-              <h3 style={{ fontSize: '1.2rem', marginBottom: '6px' }}>Kích Hoạt Tài Khoản Qua Email</h3>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.5 }}>
-                Xác thực địa chỉ email thành công qua đường dẫn kích hoạt bảo mật. Điểm thưởng sẽ được ghi ngay vào sổ cái kép của bạn.
-              </p>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <span style={{ fontSize: '2rem' }}>⭐</span>
+              <span className="badge badge-gold">TRANG RIÊNG BIỆT</span>
             </div>
-            <div style={{ paddingTop: '1.2rem', borderTop: '1px solid var(--border-subtle)', marginTop: '1.2rem' }}>
-              <Link href="/resend-verification" className="glance-link" style={{ fontSize: '0.88rem' }}>
-                Gửi lại email mã kích hoạt →
-              </Link>
-            </div>
+            <h3 style={{ fontSize: '1.4rem', marginBottom: '8px' }}>Trung Tâm Hoạt Động Tích Lũy</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: 1.6 }}>
+              Khám phá toàn bộ nhiệm vụ nhận điểm thưởng: Chuỗi điểm danh hàng ngày, Xác minh email,
+              Tham gia cộng đồng và thử nghiệm hạch toán sổ cái kép.
+            </p>
           </div>
-
-          {/* Nhiệm vụ 2: Điểm danh chuỗi ngày (Daily Streak) */}
-          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                <span style={{ fontSize: '1.8rem' }}>📅</span>
-                <span className="badge badge-gold">+250 Đến +2,000 CHIP</span>
-              </div>
-              <h3 style={{ fontSize: '1.2rem', marginBottom: '6px' }}>Điểm Danh Hàng Ngày (Streak)</h3>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.5 }}>
-                Đăng nhập và điểm danh mỗi ngày để duy trì chuỗi liên tục. Đạt mốc 7 ngày liên tiếp để nhận thưởng Hộp Quà Bí Mật.
-              </p>
-            </div>
-            <div style={{ paddingTop: '1.2rem', borderTop: '1px solid var(--border-subtle)', marginTop: '1.2rem' }}>
-              <button
-                onClick={handleClaimDaily}
-                disabled={claimedToday}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: claimedToday ? '#34d399' : 'var(--accent-bronze)',
-                  fontWeight: 600,
-                  cursor: claimedToday ? 'default' : 'pointer',
-                  padding: 0,
-                  fontSize: '0.88rem',
-                }}
-              >
-                {claimedToday ? '✓ Đã nhận thưởng hôm nay' : 'Nhấn nhận thưởng ngay →'}
-              </button>
-            </div>
+          <div style={{ marginTop: '1.5rem', paddingTop: '1.2rem', borderTop: '1px solid var(--border-subtle)' }}>
+            <Link
+              href="/activities"
+              className="nav-btn"
+              style={{ display: 'inline-flex', padding: '10px 20px', fontSize: '0.9rem' }}
+            >
+              Mở trang Hoạt Động Tích Lũy →
+            </Link>
           </div>
+        </div>
 
-          {/* Nhiệm vụ 3: Giới thiệu thành viên mới */}
-          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                <span style={{ fontSize: '1.8rem' }}>🤝</span>
-                <span className="badge badge-gold">+10,000 CHIP / Bạn</span>
-              </div>
-              <h3 style={{ fontSize: '1.2rem', marginBottom: '6px' }}>Mời Bạn Bè Tham Gia</h3>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.5 }}>
-                Chia sẻ liên kết thành viên cá nhân của bạn. Nhận hoa hồng điểm thưởng nội bộ khi bạn bè đăng ký và kích hoạt tài khoản.
-              </p>
+        {/* Card 2: Thăng Hạng Highlight */}
+        <div
+          className="glass-card glow-hover"
+          style={{
+            background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.08) 0%, rgba(18, 20, 24, 0.85) 100%)',
+            border: '1px solid rgba(56, 189, 248, 0.3)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <span style={{ fontSize: '2rem' }}>👑</span>
+              <span className="badge" style={{ background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8' }}>
+                5 CẤP BẬC HỘI VIÊN
+              </span>
             </div>
-            <div style={{ paddingTop: '1.2rem', borderTop: '1px solid var(--border-subtle)', marginTop: '1.2rem' }}>
-              <Link href="/wallet" className="glance-link" style={{ fontSize: '0.88rem' }}>
-                Xem ví & chi tiết điểm thưởng →
-              </Link>
-            </div>
+            <h3 style={{ fontSize: '1.4rem', marginBottom: '8px' }}>Tiến Trình Thăng Hạng Hội Viên</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: 1.6 }}>
+              Theo dõi chi tiết hạn mức đạt chuẩn cho từng cấp bậc (CHIP MEMBER, GOLD, PLATINUM, DIAMOND, SPECIAL).
+              Mở khóa quyền rút chip và hoa hồng giới thiệu lên đến 20%.
+            </p>
+          </div>
+          <div style={{ marginTop: '1.5rem', paddingTop: '1.2rem', borderTop: '1px solid var(--border-subtle)' }}>
+            <Link
+              href="/rank"
+              className="nav-btn"
+              style={{
+                display: 'inline-flex',
+                padding: '10px 20px',
+                fontSize: '0.9rem',
+                background: 'linear-gradient(135deg, #38bdf8 0%, #0284c7 100%)',
+                color: '#0b0c0e',
+              }}
+            >
+              Xem điều kiện thăng hạng →
+            </Link>
           </div>
         </div>
       </section>
 
       {/* Recent Activity Table for Member */}
       <section className="glass-card" style={{ padding: '1.6rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', flexWrap: 'wrap', gap: '10px' }}>
           <div>
             <h3 style={{ fontSize: '1.2rem' }}>Lịch Sử Nhận Thưởng Gần Đây</h3>
             <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
@@ -336,7 +365,7 @@ export default function UserOverviewPage() {
             </thead>
             <tbody>
               <tr>
-                <td style={{ fontFamily: 'JetBrains Mono, monospace', color: '#ffffff', fontWeight: 600 }}>
+                <td style={{ fontFamily: 'var(--font-mono)', color: '#ffffff', fontWeight: 600 }}>
                   TX-20261026-9041
                 </td>
                 <td style={{ color: '#ffffff', fontWeight: 500 }}>Thưởng hoàn thành nhiệm vụ cộng đồng</td>
@@ -359,7 +388,7 @@ export default function UserOverviewPage() {
                 </td>
               </tr>
               <tr>
-                <td style={{ fontFamily: 'JetBrains Mono, monospace', color: '#ffffff', fontWeight: 600 }}>
+                <td style={{ fontFamily: 'var(--font-mono)', color: '#ffffff', fontWeight: 600 }}>
                   TX-20261026-8812
                 </td>
                 <td style={{ color: '#ffffff', fontWeight: 500 }}>Thưởng xác minh email thành công</td>
@@ -382,7 +411,7 @@ export default function UserOverviewPage() {
                 </td>
               </tr>
               <tr>
-                <td style={{ fontFamily: 'JetBrains Mono, monospace', color: '#ffffff', fontWeight: 600 }}>
+                <td style={{ fontFamily: 'var(--font-mono)', color: '#ffffff', fontWeight: 600 }}>
                   TX-20261025-7650
                 </td>
                 <td style={{ color: '#ffffff', fontWeight: 500 }}>Thưởng duy trì chuỗi điểm danh 5 ngày</td>
@@ -406,30 +435,6 @@ export default function UserOverviewPage() {
               </tr>
             </tbody>
           </table>
-        </div>
-      </section>
-
-      {/* Regulatory & Safety Notice */}
-      <section
-        style={{
-          background: 'rgba(212, 175, 55, 0.05)',
-          border: '1px solid var(--border-bronze)',
-          borderRadius: '12px',
-          padding: '1.2rem 1.6rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '14px',
-        }}
-      >
-        <span style={{ fontSize: '1.8rem' }}>🛡️</span>
-        <div>
-          <div style={{ fontWeight: 700, color: '#f5d77f', fontSize: '0.92rem' }}>
-            Thông Báo Minh Bạch Điểm Thưởng Nội Bộ
-          </div>
-          <div style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', marginTop: '2px', lineHeight: 1.5 }}>
-            CHIPCOIN là hệ thống điểm thưởng tích lũy nội bộ phục vụ thành viên, hoàn toàn không phải đồng tiền mã hoá (cryptocurrency)
-            và chưa mở tính năng rút tiền ra ngoài hệ thống. Số dư được bảo vệ bởi kiến trúc sổ cái kép PostgreSQL bất biến.
-          </div>
         </div>
       </section>
     </div>

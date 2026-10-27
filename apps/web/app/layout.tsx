@@ -14,11 +14,15 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
+import { I18nProvider } from './lib/i18n';
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="vi">
       <body>
-        <AppShell>{children}</AppShell>
+        <I18nProvider>
+          <AppShell>{children}</AppShell>
+        </I18nProvider>
       </body>
     </html>
   );
