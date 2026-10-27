@@ -1,5 +1,17 @@
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
+export function getApiBaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    const isHttps = window.location.protocol === 'https:';
+    const envUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+    // On HTTPS (e.g. chiprin.com) avoid mixed-content and localhost errors by using relative path
+    if (isHttps || !envUrl || envUrl.includes('localhost') || envUrl.includes('127.0.0.1')) {
+      return '';
+    }
+    return envUrl;
+  }
+  return process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8080';
+}
+
+export const API_BASE_URL = getApiBaseUrl();
 
 export interface ApiResponse<T = any> {
   success: boolean;
@@ -13,7 +25,8 @@ export async function apiRequest<T = any>(
   path: string,
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
-  const url = `${API_BASE_URL}${path}`;
+  const base = typeof window !== 'undefined' ? getApiBaseUrl() : API_BASE_URL;
+  const url = `${base}${path}`;
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',

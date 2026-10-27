@@ -38,6 +38,22 @@ export default function LoginPage() {
         }),
       });
 
+      if (!res.success) {
+        if (res.error === 'account_unavailable') {
+          setError(
+            'Tài khoản của bạn chưa kích hoạt hoặc chưa xác thực email. Vui lòng kiểm tra email kích hoạt từ medubaiso1@gmail.com (bao gồm cả thư rác / spam).'
+          );
+          setUnverified(true);
+          return;
+        }
+        if (res.error === 'invalid_credentials') {
+          setError('Địa chỉ email hoặc mật khẩu không chính xác.');
+          return;
+        }
+        setError(res.message || res.error || 'Đăng nhập không thành công. Vui lòng thử lại.');
+        return;
+      }
+
       // Synchronize session with central store
       let matchedUser = ChipStore.getUserByEmail(cleanEmail);
       if (!matchedUser) {
@@ -49,12 +65,15 @@ export default function LoginPage() {
           status: 'ACTIVE',
           email_verified_at: new Date().toISOString(),
           created_at: new Date().toISOString(),
-          tier: 'CHIP GOLD',
+          tier: 'CHIP MEMBER',
           referralCode: `CHIP-${cleanEmail.split('@')[0].toUpperCase().slice(0, 4)}-7721`,
-          chipsBalance: 1250000,
-          usdtBalance: 0.25,
-          streakDays: 5,
+          chipsBalance: 5000,
+          usdtBalance: 0.001,
+          streakDays: 1,
         };
+      } else {
+        matchedUser.status = 'ACTIVE';
+        matchedUser.email_verified_at = matchedUser.email_verified_at || new Date().toISOString();
       }
 
       ChipStore.setMemberSession(matchedUser);
@@ -64,29 +83,7 @@ export default function LoginPage() {
         router.push('/');
       }, 500);
     } catch (err: any) {
-      const cleanEmail = email.trim().toLowerCase();
-      let matchedUser = ChipStore.getUserByEmail(cleanEmail);
-      if (!matchedUser) {
-        matchedUser = {
-          id: `usr-${Date.now()}`,
-          username: cleanEmail.split('@')[0],
-          email: cleanEmail,
-          roles: ['USER'],
-          status: 'ACTIVE',
-          email_verified_at: new Date().toISOString(),
-          created_at: new Date().toISOString(),
-          tier: 'CHIP GOLD',
-          referralCode: `CHIP-${cleanEmail.split('@')[0].toUpperCase().slice(0, 4)}-7721`,
-          chipsBalance: 1250000,
-          usdtBalance: 0.25,
-          streakDays: 5,
-        };
-      }
-      ChipStore.setMemberSession(matchedUser);
-      setLoggedInUser(matchedUser);
-      setTimeout(() => {
-        router.push('/');
-      }, 500);
+      setError('Lỗi kết nối máy chủ xác thực. Vui lòng kiểm tra lại mạng hoặc thử lại sau.');
     } finally {
       setLoading(false);
     }

@@ -8,11 +8,19 @@ import (
 )
 
 type Handler struct {
-	service *Service
+	service    *Service
+	outboxRepo *OutboxRepository
 }
 
-func NewHandler(service *Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(service *Service, outboxRepo ...*OutboxRepository) *Handler {
+	var repo *OutboxRepository
+	if len(outboxRepo) > 0 {
+		repo = outboxRepo[0]
+	}
+	return &Handler{
+		service:    service,
+		outboxRepo: repo,
+	}
 }
 
 func writeJSON(w http.ResponseWriter, status int, data any) {
@@ -75,6 +83,10 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 		return
+	}
+
+	if h.outboxRepo != nil {
+		_ = h.outboxRepo.QueueResend(r.Context(), user.ID)
 	}
 
 	writeJSON(w, http.StatusCreated, map[string]any{

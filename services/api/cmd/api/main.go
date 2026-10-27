@@ -308,12 +308,23 @@ func main() {
 
 	authRepo := auth.NewRepository(db)
 
+	var outboxRepo *auth.OutboxRepository
+	var tokenCipher *email.TokenCipher
+	if len(rateLimitCfg.TokenEncryptionKey) == 32 {
+		var cipherErr error
+		tokenCipher, cipherErr = email.NewTokenCipher(rateLimitCfg.TokenEncryptionKey)
+		if cipherErr == nil {
+			outboxRepo, _ = auth.NewOutboxRepository(db, tokenCipher)
+		}
+	}
+
 	authService := auth.NewService(
 		authRepo,
 	)
 
 	authHandler := auth.NewHandler(
 		authService,
+		outboxRepo,
 	)
 
 	// =====================================================
@@ -354,20 +365,10 @@ func main() {
 	var emailLimiter *middleware.EmailRateLimiter
 	var cleanupScheduler *middleware.RateLimitCleanupScheduler
 
-	if rateLimitCfg.ResendVerificationEnabled {
-		tokenCipher, err := email.NewTokenCipher(rateLimitCfg.TokenEncryptionKey)
-		if err != nil {
-			log.Fatalf("Token cipher initialization failed: %v", err)
-		}
-
+	if rateLimitCfg.ResendVerificationEnabled && outboxRepo != nil {
 		resendLookupRepo, err := auth.NewResendLookupRepository(db)
 		if err != nil {
 			log.Fatalf("Resend lookup repo initialization failed: %v", err)
-		}
-
-		outboxRepo, err := auth.NewOutboxRepository(db, tokenCipher)
-		if err != nil {
-			log.Fatalf("Outbox repo initialization failed: %v", err)
 		}
 
 		resendService, err := auth.NewResendVerificationService(outboxRepo)
