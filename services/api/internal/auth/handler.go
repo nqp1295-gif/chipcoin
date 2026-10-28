@@ -62,25 +62,39 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		switch {
-		case errors.Is(err, ErrInvalidUsername),
-			errors.Is(err, ErrInvalidEmail),
-			errors.Is(err, ErrWeakPassword):
-
+		case errors.Is(err, ErrInvalidUsername):
 			writeJSON(w, http.StatusBadRequest, map[string]any{
 				"success": false,
-				"error":   err.Error(),
+				"error":   "invalid_username",
+				"message": "Tên người dùng không hợp lệ. Vui lòng nhập từ 2 - 50 ký tự (chữ cái tiếng Việt/Anh, số, khoảng trắng, gạch dưới _, gạch ngang - hoặc dấu .).",
+			})
+
+		case errors.Is(err, ErrInvalidEmail):
+			writeJSON(w, http.StatusBadRequest, map[string]any{
+				"success": false,
+				"error":   "invalid_email",
+				"message": "Địa chỉ email không hợp lệ. Vui lòng kiểm tra lại định dạng email.",
+			})
+
+		case errors.Is(err, ErrWeakPassword):
+			writeJSON(w, http.StatusBadRequest, map[string]any{
+				"success": false,
+				"error":   "weak_password",
+				"message": "Mật khẩu chưa đáp ứng yêu cầu bảo mật (tối thiểu 12 ký tự).",
 			})
 
 		case errors.Is(err, ErrDuplicateAccount):
 			writeJSON(w, http.StatusConflict, map[string]any{
 				"success": false,
 				"error":   "account_already_exists",
+				"message": "Tên đăng nhập hoặc địa chỉ email này đã được sử dụng.",
 			})
 
 		default:
 			writeJSON(w, http.StatusInternalServerError, map[string]any{
 				"success": false,
 				"error":   "internal_error",
+				"message": "Lỗi xử lý nội bộ của máy chủ.",
 			})
 		}
 		return

@@ -28,8 +28,14 @@ function RegisterForm() {
     e.preventDefault();
     setError(null);
 
-    if (!username.trim() || !email.trim() || !password) {
+    const cleanUsername = username.trim().replace(/^@+/, '');
+    if (!cleanUsername || !email.trim() || !password) {
       setError('Vui lòng điền đầy đủ các thông tin bắt buộc.');
+      return;
+    }
+
+    if (cleanUsername.length < 2 || cleanUsername.length > 50) {
+      setError('Tên người dùng phải có độ dài từ 2 đến 50 ký tự.');
       return;
     }
 
@@ -45,7 +51,7 @@ function RegisterForm() {
       const res = await apiRequest('/api/v1/auth/register', {
         method: 'POST',
         body: JSON.stringify({
-          username: username.trim(),
+          username: cleanUsername,
           email: email.trim().toLowerCase(),
           password,
           referral_code: referralCode.trim() || undefined,
@@ -55,6 +61,18 @@ function RegisterForm() {
       if (!res.success) {
         if (res.error === 'account_already_exists') {
           setError('Tên đăng nhập hoặc địa chỉ email này đã được sử dụng.');
+        } else if (res.error === 'invalid_username' || res.error === 'invalid username') {
+          setError(
+            res.message ||
+              'Tên người dùng không hợp lệ. Vui lòng nhập từ 2 - 50 ký tự (chữ cái tiếng Việt/Anh, chữ số, khoảng trắng, gạch dưới _, gạch ngang - hoặc dấu .).'
+          );
+        } else if (res.error === 'invalid_email' || res.error === 'invalid email') {
+          setError('Địa chỉ email không hợp lệ. Vui lòng kiểm tra lại định dạng email.');
+        } else if (
+          res.error === 'password does not meet security requirements' ||
+          res.error === 'weak_password'
+        ) {
+          setError('Mật khẩu chưa đủ an toàn (yêu cầu tối thiểu 12 ký tự).');
         } else {
           setError(res.message || res.error || 'Đăng ký không thành công. Vui lòng kiểm tra lại thông tin.');
         }
@@ -63,7 +81,7 @@ function RegisterForm() {
 
       // 2. Register & Sync to Central Data Store (Bridges Member & Admin Portals)
       const storedUser = ChipStore.registerUser(
-        username.trim(),
+        cleanUsername,
         email.trim().toLowerCase(),
         referralCode.trim() || undefined
       );
@@ -151,13 +169,16 @@ function RegisterForm() {
                 id="username"
                 type="text"
                 className="form-input"
-                placeholder="vd: satoshi_vn"
+                placeholder="vd: satoshi_vn, Nguyen Van A, alex.99"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 disabled={loading}
                 autoComplete="username"
                 required
               />
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
+                Từ 2 đến 50 ký tự (hỗ trợ chữ cái tiếng Việt/Anh, chữ số, khoảng trắng, gạch dưới _, gạch ngang - và dấu .)
+              </span>
             </div>
 
             <div className="form-group">

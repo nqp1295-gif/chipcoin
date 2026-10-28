@@ -174,11 +174,14 @@ func (h *SystemHandler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	req.Email = strings.ToLower(strings.TrimSpace(req.Email))
 	req.Role = strings.ToUpper(strings.TrimSpace(req.Role))
 
-	if !usernamePattern.MatchString(req.Username) {
+	req.Username = strings.TrimPrefix(req.Username, "@")
+	req.Username = strings.Join(strings.Fields(req.Username), " ")
+
+	if !IsValidUsername(req.Username) {
 		writeJSON(w, http.StatusBadRequest, map[string]any{
 			"success": false,
 			"error":   "invalid_username",
-			"message": "Tên người dùng không hợp lệ (3-30 ký tự, chữ, số, gạch dưới).",
+			"message": "Tên người dùng không hợp lệ (2-50 ký tự, chữ cái, số, gạch dưới, gạch ngang, dấu chấm hoặc khoảng trắng).",
 		})
 		return
 	}
