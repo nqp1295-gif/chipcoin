@@ -10,6 +10,7 @@ import {
   TIER_CONFIGS,
   MemberTier,
 } from '../../lib/store';
+import { apiRequest } from '../../lib/api';
 
 type TimePreset = '24h' | '7d' | '30d' | '90d' | 'all';
 
@@ -28,13 +29,54 @@ export default function SystemReportsPage() {
   const [promoTierFilter, setPromoTierFilter] = useState<string>('ALL');
   const [allocTierFilter, setAllocTierFilter] = useState<string>('ALL');
 
-  const loadData = () => {
-    const uList = ChipStore.getUsers();
+  const loadData = async () => {
+    let uList = ChipStore.getUsers();
     setUsers(uList);
-    const pList = ChipStore.getPromotions();
-    setPromotions(pList);
-    const aList = ChipStore.getAllocations();
-    setAllocations(aList);
+    setPromotions(ChipStore.getPromotions());
+    setAllocations(ChipStore.getAllocations());
+
+    // Also fetch from API to ensure accounts registered via backend are included
+    try {
+      const res = await apiRequest('/api/v1/system/accounts');
+      if (res.success && res.data) {
+        const apiAccounts: any[] = Array.isArray(res.data) ? res.data : (res.data?.accounts || []);
+        if (apiAccounts.length > 0) {
+          const userMap = new Map<string, StoredUser>();
+          uList.forEach((u) => userMap.set(u.email.toLowerCase(), u));
+
+          apiAccounts.forEach((a) => {
+            const emailKey = a.email.toLowerCase();
+            const existing = userMap.get(emailKey);
+            if (existing) {
+              existing.status = a.status || existing.status;
+              if (a.email_verified_at) existing.email_verified_at = a.email_verified_at;
+              if (a.roles) existing.roles = a.roles;
+            } else {
+              userMap.set(emailKey, {
+                id: a.id || `usr-${Date.now()}`,
+                username: a.username || a.email.split('@')[0],
+                email: a.email,
+                roles: a.roles || ['USER'],
+                status: a.status || 'ACTIVE',
+                email_verified_at: a.email_verified_at || a.created_at || new Date().toISOString(),
+                created_at: a.created_at || new Date().toISOString(),
+                tier: 'CHIP MEMBER',
+                referralCode: `CHIP-${(a.username || a.email).toUpperCase().slice(0, 4)}-${Math.floor(1000 + Math.random() * 9000)}`,
+                chipsBalance: 5000,
+                usdtBalance: 0.001,
+                streakDays: 1,
+              });
+            }
+          });
+
+          const merged = Array.from(userMap.values());
+          setUsers(merged);
+          ChipStore.saveUsers(merged);
+        }
+      }
+    } catch (e) {
+      // API offline fallback to local store
+    }
   };
 
   useEffect(() => {
@@ -98,7 +140,7 @@ export default function SystemReportsPage() {
         const match =
           u.email.toLowerCase().includes(q) ||
           u.username.toLowerCase().includes(q) ||
-          u.referralCode.toLowerCase().includes(q) ||
+          (u.referralCode && u.referralCode.toLowerCase().includes(q)) ||
           (u.referredBy && u.referredBy.toLowerCase().includes(q));
         if (!match) return false;
       }

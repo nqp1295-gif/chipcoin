@@ -15,7 +15,7 @@ interface ActivityTask {
   description: string;
   actionUrl?: string;
   actionText: string;
-  canClaimDirectly?: boolean;
+  canClaimDirectly: boolean;
 }
 
 const TASKS: ActivityTask[] = [
@@ -38,8 +38,9 @@ const TASKS: ActivityTask[] = [
     rewardText: '+5,000 CHIP',
     category: 'ONE_TIME',
     description: 'Xác thực địa chỉ email thành công qua đường dẫn kích hoạt bảo mật. Điểm thưởng sẽ được ghi ngay vào sổ cái kép của bạn.',
-    actionUrl: '/resend-verification',
-    actionText: 'Kích hoạt / Xác minh email',
+    actionUrl: '/verify-email',
+    actionText: 'Xác minh email',
+    canClaimDirectly: true,
   },
   {
     id: 'task_referral_bonus',
@@ -50,7 +51,8 @@ const TASKS: ActivityTask[] = [
     category: 'REFERRAL',
     description: 'Chia sẻ mã giới thiệu hoặc liên kết cá nhân. Nhận hoa hồng thụ động (3% - 20%) từ mọi điểm thưởng người được giới thiệu kiếm được.',
     actionUrl: '/referrals',
-    actionText: 'Xem mã & nhánh giới thiệu',
+    actionText: 'Mở trang giới thiệu',
+    canClaimDirectly: true,
   },
   {
     id: 'task_community_telegram',
@@ -60,7 +62,7 @@ const TASKS: ActivityTask[] = [
     rewardText: '+15,000 CHIP',
     category: 'COMMUNITY',
     description: 'Theo dõi tin tức phát triển công nghệ, đợt airdrop token nội bộ và đối soát sổ cái hàng tuần cùng các hội viên khác.',
-    actionText: 'Hoàn thành nhiệm vụ',
+    actionText: 'Tham gia kênh cộng đồng',
     canClaimDirectly: true,
   },
   {
@@ -72,7 +74,8 @@ const TASKS: ActivityTask[] = [
     category: 'ONE_TIME',
     description: 'Bảo vệ tài khoản tích lũy bằng xác thực hai lớp (2FA) và ghi nhận thông tin chủ sở hữu ví điểm.',
     actionUrl: '/profile',
-    actionText: 'Mở trang hồ sơ cá nhân',
+    actionText: 'Mở hồ sơ cá nhân',
+    canClaimDirectly: true,
   },
   {
     id: 'task_ledger_test',
@@ -84,13 +87,73 @@ const TASKS: ActivityTask[] = [
     description: 'Kiểm tra tốc độ hạch toán giao dịch sổ cái kép Double-entry Ledger bảo đảm cân bằng DEBIT / CREDIT tức thì.',
     actionUrl: '/wallet',
     actionText: 'Mở ví kiểm tra sổ cái',
+    canClaimDirectly: true,
   },
 ];
+
+// Helper: get today's date string in YYYY-MM-DD format (local timezone)
+function getTodayDateStr(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+}
+
+interface PersistedTasksData {
+  daily: Record<string, string>; // taskId -> 'YYYY-MM-DD'
+  oneTime: Record<string, boolean>; // taskId -> true
+}
+
+// Helper: load persisted claimed tasks from localStorage for a given user
+function loadClaimedTasks(userId: string): PersistedTasksData {
+  if (typeof window === 'undefined') return { daily: {}, oneTime: {} };
+  try {
+    const raw = localStorage.getItem(`chipcoin_claimed_tasks_${userId}`);
+    if (!raw) return { daily: {}, oneTime: {} };
+    const parsed = JSON.parse(raw);
+    if (!parsed.daily && !parsed.oneTime) {
+      // Migrate legacy flat structure { [taskId]: true }
+      return { daily: {}, oneTime: parsed };
+    }
+    return {
+      daily: parsed.daily || {},
+      oneTime: parsed.oneTime || {},
+    };
+  } catch {
+    return { daily: {}, oneTime: {} };
+  }
+}
+
+// Helper: save claimed tasks to localStorage for a given user
+function saveClaimedTasks(userId: string, data: PersistedTasksData): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(`chipcoin_claimed_tasks_${userId}`, JSON.stringify(data));
+  } catch {}
+}
+
+// Helper: check if a task is already claimed
+function isTaskClaimed(
+  task: ActivityTask,
+  user: StoredUser | null,
+  tasksData: PersistedTasksData
+): boolean {
+  if (!user) return false;
+  const today = getTodayDateStr();
+
+  if (task.category === 'DAILY') {
+    if (task.id === 'task_daily_streak') {
+      return user.lastClaimDate === today || tasksData.daily[task.id] === today;
+    }
+    return tasksData.daily[task.id] === today;
+  }
+
+  // ONE_TIME, COMMUNITY, REFERRAL
+  return Boolean(tasksData.oneTime[task.id]);
+}
 
 export default function ActivitiesPage() {
   const { t } = useI18n();
   const [currentUser, setCurrentUser] = useState<StoredUser | null>(null);
-  const [claimedTasks, setClaimedTasks] = useState<Record<string, boolean>>({});
+  const [tasksData, setTasksData] = useState<PersistedTasksData>({ daily: {}, oneTime: {} });
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'info' } | null>(null);
 
   const loadMember = () => {
@@ -101,6 +164,15 @@ export default function ActivitiesPage() {
       if (mem) ChipStore.setMemberSession(mem);
     }
     setCurrentUser(mem);
+
+    if (mem) {
+      const loaded = loadClaimedTasks(mem.id);
+      // Synchronize daily check-in from user's lastClaimDate
+      if (mem.lastClaimDate === getTodayDateStr()) {
+        loaded.daily['task_daily_streak'] = getTodayDateStr();
+      }
+      setTasksData(loaded);
+    }
   };
 
   useEffect(() => {
@@ -115,13 +187,28 @@ export default function ActivitiesPage() {
   }, []);
 
   const handleClaim = (task: ActivityTask) => {
-    if (claimedTasks[task.id]) return;
-
     if (!currentUser) {
       setNotification({
         message: 'Vui lòng đăng nhập để nhận thưởng vào ví cá nhân của bạn!',
         type: 'info',
       });
+      setTimeout(() => setNotification(null), 3500);
+      return;
+    }
+
+    const currentTasksData = loadClaimedTasks(currentUser.id);
+    if (isTaskClaimed(task, currentUser, currentTasksData)) {
+      if (task.category === 'DAILY') {
+        setNotification({
+          message: 'Bạn đã hoàn thành nhiệm vụ này hôm nay rồi! Hãy quay lại vào ngày mai.',
+          type: 'info',
+        });
+      } else {
+        setNotification({
+          message: 'Bạn đã nhận phần thưởng cho nhiệm vụ này rồi!',
+          type: 'info',
+        });
+      }
       setTimeout(() => setNotification(null), 3500);
       return;
     }
@@ -132,8 +219,27 @@ export default function ActivitiesPage() {
         task.rewardUnits,
         `Hoàn thành hoạt động: ${task.title}`
       );
-      setCurrentUser(user);
-      setClaimedTasks((prev) => ({ ...prev, [task.id]: true }));
+
+      const today = getTodayDateStr();
+      const updatedData: PersistedTasksData = {
+        daily: { ...currentTasksData.daily },
+        oneTime: { ...currentTasksData.oneTime },
+      };
+
+      if (task.category === 'DAILY') {
+        updatedData.daily[task.id] = today;
+        if (task.id === 'task_daily_streak') {
+          ChipStore.recordDailyCheckin(currentUser.id);
+        }
+      } else {
+        updatedData.oneTime[task.id] = true;
+      }
+
+      saveClaimedTasks(currentUser.id, updatedData);
+      setTasksData(updatedData);
+
+      const refreshed = ChipStore.getUserById(currentUser.id) || user;
+      setCurrentUser(refreshed);
 
       if (promoted) {
         setNotification({
@@ -142,7 +248,7 @@ export default function ActivitiesPage() {
         });
       } else {
         setNotification({
-          message: `✨ Thành công! Đã cộng +${task.rewardUnits.toLocaleString()} CHIP vào ví của bạn. Số dư mới: ${user.chipsBalance.toLocaleString()} CHIP.`,
+          message: `✨ Thành công! Đã cộng +${task.rewardUnits.toLocaleString()} CHIP vào ví của bạn. Số dư mới: ${refreshed.chipsBalance.toLocaleString()} CHIP.`,
           type: 'success',
         });
       }
@@ -153,7 +259,8 @@ export default function ActivitiesPage() {
     }
   };
 
-  const streakDays = currentUser?.streakDays || 5;
+  const isDailyStreakClaimed = isTaskClaimed(TASKS[0], currentUser, tasksData);
+  const streakDays = currentUser?.streakDays || 1;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -222,17 +329,18 @@ export default function ActivitiesPage() {
 
           <button
             onClick={() => handleClaim(TASKS[0])}
-            disabled={claimedTasks['task_daily_streak']}
+            disabled={isDailyStreakClaimed}
             className="nav-btn"
             style={{
               padding: '10px 22px',
-              background: claimedTasks['task_daily_streak'] ? 'rgba(52, 211, 153, 0.2)' : 'var(--gradient-bronze)',
-              color: claimedTasks['task_daily_streak'] ? '#34d399' : '#0b0c0e',
-              border: claimedTasks['task_daily_streak'] ? '1px solid rgba(52, 211, 153, 0.4)' : 'none',
-              cursor: claimedTasks['task_daily_streak'] ? 'default' : 'pointer',
+              background: isDailyStreakClaimed ? 'rgba(52, 211, 153, 0.2)' : 'var(--gradient-bronze)',
+              color: isDailyStreakClaimed ? '#34d399' : '#0b0c0e',
+              border: isDailyStreakClaimed ? '1px solid rgba(52, 211, 153, 0.4)' : 'none',
+              cursor: isDailyStreakClaimed ? 'default' : 'pointer',
+              fontWeight: 700,
             }}
           >
-            {claimedTasks['task_daily_streak'] ? t('act_streak_done') : t('act_streak_btn')}
+            {isDailyStreakClaimed ? t('act_streak_done') : t('act_streak_btn')}
           </button>
         </div>
 
@@ -247,7 +355,7 @@ export default function ActivitiesPage() {
         >
           {[1, 2, 3, 4, 5, 6, 7].map((day) => {
             const isCompleted = day <= streakDays;
-            const isToday = day === streakDays + (claimedTasks['task_daily_streak'] ? 0 : 1);
+            const isToday = day === streakDays + (isDailyStreakClaimed ? 0 : 1);
             return (
               <div
                 key={day}
@@ -300,7 +408,7 @@ export default function ActivitiesPage() {
           }}
         >
           {TASKS.map((task) => {
-            const isClaimed = claimedTasks[task.id];
+            const isClaimed = isTaskClaimed(task, currentUser, tasksData);
             return (
               <div
                 key={task.id}
@@ -310,14 +418,17 @@ export default function ActivitiesPage() {
                   flexDirection: 'column',
                   justifyContent: 'space-between',
                   padding: '1.6rem',
-                  borderColor: isClaimed ? 'rgba(52, 211, 153, 0.3)' : undefined,
+                  borderColor: isClaimed ? 'rgba(52, 211, 153, 0.35)' : undefined,
+                  background: isClaimed ? 'rgba(52, 211, 153, 0.03)' : undefined,
                 }}
               >
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                     <span style={{ fontSize: '2rem' }}>{task.icon}</span>
                     <span className={`badge ${isClaimed ? 'badge-pulse' : 'badge-gold'}`}>
-                      {isClaimed ? t('act_claimed') : task.rewardText}
+                      {isClaimed
+                        ? (task.category === 'DAILY' ? '✓ ĐÃ NHẬN HÔM NAY' : t('act_claimed'))
+                        : task.rewardText}
                     </span>
                   </div>
 
@@ -335,34 +446,53 @@ export default function ActivitiesPage() {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '10px',
                   }}
                 >
-                  {task.canClaimDirectly ? (
-                    <button
-                      onClick={() => handleClaim(task)}
-                      disabled={isClaimed}
+                  {isClaimed ? (
+                    <span
                       style={{
-                        background: isClaimed ? 'rgba(52, 211, 153, 0.15)' : 'none',
-                        border: isClaimed ? '1px solid rgba(52, 211, 153, 0.3)' : 'none',
-                        padding: isClaimed ? '6px 14px' : 0,
+                        background: 'rgba(52, 211, 153, 0.15)',
+                        border: '1px solid rgba(52, 211, 153, 0.3)',
+                        padding: '6px 14px',
                         borderRadius: '6px',
-                        color: isClaimed ? '#34d399' : 'var(--accent-bronze)',
+                        color: '#34d399',
                         fontWeight: 700,
-                        cursor: isClaimed ? 'default' : 'pointer',
-                        fontSize: '0.9rem',
-                        transition: 'all 0.2s ease',
+                        fontSize: '0.88rem',
                       }}
                     >
-                      {isClaimed ? t('act_claimed') : t('act_claim_btn')}
-                    </button>
+                      {task.category === 'DAILY' ? '✓ Đã nhận hôm nay' : '✓ Đã hoàn thành'}
+                    </span>
                   ) : (
-                    <Link
-                      href={task.actionUrl || '#'}
-                      className="glance-link"
-                      style={{ fontSize: '0.9rem', fontWeight: 600 }}
-                    >
-                      {task.actionText} →
-                    </Link>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <button
+                        onClick={() => handleClaim(task)}
+                        style={{
+                          background: 'var(--gradient-bronze)',
+                          border: 'none',
+                          padding: '7px 16px',
+                          borderRadius: '6px',
+                          color: '#0b0c0e',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          fontSize: '0.88rem',
+                          transition: 'all 0.2s ease',
+                        }}
+                      >
+                        {task.id === 'task_daily_streak' ? t('act_streak_btn') : t('act_claim_btn')}
+                      </button>
+
+                      {task.actionUrl && (
+                        <Link
+                          href={task.actionUrl}
+                          className="glance-link"
+                          style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}
+                        >
+                          ({task.actionText} ↗)
+                        </Link>
+                      )}
+                    </div>
                   )}
 
                   <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>

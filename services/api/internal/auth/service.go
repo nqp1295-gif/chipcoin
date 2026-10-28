@@ -35,6 +35,7 @@ func (s *Service) Register(
 		Username:     req.Username,
 		Email:        req.Email,
 		PasswordHash: passwordHash,
+		ReferralCode: req.ReferralCode,
 	})
 
 	if err != nil {
@@ -98,6 +99,7 @@ func (s *Service) RegisterWithVerification(
 			Username:     req.Username,
 			Email:        req.Email,
 			PasswordHash: passwordHash,
+			ReferralCode: req.ReferralCode,
 		},
 		tokenHash,
 		expiresAt,

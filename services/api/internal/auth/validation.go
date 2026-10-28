@@ -17,9 +17,10 @@ var (
 var usernamePattern = regexp.MustCompile(`^[a-zA-Z0-9_]{3,30}$`)
 
 type RegisterRequest struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Username     string `json:"username"`
+	Email        string `json:"email"`
+	Password     string `json:"password"`
+	ReferralCode string `json:"referral_code,omitempty"`
 }
 
 func ValidateRegister(req *RegisterRequest) error {

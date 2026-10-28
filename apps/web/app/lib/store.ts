@@ -663,9 +663,30 @@ export const ChipStore = {
     return users.find((u) => u.email.toLowerCase() === email.toLowerCase());
   },
 
-  getUserByReferralCode(code: string): StoredUser | undefined {
+  getUserByReferralCode(code?: string): StoredUser | undefined {
+    if (!code) return undefined;
+    const clean = code.trim().toUpperCase();
     const users = this.getUsers();
-    return users.find((u) => u.referralCode.toUpperCase() === code.toUpperCase());
+    return users.find((u) => 
+      (u.referralCode && u.referralCode.trim().toUpperCase() === clean) ||
+      (u.username && u.username.trim().toUpperCase() === clean)
+    );
+  },
+
+  saveUsers(users: StoredUser[]): void {
+    safeSet(STORAGE_KEYS.USERS, users);
+  },
+
+  upsertUser(user: StoredUser): void {
+    const users = this.getUsers();
+    const idx = users.findIndex((u) => u.id === user.id || u.email.toLowerCase() === user.email.toLowerCase());
+    if (idx !== -1) {
+      users[idx] = { ...users[idx], ...user };
+    } else {
+      users.unshift(user);
+    }
+    safeSet(STORAGE_KEYS.USERS, users);
+    this.syncSessionIfActive(user);
   },
 
   // 2. Register user
@@ -681,6 +702,7 @@ export const ChipStore = {
 
     const codeSuffix = Math.floor(1000 + Math.random() * 9000);
     const newCode = `CHIP-${username.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4) || 'USER'}-${codeSuffix}`;
+    const cleanRef = referredByCode?.trim() || undefined;
 
     const newUser: StoredUser = {
       id: `usr-${Date.now()}`,
@@ -692,7 +714,7 @@ export const ChipStore = {
       created_at: new Date().toISOString(),
       tier: 'CHIP MEMBER',
       referralCode: newCode,
-      referredBy: referredByCode?.trim() || undefined,
+      referredBy: cleanRef,
       chipsBalance: 5000, // Welcome gift +5,000 CHIP
       usdtBalance: 0.001,
       streakDays: 1,
@@ -703,21 +725,25 @@ export const ChipStore = {
     users.unshift(newUser);
     safeSet(STORAGE_KEYS.USERS, users);
 
-    if (referredByCode) {
-      const referrer = this.getUserByReferralCode(referredByCode);
-      if (referrer) {
-        this.addReferralLink({
-          id: `ref-${Date.now()}`,
-          referrerCode: referrer.referralCode,
-          referredUserId: newUser.id,
-          referredEmail: newUser.email,
-          registeredAt: newUser.created_at,
-          isEmailVerified: true,
-          refereeChipsEarned: 5000,
-          commissionPaidToReferrer: Math.round(5000 * (TIER_CONFIGS[referrer.tier]?.bonusRate || 0)),
-        });
+    if (cleanRef) {
+      const referrer = this.getUserByReferralCode(cleanRef);
+      const effectiveReferrerCode = referrer ? referrer.referralCode : cleanRef.toUpperCase();
 
-        this.addChips(referrer.id, 10000, 'Hoa hồng giới thiệu thành viên mới');
+      this.addReferralLink({
+        id: `ref-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        referrerCode: effectiveReferrerCode,
+        referredUserId: newUser.id,
+        referredEmail: newUser.email,
+        registeredAt: newUser.created_at,
+        isEmailVerified: true,
+        refereeChipsEarned: 5000,
+        commissionPaidToReferrer: referrer
+          ? Math.round(5000 * (TIER_CONFIGS[referrer.tier]?.bonusRate || 0.05))
+          : 250,
+      });
+
+      if (referrer) {
+        this.addChips(referrer.id, 10000, `Hoa hồng giới thiệu thành viên mới: ${newUser.username}`);
       }
     }
 
@@ -778,6 +804,45 @@ export const ChipStore = {
 
     this.syncSessionIfActive(u);
     return { user: u, promoted };
+  },
+
+  // 3b. Record Daily Check-in (update lastClaimDate & streakDays)
+  recordDailyCheckin(userId: string): StoredUser {
+    const users = this.getUsers();
+    const idx = users.findIndex((u) => u.id === userId);
+    if (idx === -1) throw new Error('User not found');
+
+    const u = users[idx];
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+    // Check if last claim was yesterday to maintain streak
+    if (u.lastClaimDate) {
+      const lastDate = new Date(u.lastClaimDate);
+      const yesterday = new Date(now);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+
+      if (u.lastClaimDate === yesterdayStr) {
+        // Consecutive day — increment streak (max 7, then reset to 1)
+        u.streakDays = u.streakDays >= 7 ? 1 : u.streakDays + 1;
+      } else if (u.lastClaimDate === todayStr) {
+        // Already claimed today — no change
+        return u;
+      } else {
+        // Streak broken — reset to 1
+        u.streakDays = 1;
+      }
+    } else {
+      // First ever check-in
+      u.streakDays = 1;
+    }
+
+    u.lastClaimDate = todayStr;
+    users[idx] = u;
+    safeSet(STORAGE_KEYS.USERS, users);
+    this.syncSessionIfActive(u);
+    return u;
   },
 
   // 4. Update Profile
@@ -1035,9 +1100,11 @@ export const ChipStore = {
     return safeGet<StoredReferralLink[]>(STORAGE_KEYS.REFERRALS, SEED_REFERRAL_LINKS);
   },
 
-  getReferralsByReferrer(referrerCode: string): StoredReferralLink[] {
+  getReferralsByReferrer(referrerCode?: string): StoredReferralLink[] {
+    if (!referrerCode) return [];
+    const clean = referrerCode.trim().toUpperCase();
     const list = this.getReferrals();
-    return list.filter((r) => r.referrerCode.toUpperCase() === referrerCode.toUpperCase());
+    return list.filter((r) => r.referrerCode && r.referrerCode.trim().toUpperCase() === clean);
   },
 
   addReferralLink(link: StoredReferralLink): void {

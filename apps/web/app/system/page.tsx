@@ -4,6 +4,7 @@ import { useState, useEffect, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '../lib/api';
+import { ChipStore } from '../lib/store';
 
 interface AccountItem {
   id: string;
@@ -79,9 +80,7 @@ export default function SystemDashboardPage() {
     } finally {
       // Merge with shared store so newly registered members are immediately visible
       try {
-        const storedUsers = typeof window !== 'undefined'
-          ? JSON.parse(localStorage.getItem('chipcoin_synced_users_v2') || '[]')
-          : [];
+        const storedUsers = ChipStore.getUsers();
 
         const mergedMap = new Map<string, AccountItem>();
 
@@ -155,10 +154,7 @@ export default function SystemDashboardPage() {
 
       // Synchronize with Central Store
       try {
-        const storedUsers = typeof window !== 'undefined'
-          ? JSON.parse(localStorage.getItem('chipcoin_synced_users_v2') || '[]')
-          : [];
-        storedUsers.unshift({
+        ChipStore.upsertUser({
           id: `usr-${Date.now()}`,
           username: newUsername.trim() || newEmail.split('@')[0],
           email: newEmail.trim().toLowerCase(),
@@ -169,10 +165,9 @@ export default function SystemDashboardPage() {
           tier: newRole === 'ADMIN' ? 'CHIP SPECIAL' : newRole === 'ASSISTANT' ? 'CHIP DIAMOND' : 'CHIP PLATINUM',
           referralCode: `CHIP-${newRole.slice(0, 4)}-${Math.floor(1000 + Math.random() * 9000)}`,
           chipsBalance: 1000000,
+          usdtBalance: 0,
           streakDays: 1,
         });
-        localStorage.setItem('chipcoin_synced_users_v2', JSON.stringify(storedUsers));
-        window.dispatchEvent(new Event('chipcoin_store_updated'));
       } catch (e) {}
 
       setCreateSuccess(`Tạo thành công tài khoản ${newEmail} với quyền ${roleToTitle(newRole)}.`);

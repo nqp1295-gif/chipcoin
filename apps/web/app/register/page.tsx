@@ -48,6 +48,7 @@ function RegisterForm() {
           username: username.trim(),
           email: email.trim().toLowerCase(),
           password,
+          referral_code: referralCode.trim() || undefined,
         }),
       });
 

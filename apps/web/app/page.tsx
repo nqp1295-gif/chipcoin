@@ -38,15 +38,30 @@ export default function UserOverviewPage() {
   const currentTier = currentUser?.tier ?? 'CHIP MEMBER';
   const tierMeta = TIER_CONFIGS[currentTier];
 
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const isClaimedToday = currentUser?.lastClaimDate === todayStr;
+
   const handleQuickCheckin = () => {
     if (!currentUser) {
       setFeedback('Vui lòng đăng nhập tài khoản để nhận điểm danh!');
       setTimeout(() => setFeedback(null), 3500);
       return;
     }
+
+    // Check if already claimed today
+    if (currentUser.lastClaimDate === todayStr) {
+      setFeedback('Bạn đã điểm danh hôm nay rồi! Hãy quay lại vào ngày mai.');
+      setTimeout(() => setFeedback(null), 3500);
+      return;
+    }
+
     const bonus = 250;
     const { user, promoted } = ChipStore.addChips(currentUser.id, bonus, 'Điểm danh nhanh tại trang tổng quan');
-    setCurrentUser(user);
+    ChipStore.recordDailyCheckin(currentUser.id);
+    // Re-fetch user to get updated streak
+    const refreshed = ChipStore.getUserById(currentUser.id);
+    setCurrentUser(refreshed || user);
 
     if (promoted) {
       setFeedback(`🎉 Chúc mừng! Bạn đã được thăng hạng lên [${user.tier}]!`);
@@ -135,16 +150,17 @@ export default function UserOverviewPage() {
             <button
               onClick={handleQuickCheckin}
               className="nav-btn"
+              disabled={isClaimedToday}
               style={{
                 fontSize: '0.95rem',
                 padding: '10px 24px',
-                background: 'rgba(212, 175, 55, 0.15)',
-                color: '#f5d77f',
-                border: '1px solid var(--border-bronze)',
-                cursor: 'pointer',
+                background: isClaimedToday ? 'rgba(52, 211, 153, 0.2)' : 'rgba(212, 175, 55, 0.15)',
+                color: isClaimedToday ? '#34d399' : '#f5d77f',
+                border: isClaimedToday ? '1px solid rgba(52, 211, 153, 0.4)' : '1px solid var(--border-bronze)',
+                cursor: isClaimedToday ? 'default' : 'pointer',
               }}
             >
-              {t('overview_btn_checkin')}
+              {isClaimedToday ? '✓ Đã điểm danh hôm nay' : t('overview_btn_checkin')}
             </button>
           </div>
         </div>

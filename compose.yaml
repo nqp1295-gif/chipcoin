@@ -1,5 +1,8 @@
+name: chip
+
 services:
   postgres:
+    container_name: chip-postgres
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-daocoin}
@@ -15,6 +18,7 @@ services:
       interval: 5s
       retries: 10
   api:
+    container_name: chip-api
     build:
       context: .
       dockerfile: services/api/Dockerfile
@@ -45,6 +49,7 @@ services:
       postgres:
         condition: service_healthy
   web:
+    container_name: chip
     build:
       context: ./apps/web
     environment:

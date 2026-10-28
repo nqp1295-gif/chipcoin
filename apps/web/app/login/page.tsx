@@ -84,6 +84,7 @@ export default function LoginPage() {
         matchedUser.email_verified_at = matchedUser.email_verified_at || new Date().toISOString();
       }
 
+      ChipStore.upsertUser(matchedUser);
       ChipStore.setMemberSession(matchedUser);
       setLoggedInUser(matchedUser);
 

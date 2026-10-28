@@ -25,6 +25,7 @@ type RegisterInput struct {
 	Username     string
 	Email        string
 	PasswordHash string
+	ReferralCode string
 }
 
 type User struct {
@@ -56,14 +57,16 @@ func (r *Repository) Register(
 			username,
 			email,
 			password_hash,
-			status
+			status,
+			referred_by_code
 		)
-		VALUES ($1, $2, $3, 'PENDING')
+		VALUES ($1, $2, $3, 'PENDING', NULLIF($4, ''))
 		RETURNING id, username, email, status
 		`,
 		input.Username,
 		input.Email,
 		input.PasswordHash,
+		input.ReferralCode,
 	).Scan(
 		&user.ID,
 		&user.Username,
@@ -168,14 +171,16 @@ func (r *Repository) RegisterWithVerification(
 			username,
 			email,
 			password_hash,
-			status
+			status,
+			referred_by_code
 		)
-		VALUES ($1, $2, $3, 'PENDING')
+		VALUES ($1, $2, $3, 'PENDING', NULLIF($4, ''))
 		RETURNING id, username, email, status
 		`,
 		input.Username,
 		input.Email,
 		input.PasswordHash,
+		input.ReferralCode,
 	).Scan(
 		&user.ID,
 		&user.Username,
