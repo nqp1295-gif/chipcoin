@@ -362,12 +362,12 @@ export const SYSTEM_MENU_GROUPS: MenuGroup[] = [
       },
       {
         nameKey: 'nav_sys_treasury',
-        defaultName: 'Kho Quỹ Master Treasury',
+        defaultName: 'Ví Quản Trị Hệ Thống',
         href: '/system/wallet',
-        badge: 'Treasury',
+        badge: 'TON Fee',
         badgeType: 'gold',
         descKey: 'nav_sys_treasury_desc',
-        defaultDesc: 'Kho quỹ tổng thể 500M CHIP & điều chuyển pool',
+        defaultDesc: 'Ví TON TBzt...4KPhh & Quỹ thu phí 1% USDT',
         icon: ({ active }) => (
           <svg
             width="20"

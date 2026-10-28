@@ -52,11 +52,14 @@ export default function ConvertPage() {
 
   const numSource = parseFloat(sourceInput) || 0;
 
-  // Real-time calculation based on 1 USDT = 5,000,000 CHIP
+  // Real-time calculation based on 1 USDT = 5,000,000 CHIP with 1% system fee
+  const grossUsdt = direction === 'CHIP_TO_USDT' ? (numSource / CHIP_PER_USDT) : numSource;
+  const fee1PercentUsdt = Number((grossUsdt * 0.01).toFixed(6));
+  const netUsdt = Number((grossUsdt - fee1PercentUsdt).toFixed(6));
   const calculatedTarget =
     direction === 'CHIP_TO_USDT'
-      ? chipToUsdt(numSource)
-      : usdtToChip(numSource);
+      ? netUsdt
+      : Math.round(netUsdt * CHIP_PER_USDT);
 
   const availableSourceBalance =
     direction === 'CHIP_TO_USDT'
@@ -361,20 +364,36 @@ export default function ConvertPage() {
               </div>
             </div>
 
-            {/* Rate Details */}
+            {/* Rate & 1% USDT Transaction Fee Details */}
             <div
               style={{
                 display: 'flex',
-                justifyContent: 'space-between',
-                padding: '10px 14px',
+                flexDirection: 'column',
+                gap: '8px',
+                padding: '12px 14px',
                 background: 'rgba(212, 175, 55, 0.05)',
                 border: '1px solid var(--border-bronze)',
                 borderRadius: '8px',
                 fontSize: '0.82rem',
               }}
             >
-              <span style={{ color: 'var(--text-muted)' }}>Tỷ giá áp dụng:</span>
-              <span style={{ fontWeight: 700, color: '#f5d77f' }}>1 USDT = 5,000,000 CHIP (Phí: 0%)</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Tỷ giá quy ước:</span>
+                <span style={{ fontWeight: 700, color: '#f5d77f' }}>1 USDT = 5,000,000 CHIP</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Phí giao dịch hệ thống (1% USDT):</span>
+                <span style={{ fontWeight: 700, color: '#38bdf8' }}>{fee1PercentUsdt.toFixed(4)} USDT</span>
+              </div>
+              <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontStyle: 'italic', paddingLeft: '8px', borderLeft: '2px solid var(--accent-bronze)' }}>
+                ↳ Phí 1% được chuyển về Ví Quản Trị Hệ Thống: <span style={{ fontFamily: 'var(--font-mono)', color: '#38bdf8' }}>TBzt...4KPhh</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border-medium)', paddingTop: '6px' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Thực nhận sau phí:</span>
+                <span style={{ fontWeight: 800, color: '#34d399', fontSize: '0.95rem' }}>
+                  {calculatedTarget.toLocaleString()} {direction === 'CHIP_TO_USDT' ? 'USDT' : 'CHIP'}
+                </span>
+              </div>
             </div>
 
             <button
@@ -594,8 +613,8 @@ export default function ConvertPage() {
               thành{' '}
               <b style={{ color: '#34d399' }}>
                 {calculatedTarget.toLocaleString()} {direction === 'CHIP_TO_USDT' ? 'USDT' : 'CHIP'}
-              </b>
-              . Vui lòng nhập mã bảo mật 6 số (TOTP/Email OTP):
+              </b>{' '}
+              (đã khấu trừ 1% phí hệ thống: <b>{fee1PercentUsdt.toFixed(4)} USDT</b> chuyển về Ví Quản Trị Hệ Thống). Vui lòng nhập mã bảo mật 6 số:
             </p>
 
             <div style={{ marginBottom: '16px' }}>

@@ -37,7 +37,7 @@ const TASKS: ActivityTask[] = [
     rewardUnits: 5000,
     rewardText: '+5,000 CHIP',
     category: 'ONE_TIME',
-    description: 'Xác thực địa chỉ email thành công qua đường dẫn kích hoạt bảo mật. Điểm thưởng sẽ được cộng ngay vào ví điểm thưởng của bạn.',
+    description: 'Xác thực địa chỉ email thành công qua đường dẫn kích hoạt bảo mật. Điểm thưởng sẽ tự động được cộng vào ví điểm thưởng của bạn.',
     actionUrl: '/verify-email',
     actionText: 'Xác minh email',
     canClaimDirectly: true,
@@ -49,7 +49,7 @@ const TASKS: ActivityTask[] = [
     rewardUnits: 10000,
     rewardText: '+10,000 CHIP / Bạn + Hoa Hồng Nhánh',
     category: 'REFERRAL',
-    description: 'Chia sẻ mã giới thiệu hoặc liên kết cá nhân. Nhận hoa hồng thụ động (3% - 20%) từ mọi điểm thưởng người được giới thiệu kiếm được.',
+    description: 'Chia sẻ mã giới thiệu hoặc liên kết cá nhân. Yêu cầu có ít nhất 1 bạn bè đăng ký thành công qua mã giới thiệu để mở khóa phần thưởng.',
     actionUrl: '/referrals',
     actionText: 'Mở trang giới thiệu',
     canClaimDirectly: true,
@@ -59,11 +59,11 @@ const TASKS: ActivityTask[] = [
     icon: '🚀',
     title: 'Tham Gia Kênh Thông Báo Cộng Đồng',
     rewardUnits: 15000,
-    rewardText: '+15,000 CHIP',
+    rewardText: 'COMING SOON',
     category: 'COMMUNITY',
-    description: 'Theo dõi tin tức phát triển công nghệ, các đợt phát thưởng token nội bộ và cập nhật quyền lợi hàng tuần cùng cộng đồng.',
-    actionText: 'Tham gia kênh cộng đồng',
-    canClaimDirectly: true,
+    description: 'Kênh cộng đồng chính thức đang được chuẩn bị. Tính năng nhận thưởng sẽ tự động mở khi kênh thông báo chính thức đi vào hoạt động.',
+    actionText: 'Kênh cộng đồng (Sắp mở)',
+    canClaimDirectly: false,
   },
   {
     id: 'task_security_profile',
@@ -72,7 +72,7 @@ const TASKS: ActivityTask[] = [
     rewardUnits: 20000,
     rewardText: '+20,000 CHIP',
     category: 'ONE_TIME',
-    description: 'Bảo vệ tài khoản tích lũy bằng xác thực hai lớp (2FA) và ghi nhận thông tin chủ sở hữu ví điểm.',
+    description: 'Bảo vệ tài khoản tích lũy bằng xác thực hai lớp (2FA) và ghi nhận đầy đủ thông tin hồ sơ (Họ tên, SĐT, Bảo mật ví).',
     actionUrl: '/profile',
     actionText: 'Mở hồ sơ cá nhân',
     canClaimDirectly: true,
@@ -84,9 +84,9 @@ const TASKS: ActivityTask[] = [
     rewardUnits: 5000,
     rewardText: '+5,000 CHIP',
     category: 'DAILY',
-    description: 'Kiểm tra tốc độ hạch toán giao dịch tức thì, bảo đảm cân bằng và an toàn số dư ví điểm.',
-    actionUrl: '/wallet',
-    actionText: 'Mở ví kiểm tra giao dịch',
+    description: 'Kiểm tra tốc độ hạch toán giao dịch tức thì. Yêu cầu hoàn thành ít nhất 1 lần nạp tiền thành công vào ví USDT để nhận thưởng.',
+    actionUrl: '/wallet/deposit',
+    actionText: 'Mở ví nạp tiền',
     canClaimDirectly: true,
   },
 ];
@@ -110,7 +110,6 @@ function loadClaimedTasks(userId: string): PersistedTasksData {
     if (!raw) return { daily: {}, oneTime: {} };
     const parsed = JSON.parse(raw);
     if (!parsed.daily && !parsed.oneTime) {
-      // Migrate legacy flat structure { [taskId]: true }
       return { daily: {}, oneTime: parsed };
     }
     return {
@@ -130,6 +129,22 @@ function saveClaimedTasks(userId: string, data: PersistedTasksData): void {
   } catch {}
 }
 
+// Helper: check if profile is complete (Họ tên, SĐT, Bảo mật)
+function checkProfileCompleted(user: StoredUser | null): boolean {
+  if (!user) return false;
+  const hasName = Boolean(user.fullName && user.fullName.trim().length >= 2);
+  const hasPhone = Boolean(user.phoneNumber && user.phoneNumber.trim().length >= 8);
+  const hasSecurity = Boolean(user.twoFactorEnabled || user.tonWalletAddress || (user.avatarUrl && user.avatarUrl.length > 0));
+  return hasName && hasPhone && hasSecurity;
+}
+
+// Helper: check if user has at least 1 settled deposit
+function checkHasCompletedDeposit(user: StoredUser | null): boolean {
+  if (!user) return false;
+  const deposits = ChipStore.getDeposits();
+  return deposits.some((d) => d.userId === user.id && d.status === 'SETTLED');
+}
+
 // Helper: check if a task is already claimed
 function isTaskClaimed(
   task: ActivityTask,
@@ -144,6 +159,12 @@ function isTaskClaimed(
       return user.lastClaimDate === today || tasksData.daily[task.id] === today;
     }
     return tasksData.daily[task.id] === today;
+  }
+
+  // ONE_TIME email verification: if email is already verified / active, treat as claimed
+  if (task.id === 'task_email_verify') {
+    if (user.emailVerifiedRewardClaimed || tasksData.oneTime[task.id]) return true;
+    if (user.status === 'ACTIVE' && user.email_verified_at) return true;
   }
 
   // ONE_TIME, COMMUNITY, REFERRAL
@@ -191,11 +212,26 @@ export default function ActivitiesPage() {
       return;
     }
 
+    // 1. Task: Community Telegram -> Coming Soon
+    if (task.id === 'task_community_telegram') {
+      setNotification({
+        message: 'Kênh cộng đồng chính thức đang được chuẩn bị (Coming Soon). Vui lòng đón chờ!',
+        type: 'info',
+      });
+      setTimeout(() => setNotification(null), 3500);
+      return;
+    }
+
     const currentTasksData = loadClaimedTasks(currentUser.id);
     if (isTaskClaimed(task, currentUser, currentTasksData)) {
       if (task.category === 'DAILY') {
         setNotification({
           message: 'Bạn đã hoàn thành nhiệm vụ này hôm nay rồi! Hãy quay lại vào ngày mai.',
+          type: 'info',
+        });
+      } else if (task.id === 'task_email_verify') {
+        setNotification({
+          message: 'Tài khoản của bạn đã được nhận thưởng xác minh email thành công rồi!',
           type: 'info',
         });
       } else {
@@ -206,6 +242,43 @@ export default function ActivitiesPage() {
       }
       setTimeout(() => setNotification(null), 3500);
       return;
+    }
+
+    // 2. Task: Referral Bonus -> Requires at least 1 referral
+    if (task.id === 'task_referral_bonus') {
+      const referrals = ChipStore.getReferralsByReferrer(currentUser.referralCode);
+      if (referrals.length === 0) {
+        setNotification({
+          message: `Bạn chưa có bạn bè nào đăng ký qua mã giới thiệu (${currentUser.referralCode}). Hãy chia sẻ mã mời của bạn để mở khóa thưởng!`,
+          type: 'info',
+        });
+        setTimeout(() => setNotification(null), 4500);
+        return;
+      }
+    }
+
+    // 3. Task: Security & Profile -> Requires completed profile
+    if (task.id === 'task_security_profile') {
+      if (!checkProfileCompleted(currentUser)) {
+        setNotification({
+          message: 'Hồ sơ chưa hoàn thiện! Bạn cần vào trang Hồ Sơ Cá Nhân điền Họ Tên, Số Điện Thoại và Thiết Lập Bảo Mật trước khi nhận thưởng.',
+          type: 'info',
+        });
+        setTimeout(() => setNotification(null), 5000);
+        return;
+      }
+    }
+
+    // 4. Task: Ledger Test -> Requires at least 1 settled deposit
+    if (task.id === 'task_ledger_test') {
+      if (!checkHasCompletedDeposit(currentUser)) {
+        setNotification({
+          message: 'Nhiệm vụ yêu cầu bạn phải hoàn thành ít nhất 1 lần nạp tiền thành công vào ví USDT trước khi nhận thưởng!',
+          type: 'info',
+        });
+        setTimeout(() => setNotification(null), 5000);
+        return;
+      }
     }
 
     try {
@@ -404,6 +477,14 @@ export default function ActivitiesPage() {
         >
           {TASKS.map((task) => {
             const isClaimed = isTaskClaimed(task, currentUser, tasksData);
+            const isCommunity = task.id === 'task_community_telegram';
+            const isRefTask = task.id === 'task_referral_bonus';
+            const hasRefs = currentUser ? ChipStore.getReferralsByReferrer(currentUser.referralCode).length >= 1 : false;
+            const isProfTask = task.id === 'task_security_profile';
+            const isProfDone = checkProfileCompleted(currentUser);
+            const isDepTask = task.id === 'task_ledger_test';
+            const hasDep = checkHasCompletedDeposit(currentUser);
+
             return (
               <div
                 key={task.id}
@@ -420,9 +501,11 @@ export default function ActivitiesPage() {
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                     <span style={{ fontSize: '2rem' }}>{task.icon}</span>
-                    <span className={`badge ${isClaimed ? 'badge-pulse' : 'badge-gold'}`}>
+                    <span className={`badge ${isClaimed ? 'badge-pulse' : isCommunity ? 'badge-neutral' : 'badge-gold'}`}>
                       {isClaimed
                         ? (task.category === 'DAILY' ? '✓ ĐÃ NHẬN HÔM NAY' : t('act_claimed'))
+                        : isCommunity
+                        ? '⏳ SẮP RA MẮT'
                         : task.rewardText}
                     </span>
                   </div>
@@ -459,23 +542,68 @@ export default function ActivitiesPage() {
                     >
                       {task.category === 'DAILY' ? '✓ Đã nhận hôm nay' : '✓ Đã hoàn thành'}
                     </span>
+                  ) : isCommunity ? (
+                    <button
+                      disabled
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid var(--border-medium)',
+                        padding: '7px 16px',
+                        borderRadius: '6px',
+                        color: 'var(--text-muted)',
+                        fontWeight: 600,
+                        cursor: 'not-allowed',
+                        fontSize: '0.88rem',
+                      }}
+                    >
+                      ⏳ Sắp ra mắt (Coming Soon)
+                    </button>
                   ) : (
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                       <button
                         onClick={() => handleClaim(task)}
                         style={{
-                          background: 'var(--gradient-bronze)',
-                          border: 'none',
+                          background:
+                            isRefTask && !hasRefs
+                              ? 'rgba(212, 175, 55, 0.15)'
+                              : isProfTask && !isProfDone
+                              ? 'rgba(239, 68, 68, 0.15)'
+                              : isDepTask && !hasDep
+                              ? 'rgba(56, 189, 248, 0.15)'
+                              : 'var(--gradient-bronze)',
+                          color:
+                            isRefTask && !hasRefs
+                              ? '#f5d77f'
+                              : isProfTask && !isProfDone
+                              ? '#fca5a5'
+                              : isDepTask && !hasDep
+                              ? '#7dd3fc'
+                              : '#0b0c0e',
+                          border:
+                            isRefTask && !hasRefs
+                              ? '1px solid rgba(212, 175, 55, 0.3)'
+                              : isProfTask && !isProfDone
+                              ? '1px solid rgba(239, 68, 68, 0.3)'
+                              : isDepTask && !hasDep
+                              ? '1px solid rgba(56, 189, 248, 0.3)'
+                              : 'none',
                           padding: '7px 16px',
                           borderRadius: '6px',
-                          color: '#0b0c0e',
                           fontWeight: 700,
                           cursor: 'pointer',
                           fontSize: '0.88rem',
                           transition: 'all 0.2s ease',
                         }}
                       >
-                        {task.id === 'task_daily_streak' ? t('act_streak_btn') : t('act_claim_btn')}
+                        {task.id === 'task_daily_streak'
+                          ? t('act_streak_btn')
+                          : isRefTask && !hasRefs
+                          ? 'Chưa đủ điều kiện (0/1 Bạn)'
+                          : isProfTask && !isProfDone
+                          ? 'Chưa đủ hồ sơ'
+                          : isDepTask && !hasDep
+                          ? 'Chưa nạp tiền'
+                          : t('act_claim_btn')}
                       </button>
 
                       {task.actionUrl && (

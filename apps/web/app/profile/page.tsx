@@ -13,6 +13,9 @@ export default function ProfilePage() {
 
   // Editable Form States
   const [username, setUsername] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -28,6 +31,9 @@ export default function ProfilePage() {
     setCurrentUser(mem);
     if (mem) {
       setUsername(mem.username || '');
+      setFullName(mem.fullName || '');
+      setPhoneNumber(mem.phoneNumber || '');
+      setTwoFactorEnabled(Boolean(mem.twoFactorEnabled));
       setAvatarUrl(mem.avatarUrl || '');
     }
   };
@@ -101,6 +107,9 @@ export default function ProfilePage() {
       try {
         const updated = ChipStore.updateProfile(currentUser.id, {
           username: username.trim(),
+          fullName: fullName.trim(),
+          phoneNumber: phoneNumber.trim(),
+          twoFactorEnabled: twoFactorEnabled,
           avatarUrl: avatarUrl,
         });
 
@@ -109,7 +118,7 @@ export default function ProfilePage() {
         setNewPassword('');
         setConfirmPassword('');
         setSaving(false);
-        setFeedback({ message: t('profile_success_msg'), type: 'success' });
+        setFeedback({ message: 'Cập nhật thông tin hồ sơ và bảo mật thành công!', type: 'success' });
         setTimeout(() => setFeedback(null), 4000);
       } catch (err: any) {
         setSaving(false);
@@ -255,12 +264,98 @@ export default function ProfilePage() {
 
           {/* Editable Information Form */}
           <section className="glass-card" style={{ padding: '1.8rem' }}>
-            <h2 style={{ fontSize: '1.25rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>✏️</span> {t('profile_editable_title')}
-            </h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', flexWrap: 'wrap', gap: '10px' }}>
+              <h2 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                <span>✏️</span> {t('profile_editable_title')}
+              </h2>
+              {fullName.trim().length >= 2 && phoneNumber.trim().length >= 8 ? (
+                <span className="badge badge-success" style={{ fontSize: '0.78rem', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', border: '1px solid #10b981' }}>
+                  ✓ Đã Đủ Điều Kiện Nhận +20k CHIP
+                </span>
+              ) : (
+                <span className="badge badge-gold" style={{ fontSize: '0.78rem' }}>
+                  ⚠️ Cần điền Họ tên & SĐT để hoàn tất
+                </span>
+              )}
+            </div>
+
+            {/* Profile completeness meter */}
+            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 14px', borderRadius: '8px', border: '1px solid var(--border-subtle)', marginBottom: '1.2rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '6px' }}>
+                <span style={{ color: 'var(--text-secondary)' }}>Tiến độ hoàn thiện hồ sơ & bảo mật</span>
+                <span style={{ fontWeight: 700, color: (fullName.trim().length >= 2 && phoneNumber.trim().length >= 8) ? '#34d399' : 'var(--accent-bronze-light)' }}>
+                  {((fullName.trim().length >= 2 ? 1 : 0) + (phoneNumber.trim().length >= 8 ? 1 : 0) + (currentUser?.email ? 1 : 0) + (twoFactorEnabled ? 1 : 0)) * 25}%
+                </span>
+              </div>
+              <div style={{ height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
+                <div
+                  style={{
+                    height: '100%',
+                    width: `${((fullName.trim().length >= 2 ? 1 : 0) + (phoneNumber.trim().length >= 8 ? 1 : 0) + (currentUser?.email ? 1 : 0) + (twoFactorEnabled ? 1 : 0)) * 25}%`,
+                    background: (fullName.trim().length >= 2 && phoneNumber.trim().length >= 8) ? 'linear-gradient(90deg, #10b981, #34d399)' : 'linear-gradient(90deg, #d4af37, #f5d77f)',
+                    transition: 'width 0.3s ease',
+                  }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                <span style={{ color: fullName.trim().length >= 2 ? '#34d399' : 'inherit' }}>
+                  {fullName.trim().length >= 2 ? '✓' : '○'} Họ tên
+                </span>
+                <span>•</span>
+                <span style={{ color: phoneNumber.trim().length >= 8 ? '#34d399' : 'inherit' }}>
+                  {phoneNumber.trim().length >= 8 ? '✓' : '○'} Số điện thoại
+                </span>
+                <span>•</span>
+                <span style={{ color: currentUser?.email ? '#34d399' : 'inherit' }}>
+                  {currentUser?.email ? '✓' : '○'} Email
+                </span>
+                <span>•</span>
+                <span style={{ color: twoFactorEnabled ? '#34d399' : 'inherit' }}>
+                  {twoFactorEnabled ? '✓' : '○'} Bảo mật 2FA
+                </span>
+              </div>
+            </div>
 
             <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-              {/* Display Name */}
+              {/* Full Name */}
+              <div className="form-group" style={{ margin: 0 }}>
+                <label className="form-label" htmlFor="fullName">
+                  Họ và Tên Đầy Đủ <span style={{ color: '#f59e0b' }}>*</span>
+                </label>
+                <input
+                  id="fullName"
+                  type="text"
+                  className="form-input"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="vd: Nguyễn Quốc Phúc"
+                  required
+                />
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  Bắt buộc để hoàn tất hồ sơ và nhận thưởng +20,000 CHIP.
+                </span>
+              </div>
+
+              {/* Phone Number */}
+              <div className="form-group" style={{ margin: 0 }}>
+                <label className="form-label" htmlFor="phoneNumber">
+                  Số Điện Thoại Bảo Mật <span style={{ color: '#f59e0b' }}>*</span>
+                </label>
+                <input
+                  id="phoneNumber"
+                  type="tel"
+                  className="form-input"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="vd: 0987654321 hoặc +84987654321"
+                  required
+                />
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  Dùng để liên hệ xác minh giao dịch bảo mật và hỗ trợ tài khoản.
+                </span>
+              </div>
+
+              {/* Display Name / Nickname */}
               <div className="form-group" style={{ margin: 0 }}>
                 <label className="form-label" htmlFor="username">
                   {t('profile_username')}
@@ -274,6 +369,62 @@ export default function ProfilePage() {
                   placeholder="vd: satoshi_vn"
                   required
                 />
+              </div>
+
+              {/* 2FA Security Switch */}
+              <div
+                style={{
+                  background: 'rgba(212, 175, 55, 0.05)',
+                  border: '1px solid var(--border-bronze)',
+                  borderRadius: '8px',
+                  padding: '14px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: '12px',
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#f5d77f' }}>
+                    🛡️ Xác Thực Bảo Mật 2 Lớp (2FA)
+                  </div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                    Tăng cường bảo vệ tài khoản khi rút tiền và chuyển đổi số dư
+                  </div>
+                </div>
+                <label style={{ position: 'relative', display: 'inline-block', width: '48px', height: '26px', cursor: 'pointer', flexShrink: 0 }}>
+                  <input
+                    type="checkbox"
+                    checked={twoFactorEnabled}
+                    onChange={(e) => setTwoFactorEnabled(e.target.checked)}
+                    style={{ opacity: 0, width: 0, height: 0 }}
+                  />
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: twoFactorEnabled ? '#10b981' : 'rgba(255,255,255,0.2)',
+                      borderRadius: '26px',
+                      transition: '0.3s',
+                    }}
+                  >
+                    <span
+                      style={{
+                        position: 'absolute',
+                        height: '20px',
+                        width: '20px',
+                        left: twoFactorEnabled ? '24px' : '3px',
+                        bottom: '3px',
+                        background: '#ffffff',
+                        borderRadius: '50%',
+                        transition: '0.3s',
+                      }}
+                    />
+                  </span>
+                </label>
               </div>
 
               {/* Password Section */}

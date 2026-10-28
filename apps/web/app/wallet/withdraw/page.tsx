@@ -60,7 +60,9 @@ export default function WithdrawPage() {
 
   const numUsdt = parseFloat(amountUsdt) || 0;
   const gasFee = 0.10;
-  const netAmount = numUsdt > gasFee ? Number((numUsdt - gasFee).toFixed(4)) : 0;
+  const fee1Percent = Number((numUsdt * 0.01).toFixed(4));
+  const totalFee = Number((fee1Percent + gasFee).toFixed(4));
+  const netAmount = numUsdt > totalFee ? Number((numUsdt - totalFee).toFixed(4)) : 0;
 
   const defaultTier = IS_LOCAL_DEV ? 'CHIP GOLD' : 'CHIP MEMBER';
   const currentTierMeta = currentUser?.tier ? TIER_CONFIGS[currentUser.tier] : TIER_CONFIGS[defaultTier];
@@ -97,8 +99,8 @@ export default function WithdrawPage() {
       return;
     }
 
-    if (numUsdt <= gasFee) {
-      setFeedback({ message: `Số lượng rút phải lớn hơn phí mạng TON (${gasFee} USDT).`, type: 'error' });
+    if (numUsdt <= totalFee) {
+      setFeedback({ message: `Số lượng rút phải lớn hơn tổng phí giao dịch (${totalFee} USDT gồm 1% phí hệ thống + 0.1 USDT gas).`, type: 'error' });
       return;
     }
 
@@ -342,16 +344,23 @@ export default function WithdrawPage() {
                 fontSize: '0.82rem',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '6px',
+                gap: '8px',
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
-                <span>Phí mạng blockchain TON (Gas & Jetton):</span>
-                <span>{gasFee} USDT</span>
+                <span>Phí giao dịch hệ thống (1% khối lượng):</span>
+                <span style={{ color: '#f5d77f', fontWeight: 600 }}>{fee1Percent.toFixed(4)} USDT</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ffffff', fontWeight: 700, borderTop: '1px solid var(--border-medium)', paddingTop: '6px' }}>
+              <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontStyle: 'italic', paddingLeft: '8px', borderLeft: '2px solid var(--accent-bronze)' }}>
+                ↳ Phí 1% được chuyển về Ví Quản Trị: <span style={{ fontFamily: 'var(--font-mono)', color: '#38bdf8' }}>TBzt...4KPhh</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
+                <span>Phí mạng blockchain TON (Gas & Jetton):</span>
+                <span>{gasFee.toFixed(2)} USDT</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ffffff', fontWeight: 700, borderTop: '1px solid var(--border-medium)', paddingTop: '8px' }}>
                 <span>Thực nhận về ví TON:</span>
-                <span style={{ color: '#34d399', fontSize: '1rem' }}>{netAmount.toFixed(4)} USDT</span>
+                <span style={{ color: '#34d399', fontSize: '1.05rem' }}>{netAmount.toFixed(4)} USDT</span>
               </div>
             </div>
 

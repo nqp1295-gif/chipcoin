@@ -123,6 +123,9 @@ export interface StoredUser {
   tier: MemberTier;
   referralCode: string;
   referredBy?: string;
+  fullName?: string; // Họ và tên đầy đủ
+  phoneNumber?: string; // Số điện thoại liên hệ
+  emailVerifiedRewardClaimed?: boolean; // Đã nhận chip thưởng xác thực email chưa
   chipsBalance: number;
   usdtBalance: number; // Internal USDT balance (6 decimal precision)
   streakDays: number;
@@ -133,6 +136,30 @@ export interface StoredUser {
   telegramUserId?: string; // Connected Telegram ID e.g. "tg_982144912"
   telegramUsername?: string; // Telegram @username
   twoFactorEnabled?: boolean; // 2FA protection for withdrawals/conversions
+}
+
+// ============================================================================
+// SYSTEM ADMIN TREASURY & 1% TRANSACTION FEE ENGINE
+// Connected TON Wallet: TBztwgxtzSBPvFA56VM5Mpozh6Gj84KPhh
+// All member USDT transactions incur 1% fee transferred to this treasury
+// ============================================================================
+export const ADMIN_TON_WALLET = 'TBztwgxtzSBPvFA56VM5Mpozh6Gj84KPhh';
+export const USDT_TRANSACTION_FEE_RATE = 0.01; // 1%
+
+export interface AdminFeeRecord {
+  id: string;
+  timestamp: string;
+  userId: string;
+  userEmail: string;
+  txType: 'CONVERT_CHIP_TO_USDT' | 'CONVERT_USDT_TO_CHIP' | 'WITHDRAW_USDT' | 'DEPOSIT_USDT';
+  txTypeLabel: string;
+  volumeUsdt: number;
+  feeRate: number; // 0.01 (1%)
+  feeUsdt: number;
+  beneficiaryWallet: string; // "TBztwgxtzSBPvFA56VM5Mpozh6Gj84KPhh"
+  orderId: string;
+  txHash?: string;
+  status: 'RECORDED';
 }
 
 export interface StoredReferralLink {
@@ -599,6 +626,53 @@ const _RAW_SEED_ALLOCATIONS: ChipAllocationRecord[] = [
 ];
 const SEED_ALLOCATIONS: ChipAllocationRecord[] = IS_LOCAL_DEV ? _RAW_SEED_ALLOCATIONS : [];
 
+const _RAW_SEED_ADMIN_FEES: AdminFeeRecord[] = [
+  {
+    id: 'fee-seed-001',
+    timestamp: '2026-10-25 16:00:00',
+    userId: 'usr-mem-001',
+    userEmail: 'alex.investor@example.com',
+    txType: 'WITHDRAW_USDT',
+    txTypeLabel: 'Rút USDT về ví TON cá nhân',
+    volumeUsdt: 5.0,
+    feeRate: 0.01,
+    feeUsdt: 0.05,
+    beneficiaryWallet: ADMIN_TON_WALLET,
+    orderId: 'wdr-ord-001',
+    txHash: '0x94fb...31de',
+    status: 'RECORDED',
+  },
+  {
+    id: 'fee-seed-002',
+    timestamp: '2026-10-25 14:30:00',
+    userId: 'usr-mem-002',
+    userEmail: 'sophia.chain@example.com',
+    txType: 'CONVERT_CHIP_TO_USDT',
+    txTypeLabel: 'Quy đổi CHIP sang USDT',
+    volumeUsdt: 2.0,
+    feeRate: 0.01,
+    feeUsdt: 0.02,
+    beneficiaryWallet: ADMIN_TON_WALLET,
+    orderId: 'ord-conv-002',
+    status: 'RECORDED',
+  },
+  {
+    id: 'fee-seed-003',
+    timestamp: '2026-10-24 10:15:00',
+    userId: 'usr-mem-001',
+    userEmail: 'alex.investor@example.com',
+    txType: 'CONVERT_USDT_TO_CHIP',
+    txTypeLabel: 'Quy đổi USDT sang CHIP',
+    volumeUsdt: 10.0,
+    feeRate: 0.01,
+    feeUsdt: 0.10,
+    beneficiaryWallet: ADMIN_TON_WALLET,
+    orderId: 'ord-conv-001',
+    status: 'RECORDED',
+  },
+];
+const SEED_ADMIN_FEES: AdminFeeRecord[] = IS_LOCAL_DEV ? _RAW_SEED_ADMIN_FEES : [];
+
 const STORAGE_KEYS = {
   USERS: 'chipcoin_synced_users_v4',
   REFERRALS: 'chipcoin_synced_referrals_v4',
@@ -607,6 +681,7 @@ const STORAGE_KEYS = {
   CONVERSIONS: 'chipcoin_synced_conversions_v4',
   DEPOSITS: 'chipcoin_synced_deposits_v4',
   WITHDRAWALS: 'chipcoin_synced_withdrawals_v4',
+  ADMIN_FEES: 'chipcoin_admin_fees_v1',
   USER_SESSION: 'chipcoin_user_session',
   SYSTEM_SESSION: 'chipcoin_system_session',
 };
@@ -848,7 +923,13 @@ export const ChipStore = {
   // 4. Update Profile
   updateProfile(
     userId: string,
-    updates: { username?: string; avatarUrl?: string; twoFactorEnabled?: boolean }
+    updates: {
+      username?: string;
+      fullName?: string;
+      phoneNumber?: string;
+      avatarUrl?: string;
+      twoFactorEnabled?: boolean;
+    }
   ): StoredUser {
     const users = this.getUsers();
     const idx = users.findIndex((u) => u.id === userId);
@@ -857,6 +938,12 @@ export const ChipStore = {
     const u = users[idx];
     if (updates.username && updates.username.trim()) {
       u.username = updates.username.trim();
+    }
+    if (typeof updates.fullName === 'string') {
+      u.fullName = updates.fullName.trim();
+    }
+    if (typeof updates.phoneNumber === 'string') {
+      u.phoneNumber = updates.phoneNumber.trim();
     }
     if (typeof updates.avatarUrl === 'string') {
       u.avatarUrl = updates.avatarUrl;
@@ -911,7 +998,7 @@ export const ChipStore = {
     userId: string,
     fromAsset: 'CHIP' | 'USDT',
     sourceAmount: number
-  ): { user: StoredUser; order: ConversionOrder } {
+  ): { user: StoredUser; order: ConversionOrder; feeRecord: AdminFeeRecord } {
     if (sourceAmount <= 0) throw new Error('Số lượng chuyển đổi phải lớn hơn 0');
 
     const users = this.getUsers();
@@ -920,12 +1007,19 @@ export const ChipStore = {
 
     const u = users[idx];
     let targetAmount = 0;
+    let volumeUsdt = 0;
+    let feeUsdt = 0;
 
     if (fromAsset === 'CHIP') {
       if (u.chipsBalance < sourceAmount) {
         throw new Error('Số dư CHIP không đủ để quy đổi');
       }
-      targetAmount = Number((sourceAmount / CHIP_PER_USDT).toFixed(6));
+      const grossUsdt = Number((sourceAmount / CHIP_PER_USDT).toFixed(6));
+      volumeUsdt = grossUsdt;
+      // 1% transaction fee on USDT
+      feeUsdt = Number((grossUsdt * USDT_TRANSACTION_FEE_RATE).toFixed(6));
+      targetAmount = Number((grossUsdt - feeUsdt).toFixed(6));
+
       u.chipsBalance -= sourceAmount;
       u.usdtBalance = Number(((u.usdtBalance || 0) + targetAmount).toFixed(6));
     } else {
@@ -933,7 +1027,12 @@ export const ChipStore = {
       if ((u.usdtBalance || 0) < sourceAmount) {
         throw new Error('Số dư USDT không đủ để quy đổi sang CHIP');
       }
-      targetAmount = Math.round(sourceAmount * CHIP_PER_USDT);
+      volumeUsdt = sourceAmount;
+      // 1% transaction fee on USDT
+      feeUsdt = Number((sourceAmount * USDT_TRANSACTION_FEE_RATE).toFixed(6));
+      const netUsdt = Number((sourceAmount - feeUsdt).toFixed(6));
+      targetAmount = Math.round(netUsdt * CHIP_PER_USDT);
+
       u.usdtBalance = Number(((u.usdtBalance || 0) - sourceAmount).toFixed(6));
       u.chipsBalance += targetAmount;
 
@@ -943,18 +1042,36 @@ export const ChipStore = {
       u.tier = calculateTier(u.chipsBalance, verifiedCount);
     }
 
+    const orderId = `ord-conv-${Date.now()}`;
     const order: ConversionOrder = {
-      id: `ord-conv-${Date.now()}`,
+      id: orderId,
       userId: u.id,
       userEmail: u.email,
       fromAsset,
       toAsset: fromAsset === 'CHIP' ? 'USDT' : 'CHIP',
       sourceAmount,
       targetAmount,
-      rateApplied: '1 USDT = 5,000,000 CHIP',
+      rateApplied: '1 USDT = 5,000,000 CHIP (Khấu trừ 1% phí hệ thống)',
       createdAt: new Date().toISOString(),
       status: 'SETTLED',
     };
+
+    const feeRecord: AdminFeeRecord = {
+      id: `fee-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`,
+      timestamp: new Date().toISOString(),
+      userId: u.id,
+      userEmail: u.email,
+      txType: fromAsset === 'CHIP' ? 'CONVERT_CHIP_TO_USDT' : 'CONVERT_USDT_TO_CHIP',
+      txTypeLabel: fromAsset === 'CHIP' ? 'Quy đổi CHIP sang USDT' : 'Quy đổi USDT sang CHIP',
+      volumeUsdt,
+      feeRate: USDT_TRANSACTION_FEE_RATE,
+      feeUsdt,
+      beneficiaryWallet: ADMIN_TON_WALLET,
+      orderId,
+      status: 'RECORDED',
+    };
+
+    this.addAdminFeeRecord(feeRecord);
 
     const convs = this.getConversions();
     convs.unshift(order);
@@ -964,7 +1081,7 @@ export const ChipStore = {
     safeSet(STORAGE_KEYS.USERS, users);
     this.syncSessionIfActive(u);
 
-    return { user: u, order };
+    return { user: u, order, feeRecord };
   },
 
   // 7. Deposits: USDT (TON Jetton / Telegram Wallet)
@@ -987,7 +1104,7 @@ export const ChipStore = {
       userEmail: user.email,
       amountUsdt,
       equivalentChip,
-      depositAddress: 'EQBvW8Z5huBkMJYdn3PCDnHoKK3xNJa_W0C_z8LgqG12Ton',
+      depositAddress: ADMIN_TON_WALLET,
       memo,
       network: 'TON Mainnet',
       asset: 'USDT (TON Jetton)',
@@ -1040,7 +1157,7 @@ export const ChipStore = {
     amountUsdt: number,
     destinationTonAddress: string,
     _otpCode?: string
-  ): { user: StoredUser; withdrawal: WithdrawalOrder } {
+  ): { user: StoredUser; withdrawal: WithdrawalOrder; feeRecord: AdminFeeRecord } {
     if (amountUsdt <= 0) throw new Error('Số lượng rút phải lớn hơn 0');
 
     const users = this.getUsers();
@@ -1059,30 +1176,53 @@ export const ChipStore = {
       throw new Error(`Số dư USDT không đủ để rút. Số dư hiện có: ${(u.usdtBalance || 0)} USDT`);
     }
 
-    const feeUsdt = 0.1; // Estimated network gas fee
-    if (amountUsdt <= feeUsdt) {
-      throw new Error('Số lượng rút phải lớn hơn phí mạng TON (0.1 USDT)');
+    const gasFee = 0.1; // Estimated network gas fee
+    const fee1Percent = Number((amountUsdt * USDT_TRANSACTION_FEE_RATE).toFixed(6)); // 1% transaction fee
+    const totalDeductedFee = Number((fee1Percent + gasFee).toFixed(6));
+
+    if (amountUsdt <= totalDeductedFee) {
+      throw new Error(`Số lượng rút phải lớn hơn tổng phí giao dịch (${totalDeductedFee} USDT bao gồm 1% phí hệ thống + 0.1 USDT gas mạng)`);
     }
 
-    const netAmountUsdt = Number((amountUsdt - feeUsdt).toFixed(6));
+    const netAmountUsdt = Number((amountUsdt - totalDeductedFee).toFixed(6));
 
     // Deduct USDT balance immediately
     u.usdtBalance = Number(((u.usdtBalance || 0) - amountUsdt).toFixed(6));
 
+    const wdrId = `wdr-${Date.now()}`;
+    const txHash = `0x${Math.random().toString(16).substring(2, 6)}...${Math.random().toString(16).substring(2, 6)}`;
     const withdrawal: WithdrawalOrder = {
-      id: `wdr-${Date.now()}`,
+      id: wdrId,
       userId: u.id,
       userEmail: u.email,
       amountUsdt,
-      feeUsdt,
+      feeUsdt: totalDeductedFee,
       netAmountUsdt,
       destinationTonAddress: destinationTonAddress.trim(),
       network: 'TON Mainnet',
       status: 'SETTLED',
-      txHash: `0x${Math.random().toString(16).substring(2, 6)}...${Math.random().toString(16).substring(2, 6)}`,
+      txHash,
       createdAt: new Date().toISOString(),
       settledAt: new Date().toISOString(),
     };
+
+    const feeRecord: AdminFeeRecord = {
+      id: `fee-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`,
+      timestamp: new Date().toISOString(),
+      userId: u.id,
+      userEmail: u.email,
+      txType: 'WITHDRAW_USDT',
+      txTypeLabel: 'Rút USDT về ví TON cá nhân',
+      volumeUsdt: amountUsdt,
+      feeRate: USDT_TRANSACTION_FEE_RATE,
+      feeUsdt: fee1Percent,
+      beneficiaryWallet: ADMIN_TON_WALLET,
+      orderId: wdrId,
+      txHash,
+      status: 'RECORDED',
+    };
+
+    this.addAdminFeeRecord(feeRecord);
 
     const list = this.getWithdrawals();
     list.unshift(withdrawal);
@@ -1092,7 +1232,32 @@ export const ChipStore = {
     safeSet(STORAGE_KEYS.USERS, users);
     this.syncSessionIfActive(u);
 
-    return { user: u, withdrawal };
+    return { user: u, withdrawal, feeRecord };
+  },
+
+  // 8b. Admin Treasury Fee Ledger & Stats
+  getAdminFeeRecords(): AdminFeeRecord[] {
+    return safeGet<AdminFeeRecord[]>(STORAGE_KEYS.ADMIN_FEES, SEED_ADMIN_FEES);
+  },
+
+  addAdminFeeRecord(record: AdminFeeRecord): void {
+    const list = this.getAdminFeeRecords();
+    list.unshift(record);
+    safeSet(STORAGE_KEYS.ADMIN_FEES, list);
+  },
+
+  getAdminTreasuryStats() {
+    const fees = this.getAdminFeeRecords();
+    const totalFeeUsdt = Number(fees.reduce((sum, f) => sum + (f.feeUsdt || 0), 0).toFixed(6));
+    const totalVolumeUsdt = Number(fees.reduce((sum, f) => sum + (f.volumeUsdt || 0), 0).toFixed(6));
+    const chipEquivalent = Math.round(totalFeeUsdt * CHIP_PER_USDT);
+    return {
+      tonWallet: ADMIN_TON_WALLET,
+      totalFeeUsdt,
+      totalVolumeUsdt,
+      totalTxCount: fees.length,
+      chipEquivalent,
+    };
   },
 
   // 9. Referral Management

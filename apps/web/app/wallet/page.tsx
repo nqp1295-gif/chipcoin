@@ -525,6 +525,72 @@ export default function WalletPage() {
         </div>
       </div>
 
+      {/* Dual Wallet Architecture Guide Card (CHIP Wallet & USDT Wallet) */}
+      <section
+        className="glass-card"
+        style={{
+          padding: '1.8rem',
+          background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.06) 0%, rgba(0, 152, 234, 0.06) 100%)',
+          border: '1px solid var(--border-bronze)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1rem', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '1.4rem' }}>🏛️</span>
+          <div>
+            <h3 style={{ margin: 0, fontSize: '1.18rem', color: '#f5d77f' }}>
+              Kiến Trúc Ví Song Song: Ví CHIP & Ví USDT
+            </h3>
+            <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+              Mô hình quản lý tài sản độc lập, an toàn và tối ưu cho toàn bộ hệ sinh thái
+            </span>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.2rem' }}>
+          {/* Card 1: Ví CHIP */}
+          <div
+            style={{
+              background: 'rgba(0,0,0,0.4)',
+              border: '1px solid var(--accent-bronze)',
+              borderRadius: '12px',
+              padding: '16px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <span style={{ fontSize: '1.3rem' }}>🪙</span>
+              <h4 style={{ margin: 0, color: '#f5d77f', fontSize: '1rem' }}>VÍ ĐIỂM THƯỞNG CHIP</h4>
+            </div>
+            <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+              <li><b>Nhận thưởng:</b> Điểm danh hàng ngày, hoàn thành nhiệm vụ, hoa hồng giới thiệu nhánh.</li>
+              <li><b>Thanh toán:</b> Dùng để mua các sản phẩm, gói hỗ trợ claim Chip trên web.</li>
+              <li><b>Chuyển đổi:</b> Quy đổi tự do sang ví USDT theo tỷ giá cố định <b>1 USDT = 5,000,000 CHIP</b>.</li>
+              <li style={{ color: 'var(--text-muted)' }}><i>Lưu ý: Không hỗ trợ nạp/rút trực tiếp on-chain.</i></li>
+            </ul>
+          </div>
+
+          {/* Card 2: Ví USDT */}
+          <div
+            style={{
+              background: 'rgba(0,0,0,0.4)',
+              border: '1px solid rgba(0, 152, 234, 0.4)',
+              borderRadius: '12px',
+              padding: '16px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <span style={{ fontSize: '1.3rem' }}>💵</span>
+              <h4 style={{ margin: 0, color: '#38bdf8', fontSize: '1rem' }}>VÍ TIỀN USDT (TON NETWORK)</h4>
+            </div>
+            <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+              <li><b>Nạp tiền:</b> Mọi khoản nạp từ bên ngoài vào tài khoản bắt buộc nạp vào ví USDT.</li>
+              <li><b>Rút tiền:</b> Rút USDT trực tiếp về ví TON cá nhân hoặc Telegram Wallet (từ hạng PLATINUM).</li>
+              <li><b>Chuyển đổi sang CHIP:</b> Nạp USDT sau đó chuyển đổi sang ví CHIP để thanh toán mua sản phẩm web.</li>
+              <li><b>Phí giao dịch:</b> Phí <b>1%</b> trên mọi giao dịch USDT, tự động ghi nhận về <b>Ví Quản Trị Hệ Thống</b>.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
       {/* Ledger History Table */}
       <div className="glass-card" style={{ padding: '1.4rem' }}>
         <div

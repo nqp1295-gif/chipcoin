@@ -47,8 +47,8 @@ export const DICTIONARIES: Record<SupportedLanguage, Record<string, string>> = {
     // Navigation - System
     nav_sys_accounts: 'Quản Lý Tài Khoản 4 Cấp',
     nav_sys_accounts_desc: 'Admin, Trợ lý, Chuyên viên, Người dùng',
-    nav_sys_treasury: 'Kho Quỹ Master Treasury',
-    nav_sys_treasury_desc: 'Kho quỹ 500M CHIP & điều chuyển pool',
+    nav_sys_treasury: 'Ví Quản Trị Hệ Thống',
+    nav_sys_treasury_desc: 'Ví TON TBzt...4KPhh & Quỹ thu phí 1% USDT',
     nav_sys_tracking: 'Giám Sát Outbox Worker',
     nav_sys_tracking_desc: 'Hàng đợi sự kiện Transactional Outbox thời gian thực',
     nav_sys_email: 'Giám Sát Gmail SMTP & Outbox',
