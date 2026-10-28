@@ -91,10 +91,12 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 			})
 
 		default:
+			log.Printf("ERROR: Register failed for user %q (%q): %v", req.Username, req.Email, err)
 			writeJSON(w, http.StatusInternalServerError, map[string]any{
 				"success": false,
 				"error":   "internal_error",
 				"message": "Lỗi xử lý nội bộ của máy chủ.",
+				"detail":  err.Error(),
 			})
 		}
 		return

@@ -50,29 +50,53 @@ func (r *Repository) Register(
 	defer tx.Rollback(ctx)
 
 	// 1. Create user
-	err = tx.QueryRow(
-		ctx,
-		`
-		INSERT INTO users (
-			username,
-			email,
-			password_hash,
-			status,
-			referred_by_code
+	if r.hasReferredByCodeColumn(ctx) {
+		err = tx.QueryRow(
+			ctx,
+			`
+			INSERT INTO users (
+				username,
+				email,
+				password_hash,
+				status,
+				referred_by_code
+			)
+			VALUES ($1, $2, $3, 'PENDING', NULLIF($4, ''))
+			RETURNING id, username, email, status
+			`,
+			input.Username,
+			input.Email,
+			input.PasswordHash,
+			input.ReferralCode,
+		).Scan(
+			&user.ID,
+			&user.Username,
+			&user.Email,
+			&user.Status,
 		)
-		VALUES ($1, $2, $3, 'PENDING', NULLIF($4, ''))
-		RETURNING id, username, email, status
-		`,
-		input.Username,
-		input.Email,
-		input.PasswordHash,
-		input.ReferralCode,
-	).Scan(
-		&user.ID,
-		&user.Username,
-		&user.Email,
-		&user.Status,
-	)
+	} else {
+		err = tx.QueryRow(
+			ctx,
+			`
+			INSERT INTO users (
+				username,
+				email,
+				password_hash,
+				status
+			)
+			VALUES ($1, $2, $3, 'PENDING')
+			RETURNING id, username, email, status
+			`,
+			input.Username,
+			input.Email,
+			input.PasswordHash,
+		).Scan(
+			&user.ID,
+			&user.Username,
+			&user.Email,
+			&user.Status,
+		)
+	}
 
 	if err != nil {
 		return user, normalizeDBError(err)
@@ -147,6 +171,19 @@ func normalizeDBError(err error) error {
 
 	return err
 }
+func (r *Repository) hasReferredByCodeColumn(ctx context.Context) bool {
+	var exists bool
+	err := r.db.QueryRow(ctx, `
+		SELECT EXISTS (
+			SELECT 1 
+			FROM information_schema.columns 
+			WHERE table_name = 'users' 
+			  AND column_name = 'referred_by_code'
+		)
+	`).Scan(&exists)
+	return err == nil && exists
+}
+
 func (r *Repository) RegisterWithVerification(
 	ctx context.Context,
 	input RegisterInput,
@@ -164,29 +201,53 @@ func (r *Repository) RegisterWithVerification(
 	defer tx.Rollback(ctx)
 
 	// 1. Create pending user
-	err = tx.QueryRow(
-		ctx,
-		`
-		INSERT INTO users (
-			username,
-			email,
-			password_hash,
-			status,
-			referred_by_code
+	if r.hasReferredByCodeColumn(ctx) {
+		err = tx.QueryRow(
+			ctx,
+			`
+			INSERT INTO users (
+				username,
+				email,
+				password_hash,
+				status,
+				referred_by_code
+			)
+			VALUES ($1, $2, $3, 'PENDING', NULLIF($4, ''))
+			RETURNING id, username, email, status
+			`,
+			input.Username,
+			input.Email,
+			input.PasswordHash,
+			input.ReferralCode,
+		).Scan(
+			&user.ID,
+			&user.Username,
+			&user.Email,
+			&user.Status,
 		)
-		VALUES ($1, $2, $3, 'PENDING', NULLIF($4, ''))
-		RETURNING id, username, email, status
-		`,
-		input.Username,
-		input.Email,
-		input.PasswordHash,
-		input.ReferralCode,
-	).Scan(
-		&user.ID,
-		&user.Username,
-		&user.Email,
-		&user.Status,
-	)
+	} else {
+		err = tx.QueryRow(
+			ctx,
+			`
+			INSERT INTO users (
+				username,
+				email,
+				password_hash,
+				status
+			)
+			VALUES ($1, $2, $3, 'PENDING')
+			RETURNING id, username, email, status
+			`,
+			input.Username,
+			input.Email,
+			input.PasswordHash,
+		).Scan(
+			&user.ID,
+			&user.Username,
+			&user.Email,
+			&user.Status,
+		)
+	}
 
 	if err != nil {
 		return User{}, normalizeDBError(err)

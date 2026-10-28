@@ -43,7 +43,7 @@ func (s *Service) Register(
 			return User{}, ErrDuplicateAccount
 		}
 
-		return User{}, fmt.Errorf("%w: database operation", ErrRegistrationFailed)
+		return User{}, fmt.Errorf("%w: database operation: %w", ErrRegistrationFailed, err)
 	}
 
 	return user, nil
@@ -111,8 +111,9 @@ func (s *Service) RegisterWithVerification(
 		}
 
 		return User{}, "", fmt.Errorf(
-			"%w: database operation",
+			"%w: database operation: %w",
 			ErrRegistrationFailed,
+			err,
 		)
 	}
 

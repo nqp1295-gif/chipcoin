@@ -302,6 +302,11 @@ func main() {
 		"PostgreSQL connected successfully",
 	)
 
+	// Ensure required database schema migrations are applied
+	if err := database.EnsureMigrations(ctx, db); err != nil {
+		log.Printf("WARN: EnsureMigrations encountered error: %v", err)
+	}
+
 	// =====================================================
 	// 4. Authentication Repository & Service
 	// =====================================================

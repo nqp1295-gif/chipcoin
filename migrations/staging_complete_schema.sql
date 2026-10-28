@@ -347,3 +347,15 @@ END $$;
 
 INSERT INTO schema_migrations (version) VALUES ('007_seed_initial_admin') ON CONFLICT (version) DO NOTHING;
 
+-- ====================================================================
+-- 8. Migration 008: Add referred_by_code for Referral Tracking
+-- ====================================================================
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS referred_by_code VARCHAR(50) DEFAULT NULL;
+
+CREATE INDEX IF NOT EXISTS idx_users_referred_by_code
+ON users (referred_by_code)
+WHERE referred_by_code IS NOT NULL;
+
+INSERT INTO schema_migrations (version) VALUES ('008_add_referral_code_tracking') ON CONFLICT (version) DO NOTHING;
+

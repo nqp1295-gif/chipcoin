@@ -74,7 +74,7 @@ function RegisterForm() {
         ) {
           setError('Mật khẩu chưa đủ an toàn (yêu cầu tối thiểu 12 ký tự).');
         } else {
-          setError(res.message || res.error || 'Đăng ký không thành công. Vui lòng kiểm tra lại thông tin.');
+          setError(res.message || (res as any).detail || res.error || 'Đăng ký không thành công. Vui lòng kiểm tra lại thông tin.');
         }
         return;
       }
