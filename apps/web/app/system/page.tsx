@@ -350,8 +350,10 @@ export default function SystemAccountsPage() {
         res.destinationTonWallet
       );
 
+      const refundDest = res.destinationTonWallet || ChipStore.getActiveAdminWallet().address;
+      const destMeta = detectWalletNetwork(refundDest);
       showToast(
-        `🗑️ Đã xóa vĩnh viễn tài khoản ${deleteModalAccount.email}. Đã hoàn +${res.chipsRefunded.toLocaleString()} CHIP về Kho Quỹ Hệ Thống & +${res.usdtRefunded.toFixed(4)} USDT về 💎 Ví TON Quản Trị (${ADMIN_TON_WALLET.slice(0, 6)}...${ADMIN_TON_WALLET.slice(-6)})!`,
+        `🗑️ Đã xóa vĩnh viễn tài khoản ${deleteModalAccount.email}. Đã hoàn +${res.chipsRefunded.toLocaleString()} CHIP về Kho Quỹ Hệ Thống & +${res.usdtRefunded.toFixed(4)} USDT về ${destMeta.icon} Ví ${destMeta.shortName} Quản Trị (${refundDest.slice(0, 6)}...${refundDest.slice(-6)})!`,
         'success',
         8000
       );
@@ -1102,24 +1104,28 @@ export default function SystemAccountsPage() {
                 </div>
 
                 <div style={{ background: 'rgba(0,0,0,0.4)', padding: '10px', borderRadius: '6px' }}>
-                  <div style={{ color: 'var(--text-muted)', fontSize: '0.74rem' }}>Số dư USDT hoàn về ví TON:</div>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.74rem' }}>Số dư USDT hoàn về ví Quản Trị:</div>
                   <div style={{ color: '#38bdf8', fontWeight: 800, fontSize: '1.1rem', marginTop: '2px' }}>
                     +{(deleteModalAccount.usdtBalance || 0).toFixed(4)} USDT
                   </div>
                   <div style={{ color: '#34d399', fontSize: '0.7rem', fontFamily: 'var(--font-mono)' }}>
-                    &rarr; {ADMIN_TON_WALLET.slice(0, 6)}...{ADMIN_TON_WALLET.slice(-6)}
+                    {(() => {
+                      const addr = ChipStore.getActiveAdminWallet().address;
+                      return `→ ${addr.slice(0, 6)}...${addr.slice(-6)}`;
+                    })()}
                   </div>
                 </div>
               </div>
 
               <div style={{ marginTop: '10px', fontSize: '0.78rem', color: '#cbd5e1', lineHeight: 1.4 }}>
                 {(() => {
-                  const meta = detectWalletNetwork(ADMIN_TON_WALLET);
+                  const currentAdminWallet = ChipStore.getActiveAdminWallet().address;
+                  const meta = detectWalletNetwork(currentAdminWallet);
                   return (
                     <>
                       {meta.icon} <strong>Địa chỉ Ví {meta.shortName} Quản Trị nhận hoàn số dư USDT:</strong>
                       <div style={{ fontFamily: 'var(--font-mono)', color: meta.isTron ? '#fca5a5' : '#38bdf8', fontSize: '0.8rem', marginTop: '2px', wordBreak: 'break-all' }}>
-                        {ADMIN_TON_WALLET}{' '}
+                        {currentAdminWallet}{' '}
                         <a
                           href={meta.explorerUrl}
                           target="_blank"

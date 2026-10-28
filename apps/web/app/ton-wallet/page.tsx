@@ -685,7 +685,7 @@ export default function TonWalletPage() {
                   className="form-input"
                   placeholder={
                     networkMode === 'TON'
-                      ? 'EQBvW8Z5huBkMJYdn3PCDnHoKK3xNJa_W0C_z8LgqG12Ton'
+                      ? 'UQCVAiHyPJ1EkUvTIubK53SXMvwThmpAMrKxdLlkQLiMSRqr'
                       : 'TBztwgxtzSBPvFA56VM5Mpozh6Gj84KPhh'
                   }
                   value={tonAddress}
@@ -718,7 +718,7 @@ export default function TonWalletPage() {
                     type="button"
                     onClick={() => {
                       setNetworkMode('TON');
-                      setTonAddress('EQBvW8Z5huBkMJYdn3PCDnHoKK3xNJa_W0C_z8LgqG12Ton');
+                      setTonAddress('UQCVAiHyPJ1EkUvTIubK53SXMvwThmpAMrKxdLlkQLiMSRqr');
                     }}
                     style={{
                       background: 'none',

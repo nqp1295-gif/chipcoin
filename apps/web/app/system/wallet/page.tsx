@@ -94,12 +94,12 @@ export default function SystemWalletPage() {
   const [walletConfig, setWalletConfig] = useState({
     tronWallet: DEFAULT_ADMIN_TRON_WALLET,
     tonWallet: DEFAULT_ADMIN_TON_WALLET,
-    activeNetwork: 'TRON' as 'TRON' | 'TON',
+    activeNetwork: 'TON' as 'TRON' | 'TON',
   });
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [editTron, setEditTron] = useState('');
   const [editTon, setEditTon] = useState('');
-  const [editNetwork, setEditNetwork] = useState<'TRON' | 'TON'>('TRON');
+  const [editNetwork, setEditNetwork] = useState<'TRON' | 'TON'>('TON');
   const [configMsg, setConfigMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   const [activeTab, setActiveTab] = useState<'FEES' | 'POOLS' | 'JOURNAL'>('FEES');
@@ -528,7 +528,7 @@ export default function SystemWalletPage() {
                 Sổ Nhật Ký Thu Phí Giao Dịch 1% Về Ví Quản Trị
               </h3>
               <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                Tất cả các khoản phí 1% phát sinh từ giao dịch của hội viên đều được ghi nhận tự động vào ví <b>{ADMIN_TON_WALLET}</b>
+                Tất cả các khoản phí 1% phát sinh từ giao dịch của hội viên đều được ghi nhận tự động vào ví <b>{activeAddress}</b>
               </p>
             </div>
             <span className="badge badge-success">
@@ -947,7 +947,7 @@ export default function SystemWalletPage() {
                   id="ton-addr"
                   type="text"
                   className="form-input"
-                  placeholder="EQBvW8Z5huBkMJYdn3PCDnHoKK3xNJa_W0C_z8LgqG12Ton"
+                  placeholder="UQCVAiHyPJ1EkUvTIubK53SXMvwThmpAMrKxdLlkQLiMSRqr"
                   value={editTon}
                   onChange={(e) => setEditTon(e.target.value)}
                   style={{ fontFamily: 'var(--font-mono)', fontSize: '0.88rem' }}

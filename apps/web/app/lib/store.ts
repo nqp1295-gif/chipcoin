@@ -145,11 +145,11 @@ export interface StoredUser {
 // ============================================================================
 // SYSTEM ADMIN TREASURY & 1% TRANSACTION FEE ENGINE
 // Default TRON (TRC-20 USDT): TBztwgxtzSBPvFA56VM5Mpozh6Gj84KPhh (Explorer: Tronscan)
-// Default TON (USDT Jetton): EQBvW8Z5huBkMJYdn3PCDnHoKK3xNJa_W0C_z8LgqG12Ton (Explorer: Tonviewer)
+// Default TON (USDT Jetton): UQCVAiHyPJ1EkUvTIubK53SXMvwThmpAMrKxdLlkQLiMSRqr (Explorer: Tonviewer)
 // ============================================================================
 export const DEFAULT_ADMIN_TRON_WALLET = 'TBztwgxtzSBPvFA56VM5Mpozh6Gj84KPhh';
-export const DEFAULT_ADMIN_TON_WALLET = 'EQBvW8Z5huBkMJYdn3PCDnHoKK3xNJa_W0C_z8LgqG12Ton';
-export const ADMIN_TON_WALLET = 'TBztwgxtzSBPvFA56VM5Mpozh6Gj84KPhh'; // Legacy alias
+export const DEFAULT_ADMIN_TON_WALLET = 'UQCVAiHyPJ1EkUvTIubK53SXMvwThmpAMrKxdLlkQLiMSRqr';
+export const ADMIN_TON_WALLET = 'UQCVAiHyPJ1EkUvTIubK53SXMvwThmpAMrKxdLlkQLiMSRqr';
 export const USDT_TRANSACTION_FEE_RATE = 0.01; // 1%
 
 export function detectWalletNetwork(address: string): {
@@ -329,7 +329,7 @@ const _RAW_SEED_USERS: StoredUser[] = [
     usdtBalance: 100.00, // 500,000,000 CHIP / 5,000,000 = 100 USDT
     streakDays: 45,
     avatarUrl: '',
-    tonWalletAddress: 'EQBvW8Z5huBkMJYdn3PCDnHoKK3xNJa_W0C_z8LgqG12Ton',
+    tonWalletAddress: 'UQCVAiHyPJ1EkUvTIubK53SXMvwThmpAMrKxdLlkQLiMSRqr',
     tonBoundAt: '2026-09-02T10:00:00Z',
     telegramUserId: 'tg_889102481',
     telegramUsername: 'admin_chipcoin',
@@ -506,7 +506,7 @@ const _RAW_SEED_DEPOSITS: DepositIntent[] = [
     userEmail: 'alex.investor@example.com',
     amountUsdt: 10.0,
     equivalentChip: 50000000,
-    depositAddress: 'EQBvW8Z5huBkMJYdn3PCDnHoKK3xNJa_W0C_z8LgqG12Ton',
+    depositAddress: 'UQCVAiHyPJ1EkUvTIubK53SXMvwThmpAMrKxdLlkQLiMSRqr',
     memo: 'DEP-ALEX-9901',
     network: 'TON Mainnet',
     asset: 'USDT (TON Jetton)',
@@ -1089,7 +1089,9 @@ export const ChipStore = {
     const chipsRefunded = targetUser.chipsBalance || 0;
     const usdtRefunded = targetUser.usdtBalance || 0;
 
-    // 1. Hoàn toàn bộ số dư USDT về VÍ TON QUẢN TRỊ CHÍNH THỨC
+    const adminWallet = this.getActiveAdminWallet().address;
+
+    // 1. Hoàn toàn bộ số dư USDT về VÍ QUẢN TRỊ CHÍNH THỨC
     if (usdtRefunded > 0) {
       const feeRecord: AdminFeeRecord = {
         id: `fee-del-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -1097,11 +1099,11 @@ export const ChipStore = {
         userId: targetUser.id,
         userEmail: targetUser.email,
         txType: 'CONVERT_USDT_TO_CHIP',
-        txTypeLabel: `Hoàn số dư USDT về Ví TON Quản Trị khi xóa tài khoản (${reason.trim()})`,
+        txTypeLabel: `Hoàn số dư USDT về Ví Quản Trị khi xóa tài khoản (${reason.trim()})`,
         volumeUsdt: usdtRefunded,
         feeRate: 1.0,
         feeUsdt: usdtRefunded,
-        beneficiaryWallet: ADMIN_TON_WALLET,
+        beneficiaryWallet: adminWallet,
         orderId: `del-acc-${targetUser.id}`,
         status: 'RECORDED',
       };
@@ -1124,7 +1126,7 @@ export const ChipStore = {
       user: targetUser,
       chipsRefunded,
       usdtRefunded,
-      destinationTonWallet: ADMIN_TON_WALLET,
+      destinationTonWallet: adminWallet,
     };
   },
 
@@ -1155,7 +1157,7 @@ export const ChipStore = {
     return safeGet(STORAGE_KEYS.ADMIN_WALLET_CONFIG, {
       tronWallet: DEFAULT_ADMIN_TRON_WALLET,
       tonWallet: DEFAULT_ADMIN_TON_WALLET,
-      activeNetwork: 'TRON' as const,
+      activeNetwork: 'TON' as const,
     });
   },
 
@@ -1288,7 +1290,7 @@ export const ChipStore = {
       volumeUsdt,
       feeRate: USDT_TRANSACTION_FEE_RATE,
       feeUsdt,
-      beneficiaryWallet: ADMIN_TON_WALLET,
+      beneficiaryWallet: this.getActiveAdminWallet().address,
       orderId,
       status: 'RECORDED',
     };
@@ -1326,7 +1328,7 @@ export const ChipStore = {
       userEmail: user.email,
       amountUsdt,
       equivalentChip,
-      depositAddress: ADMIN_TON_WALLET,
+      depositAddress: this.getActiveAdminWallet().address,
       memo,
       network: 'TON Mainnet',
       asset: 'USDT (TON Jetton)',
@@ -1438,7 +1440,7 @@ export const ChipStore = {
       volumeUsdt: amountUsdt,
       feeRate: USDT_TRANSACTION_FEE_RATE,
       feeUsdt: fee1Percent,
-      beneficiaryWallet: ADMIN_TON_WALLET,
+      beneficiaryWallet: this.getActiveAdminWallet().address,
       orderId: wdrId,
       txHash,
       status: 'RECORDED',
