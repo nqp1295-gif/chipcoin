@@ -109,10 +109,10 @@ function VerifyEmailContent() {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#38bdf8', fontWeight: 700, marginBottom: '6px' }}>
-                <span>🛡️ Bảo Vệ Chống Quét Link Tự Động (Link Scanner Defense)</span>
+                <span>{t('verify_defense_title', '🛡️ Bảo Vệ Chống Quét Link Tự Động (Link Scanner Defense)')}</span>
               </div>
               <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
-                Mã xác thực của bạn đã sẵn sàng (<code>{maskedToken}</code>). Nhấn nút bên dưới để hoàn tất việc kích hoạt tài khoản.
+                {t('verify_ready_text', 'Mã xác thực của bạn đã sẵn sàng ({0}). Nhấn nút bên dưới để hoàn tất việc kích hoạt tài khoản.').replace('{0}', maskedToken)}
               </p>
             </div>
 
@@ -130,11 +130,11 @@ function VerifyEmailContent() {
                 gap: '8px',
               }}
             >
-              ⚡ Xác Nhận Kích Hoạt Tài Khoản Ngay
+              {t('verify_btn_confirm_now', '⚡ Xác Nhận Kích Hoạt Tài Khoản Ngay')}
             </button>
 
             <div style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              Mã xác minh có hiệu lực trong vòng <strong>15 phút</strong> kể từ khi phát hành.
+              {t('verify_valid_15m', 'Mã xác minh có hiệu lực trong vòng 15 phút kể từ khi phát hành.')}
             </div>
           </div>
         )}
@@ -167,10 +167,10 @@ function VerifyEmailContent() {
           <div style={{ textAlign: 'center' }}>
             <div className="alert-box alert-warning" style={{ display: 'block', textAlign: 'left' }}>
               <div style={{ fontWeight: 700, fontSize: '1.05rem', marginBottom: '6px' }}>
-                ⏳ Mã Xác Minh Đã Hết Hạn
+                {t('verify_expired_title', '⏳ Mã Xác Minh Đã Hết Hạn')}
               </div>
               <p style={{ fontSize: '0.92rem', margin: 0 }}>
-                {errorMessage || 'Liên kết xác minh chỉ có hiệu lực 15 phút để đảm bảo an toàn. Vui lòng yêu cầu cấp lại mã mới.'}
+                {errorMessage || t('verify_expired_desc', 'Liên kết xác minh chỉ có hiệu lực 15 phút để đảm bảo an toàn. Vui lòng yêu cầu cấp lại mã mới.')}
               </p>
             </div>
 
@@ -199,13 +199,13 @@ function VerifyEmailContent() {
             >
               <div className="form-group">
                 <label className="form-label" htmlFor="manual-token">
-                  Nhập mã token xác minh (64 ký tự hex)
+                  {t('verify_token_label', 'Nhập mã token xác minh (64 ký tự hex)')}
                 </label>
                 <input
                   id="manual-token"
                   type="text"
                   className="form-input"
-                  placeholder="Dán 64 ký tự hex từ email..."
+                  placeholder={t('verify_token_ph', 'Dán 64 ký tự hex từ email...')}
                   value={token}
                   onChange={(e) => setToken(e.target.value)}
                   style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}
@@ -213,13 +213,13 @@ function VerifyEmailContent() {
               </div>
 
               <button type="submit" className="btn-primary" style={{ width: '100%' }}>
-                Kiểm Tra &amp; Xác Thực Lại Mã
+                {t('verify_btn_check_again', 'Kiểm Tra & Xác Thực Lại Mã')}
               </button>
             </form>
 
             <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
               <Link href="/resend-verification" style={{ color: 'var(--accent-bronze)', fontSize: '0.9rem' }}>
-                Hoặc yêu cầu gửi lại email mới
+                {t('verify_or_resend', 'Hoặc yêu cầu gửi lại email mới')}
               </Link>
             </div>
           </div>
@@ -230,14 +230,14 @@ function VerifyEmailContent() {
           <div style={{ textAlign: 'center' }}>
             <div className="alert-box alert-warning" style={{ display: 'block', textAlign: 'left' }}>
               <div style={{ fontWeight: 700, fontSize: '1.05rem', marginBottom: '6px' }}>
-                ℹ️ Mã Đã Được Sử Dụng Hoặc Tài Khoản Đã Kích Hoạt
+                {t('verify_already_used_title', 'ℹ️ Mã Đã Được Sử Dụng Hoặc Tài Khoản Đã Kích Hoạt')}
               </div>
               <p style={{ fontSize: '0.92rem', margin: 0 }}>{errorMessage}</p>
             </div>
 
             <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <Link href="/login" className="btn-primary" style={{ textAlign: 'center' }}>
-                Đi Đến Trang Đăng Nhập
+                {t('verify_btn_goto_login', 'Đi Đến Trang Đăng Nhập')}
               </Link>
             </div>
           </div>
@@ -253,13 +253,13 @@ function VerifyEmailContent() {
           >
             <div className="form-group">
               <label className="form-label" htmlFor="token-input">
-                Mã xác minh (Token)
+                {t('verify_token_short_label', 'Mã xác minh (Token)')}
               </label>
               <input
                 id="token-input"
                 type="text"
                 className="form-input"
-                placeholder="Dán mã 64 ký tự hex..."
+                placeholder={t('verify_token_ph', 'Dán 64 ký tự hex từ email...')}
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
                 style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}
@@ -268,7 +268,7 @@ function VerifyEmailContent() {
             </div>
 
             <button type="submit" className="btn-primary" style={{ width: '100%' }}>
-              Xác Thực Tài Khoản
+              {t('verify_btn_submit', 'Xác Thực Tài Khoản')}
             </button>
           </form>
         )}

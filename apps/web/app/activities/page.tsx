@@ -173,6 +173,61 @@ function isTaskClaimed(
 
 export default function ActivitiesPage() {
   const { t } = useI18n();
+
+  const getTaskMeta = (task: ActivityTask) => {
+    switch (task.id) {
+      case 'task_daily_streak':
+        return {
+          title: t('task_streak_title'),
+          rewardText: t('task_streak_reward'),
+          description: t('task_streak_desc'),
+          actionText: t('task_streak_action'),
+        };
+      case 'task_email_verify':
+        return {
+          title: t('task_email_title'),
+          rewardText: task.rewardText,
+          description: t('task_email_desc'),
+          actionText: t('task_email_action'),
+        };
+      case 'task_referral_bonus':
+        return {
+          title: t('task_referral_title'),
+          rewardText: t('task_referral_reward'),
+          description: t('task_referral_desc'),
+          actionText: t('task_referral_action'),
+        };
+      case 'task_community_telegram':
+        return {
+          title: t('task_community_title'),
+          rewardText: 'COMING SOON',
+          description: t('task_community_desc'),
+          actionText: t('task_community_action'),
+        };
+      case 'task_security_profile':
+        return {
+          title: t('task_profile_title'),
+          rewardText: task.rewardText,
+          description: t('task_profile_desc'),
+          actionText: t('task_profile_action'),
+        };
+      case 'task_ledger_test':
+        return {
+          title: t('task_deposit_title'),
+          rewardText: task.rewardText,
+          description: t('task_deposit_desc'),
+          actionText: t('task_deposit_action'),
+        };
+      default:
+        return {
+          title: task.title,
+          rewardText: task.rewardText,
+          description: task.description,
+          actionText: task.actionText,
+        };
+    }
+  };
+
   const [currentUser, setCurrentUser] = useState<StoredUser | null>(null);
   const [tasksData, setTasksData] = useState<PersistedTasksData>({ daily: {}, oneTime: {} });
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'info' } | null>(null);
@@ -476,6 +531,7 @@ export default function ActivitiesPage() {
           }}
         >
           {TASKS.map((task) => {
+            const meta = getTaskMeta(task);
             const isClaimed = isTaskClaimed(task, currentUser, tasksData);
             const isCommunity = task.id === 'task_community_telegram';
             const isRefTask = task.id === 'task_referral_bonus';
@@ -503,16 +559,16 @@ export default function ActivitiesPage() {
                     <span style={{ fontSize: '2rem' }}>{task.icon}</span>
                     <span className={`badge ${isClaimed ? 'badge-pulse' : isCommunity ? 'badge-neutral' : 'badge-gold'}`}>
                       {isClaimed
-                        ? (task.category === 'DAILY' ? '✓ ĐÃ NHẬN HÔM NAY' : t('act_claimed'))
+                        ? (task.category === 'DAILY' ? `✓ ${t('act_claimed_today')}` : t('act_claimed'))
                         : isCommunity
-                        ? '⏳ SẮP RA MẮT'
-                        : task.rewardText}
+                        ? `⏳ ${t('act_coming_soon')}`
+                        : meta.rewardText}
                     </span>
                   </div>
 
-                  <h3 style={{ fontSize: '1.2rem', marginBottom: '6px' }}>{task.title}</h3>
+                  <h3 style={{ fontSize: '1.2rem', marginBottom: '6px' }}>{meta.title}</h3>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.55 }}>
-                    {task.description}
+                    {meta.description}
                   </p>
                 </div>
 
@@ -540,7 +596,7 @@ export default function ActivitiesPage() {
                         fontSize: '0.88rem',
                       }}
                     >
-                      {task.category === 'DAILY' ? '✓ Đã nhận hôm nay' : '✓ Đã hoàn thành'}
+                      {task.category === 'DAILY' ? `✓ ${t('act_claimed_today')}` : `✓ ${t('act_completed')}`}
                     </span>
                   ) : isCommunity ? (
                     <button
@@ -556,7 +612,7 @@ export default function ActivitiesPage() {
                         fontSize: '0.88rem',
                       }}
                     >
-                      ⏳ Sắp ra mắt (Coming Soon)
+                      ⏳ {t('act_coming_soon')}
                     </button>
                   ) : (
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -598,11 +654,11 @@ export default function ActivitiesPage() {
                         {task.id === 'task_daily_streak'
                           ? t('act_streak_btn')
                           : isRefTask && !hasRefs
-                          ? 'Chưa đủ điều kiện (0/1 Bạn)'
+                          ? t('act_req_referral_not_met')
                           : isProfTask && !isProfDone
-                          ? 'Chưa đủ hồ sơ'
+                          ? t('act_req_profile_not_met')
                           : isDepTask && !hasDep
-                          ? 'Chưa nạp tiền'
+                          ? t('act_req_deposit_not_met')
                           : t('act_claim_btn')}
                       </button>
 
@@ -612,7 +668,7 @@ export default function ActivitiesPage() {
                           className="glance-link"
                           style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}
                         >
-                          ({task.actionText} ↗)
+                          ({meta.actionText} ↗)
                         </Link>
                       )}
                     </div>

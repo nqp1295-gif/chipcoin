@@ -209,14 +209,14 @@ export default function DepositPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.2rem' }}>
             <span style={{ fontSize: '1.2rem' }}>1️⃣</span>
             <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#f5d77f' }}>
-              Tạo Lệnh Nạp USDT (TON Mainnet)
+              {t('deposit_create_title')}
             </h3>
           </div>
 
           <form onSubmit={handleCreateIntent} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '6px' }}>
-                Số lượng USDT muốn nạp (Tối thiểu 1.0 USDT):
+                {t('deposit_amount_label')}
               </label>
               <div
                 style={{
@@ -284,11 +284,11 @@ export default function DepositPage() {
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Tỷ giá quy ước:</span>
+                <span style={{ color: 'var(--text-muted)' }}>{t('convert_official_rate')}</span>
                 <span style={{ fontWeight: 600, color: '#f5d77f' }}>1 USDT = 5,000,000 CHIP</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Giá trị quy đổi nội bộ:</span>
+                <span style={{ color: 'var(--text-muted)' }}>{t('deposit_col_chip_equiv')}:</span>
                 <span style={{ fontWeight: 700, color: '#34d399' }}>
                   ≈ {equivalentChips.toLocaleString()} CHIP
                 </span>
@@ -307,7 +307,7 @@ export default function DepositPage() {
                 cursor: 'pointer',
               }}
             >
-              {isGenerating ? 'Đang khởi tạo...' : 'Tạo Mã Nạp Tiền & Hóa Đơn'}
+              {isGenerating ? t('state_loading') : t('deposit_btn_create')}
             </button>
           </form>
         </div>
@@ -326,7 +326,7 @@ export default function DepositPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '1.2rem' }}>2️⃣</span>
               <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#38bdf8' }}>
-                Thông Tin Thanh Toán TON
+                {t('deposit_sim_title')}
               </h3>
             </div>
             {activeIntent && (
@@ -340,7 +340,7 @@ export default function DepositPage() {
                   color: activeIntent.status === 'SETTLED' ? '#34d399' : '#fbbf24',
                 }}
               >
-                {activeIntent.status === 'SETTLED' ? '✓ ĐÃ HẠCH TOÁN' : '⏳ CHỜ CHUYỂN TIỀN'}
+                {activeIntent.status === 'SETTLED' ? `✓ ${t('status_settled')}` : `⏳ ${t('deposit_waiting_payment')}`}
               </span>
             )}
           </div>
@@ -349,7 +349,7 @@ export default function DepositPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {/* Amount to send */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '1px solid var(--border-medium)', paddingBottom: '10px' }}>
-                <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Số lượng cần chuyển:</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{t('deposit_amount_to_send')}</span>
                 <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#ffffff', fontFamily: 'Outfit, sans-serif' }}>
                   {activeIntent.amountUsdt.toFixed(2)}{' '}
                   <span style={{ color: '#38bdf8', fontSize: '1rem' }}>USDT</span>
@@ -363,7 +363,7 @@ export default function DepositPage() {
                   return (
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                       <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                        Địa chỉ ví nhận ({depMeta.networkName}):
+                        {t('deposit_receive_addr')} ({depMeta.networkName}):
                       </span>
                       <a
                         href={depMeta.explorerUrl}
@@ -371,7 +371,7 @@ export default function DepositPage() {
                         rel="noopener noreferrer"
                         style={{ fontSize: '0.74rem', color: depMeta.isTron ? '#f87171' : '#38bdf8', textDecoration: 'none', fontWeight: 600 }}
                       >
-                        Tra cứu trên {depMeta.explorerName} ↗
+                        {t('deposit_lookup_explorer')}
                       </a>
                     </div>
                   );
@@ -405,7 +405,7 @@ export default function DepositPage() {
                       fontWeight: 600,
                     }}
                   >
-                    {copiedAddr ? '✓ Đã chép' : 'Sao chép'}
+                    {copiedAddr ? t('deposit_copied') : t('deposit_copy')}
                   </button>
                 </div>
               </div>
@@ -414,9 +414,9 @@ export default function DepositPage() {
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                   <span style={{ fontSize: '0.78rem', color: '#fbbf24', fontWeight: 700 }}>
-                    ⚠️ BẮT BUỘC ĐIỀN MEMO / COMMENT:
+                    ⚠️ {t('deposit_memo_warning')}
                   </span>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Để nhận diện tài khoản</span>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{t('deposit_memo_desc')}</span>
                 </div>
                 <div
                   style={{
@@ -447,7 +447,7 @@ export default function DepositPage() {
                       fontWeight: 700,
                     }}
                   >
-                    {copiedMemo ? '✓ Đã chép' : 'Chép Memo'}
+                    {copiedMemo ? t('deposit_copied') : t('deposit_btn_copy_memo')}
                   </button>
                 </div>
               </div>
@@ -472,7 +472,7 @@ export default function DepositPage() {
                     border: 'none',
                   }}
                 >
-                  ✈️ Mở Telegram Wallet Để Chuyển USDT ↗
+                  ✈️ {t('deposit_btn_telegram')}
                 </a>
 
                 {IS_LOCAL_DEV && activeIntent.status !== 'SETTLED' && (
@@ -490,14 +490,14 @@ export default function DepositPage() {
                       cursor: 'pointer',
                     }}
                   >
-                    {isSimulating ? 'Đang lắng nghe sự kiện on-chain...' : '🧪 Mô phỏng xác nhận nạp tiền on-chain (DEV ONLY)'}
+                    {isSimulating ? t('deposit_sim_listening') : t('deposit_sim_dev_btn')}
                   </button>
                 )}
               </div>
             </div>
           ) : (
             <div style={{ textAlign: 'center', padding: '36px 12px', color: 'var(--text-muted)' }}>
-              Vui lòng nhập số tiền ở bên trái và bấm &quot;Tạo Mã Nạp Tiền&quot; để hiển thị thông tin chuyển khoản.
+              {t('deposit_enter_amount_hint')}
             </div>
           )}
         </div>
@@ -507,9 +507,9 @@ export default function DepositPage() {
       <div className="glass-card" style={{ padding: '1.4rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', flexWrap: 'wrap', gap: '10px' }}>
           <div>
-            <h3 style={{ fontSize: '1.15rem' }}>Lịch Sử Lệnh Nạp USDT Mạng TON</h3>
+            <h3 style={{ fontSize: '1.15rem' }}>{t('deposit_history_title')}</h3>
             <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-              Theo dõi giao dịch nạp USDT và quy đổi tương đương
+              {t('deposit_history_sub')}
             </span>
           </div>
           <span className="badge badge-active">TON Mainnet Jettons</span>
@@ -519,20 +519,20 @@ export default function DepositPage() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>MÃ LỆNH</th>
-                <th>THỜI GIAN</th>
-                <th>SỐ TIỀN USDT</th>
-                <th>TƯƠNG ĐƯƠNG CHIP</th>
-                <th>MEMO NHẬN DIỆN</th>
-                <th>HASH GIAO DỊCH</th>
-                <th>TRẠNG THÁI</th>
+                <th>{t('deposit_col_order')}</th>
+                <th>{t('deposit_col_time')}</th>
+                <th>{t('deposit_col_usdt')}</th>
+                <th>{t('deposit_col_chip_equiv')}</th>
+                <th>{t('deposit_col_memo')}</th>
+                <th>{t('deposit_col_txhash')}</th>
+                <th>{t('col_status')}</th>
               </tr>
             </thead>
             <tbody>
               {deposits.length === 0 ? (
                 <tr>
                   <td colSpan={7} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '24px' }}>
-                    Chưa có lệnh nạp nào.
+                    {t('deposit_no_records')}
                   </td>
                 </tr>
               ) : (
@@ -568,7 +568,7 @@ export default function DepositPage() {
                           border: `1px solid ${dep.status === 'SETTLED' ? 'rgba(52, 211, 153, 0.3)' : 'rgba(251, 191, 36, 0.3)'}`,
                         }}
                       >
-                        {dep.status === 'SETTLED' ? 'ĐÃ HẠCH TOÁN' : 'CHỜ THANH TOÁN'}
+                        {dep.status === 'SETTLED' ? t('deposit_status_settled', 'ĐÃ HẠCH TOÁN') : t('deposit_status_waiting', 'CHỜ THANH TOÁN')}
                       </span>
                     </td>
                   </tr>

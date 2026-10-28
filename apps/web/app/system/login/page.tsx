@@ -229,7 +229,7 @@ export default function SystemLoginPage() {
                   <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f5d77f' }}>
                     {t('sys_login_role_admin')}
                   </div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Toàn quyền</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t('sys_login_full_rights', 'Toàn quyền')}</div>
                 </button>
 
                 <button
@@ -255,7 +255,7 @@ export default function SystemLoginPage() {
                   <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#a5b4fc' }}>
                     {t('sys_login_role_assistant')}
                   </div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Điều hành</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t('sys_login_ops_rights', 'Điều hành')}</div>
                 </button>
 
                 <button
@@ -281,7 +281,7 @@ export default function SystemLoginPage() {
                   <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#7dd3fc' }}>
                     {t('sys_login_role_specialist')}
                   </div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Nghiệp vụ</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t('sys_login_spec_rights', 'Nghiệp vụ')}</div>
                 </button>
               </div>
             </div>
@@ -301,10 +301,10 @@ export default function SystemLoginPage() {
               }}
             >
               <div>
-                <span style={{ color: 'var(--text-muted)' }}>Tài khoản đang chọn: </span>
+                <span style={{ color: 'var(--text-muted)' }}>{t('sys_login_selected_acc', 'Tài khoản đang chọn:')} </span>
                 <strong style={{ color: '#f5d77f' }}>{email}</strong>
                 <br />
-                <span style={{ color: 'var(--text-muted)' }}>Mật khẩu mặc định: </span>
+                <span style={{ color: 'var(--text-muted)' }}>{t('sys_login_default_pwd', 'Mật khẩu mặc định:')} </span>
                 <code style={{ color: '#fff', background: 'rgba(0,0,0,0.3)', padding: '2px 6px', borderRadius: '4px' }}>
                   Admin@Chiprin2026!
                 </code>
@@ -323,7 +323,7 @@ export default function SystemLoginPage() {
                   cursor: 'pointer',
                 }}
               >
-                ⚡ Điền lại
+                {t('sys_login_btn_refill', '⚡ Điền lại')}
               </button>
             </div>
           </>
@@ -349,7 +349,7 @@ export default function SystemLoginPage() {
                       textDecoration: 'none',
                     }}
                   >
-                    👉 Chuyển sang Cổng Đăng Nhập Người Dùng
+                    {t('sys_login_switch_user', '👉 Chuyển sang Cổng Đăng Nhập Người Dùng')}
                   </Link>
                 </div>
               )}
@@ -428,14 +428,14 @@ export default function SystemLoginPage() {
                     padding: 0,
                   }}
                 >
-                  {showPassword ? '👁️ Ẩn mật khẩu' : '👁️ Hiện mật khẩu'}
+                  {showPassword ? t('sys_login_hide_pwd', '👁️ Ẩn mật khẩu') : t('sys_login_show_pwd', '👁️ Hiện mật khẩu')}
                 </button>
               </div>
               <input
                 id="sys-password"
                 type={showPassword ? 'text' : 'password'}
                 className="form-input"
-                placeholder="Nhập mật khẩu quản trị..."
+                placeholder={t('sys_login_pwd_ph', 'Nhập mật khẩu quản trị...')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}

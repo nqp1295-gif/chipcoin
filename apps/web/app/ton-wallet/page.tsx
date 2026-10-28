@@ -343,14 +343,14 @@ export default function TonWalletPage() {
                         border: '1px solid rgba(52, 211, 153, 0.4)',
                       }}
                     >
-                      ✓ Đã liên kết {boundMeta.shortName}
+                      ✓ {t('ton_bound_badge', 'Đã liên kết')} {boundMeta.shortName}
                     </span>
-                    <h2 style={{ fontSize: '1.4rem', marginTop: '4px' }}>Ví {boundMeta.networkName} Của Bạn</h2>
+                    <h2 style={{ fontSize: '1.4rem', marginTop: '4px' }}>{t('ton_bound_wallet_title', 'Ví {0} Của Bạn').replace('{0}', boundMeta.networkName)}</h2>
                   </div>
                 </div>
 
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>THỜI ĐIỂM XÁC THỰC</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('ton_bound_verified_at', 'THỜI ĐIỂM XÁC THỰC')}</div>
                   <div style={{ fontSize: '0.85rem', color: '#ffffff', fontWeight: 600 }}>
                     {currentUser?.tonBoundAt ? new Date(currentUser.tonBoundAt).toLocaleString() : '2026-10-20 12:00'}
                   </div>
@@ -369,7 +369,7 @@ export default function TonWalletPage() {
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '6px' }}>
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
-                    ĐỊA CHỈ VÍ {boundMeta.shortName.toUpperCase()} ĐÃ XÁC THỰC:
+                    {t('ton_bound_address_label', 'ĐỊA CHỈ VÍ {0} ĐÃ XÁC THỰC:').replace('{0}', boundMeta.shortName.toUpperCase())}
                   </div>
                   <a
                     href={boundMeta.explorerUrl}
@@ -382,7 +382,7 @@ export default function TonWalletPage() {
                       fontWeight: 700,
                     }}
                   >
-                    🔍 Tra cứu trên {boundMeta.explorerName} ↗
+                    🔍 {t('ton_bound_explorer', 'Tra cứu trên {0} ↗').replace('{0}', boundMeta.explorerName)}
                   </a>
                 </div>
                 <div
@@ -416,7 +416,7 @@ export default function TonWalletPage() {
                   }}
                 >
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                    HẠNG HỘI VIÊN &amp; QUYỀN RÚT CHIP:
+                    {t('ton_bound_tier_withdraw', 'HẠNG HỘI VIÊN & QUYỀN RÚT CHIP:')}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
                     <span
@@ -432,7 +432,7 @@ export default function TonWalletPage() {
                       {currentUser?.tier}
                     </span>
                     <span style={{ fontSize: '0.85rem', color: canWithdraw ? '#34d399' : '#fbbf24', fontWeight: 600 }}>
-                      {canWithdraw ? '✓ Được phép rút chip sang ví cá nhân' : '🔒 Cần đạt CHIP PLATINUM để rút'}
+                      {canWithdraw ? t('ton_bound_withdraw_allowed', '✓ Được phép rút chip sang ví cá nhân') : t('ton_bound_withdraw_locked', '🔒 Cần đạt CHIP PLATINUM để rút')}
                     </span>
                   </div>
                 </div>
@@ -446,20 +446,20 @@ export default function TonWalletPage() {
                   }}
                 >
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                    BẢO VỆ TIMELOCK 7 NGÀY:
+                    {t('ton_bound_timelock_label', 'BẢO VỆ TIMELOCK 7 NGÀY:')}
                   </div>
                   <div style={{ fontSize: '0.85rem', color: '#38bdf8', fontWeight: 600, marginTop: '6px' }}>
-                    🛡️ Đang kích hoạt khóa an toàn đóng băng địa chỉ ví
+                    {t('ton_bound_timelock_active', '🛡️ Đang kích hoạt khóa an toàn đóng băng địa chỉ ví')}
                   </div>
                 </div>
               </div>
 
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                 <Link href="/wallet" className="nav-btn" style={{ fontSize: '0.9rem', padding: '9px 20px' }}>
-                  🪙 Đi tới Ví CHIP để giao dịch →
+                  {t('ton_bound_goto_wallet', '🪙 Đi tới Ví CHIP để giao dịch →')}
                 </Link>
                 <Link href="/rank" className="btn-secondary" style={{ fontSize: '0.9rem', padding: '9px 20px' }}>
-                  👑 Xem điều kiện thăng cấp
+                  {t('ton_bound_view_ranks', '👑 Xem điều kiện thăng cấp')}
                 </Link>
                 <button
                   type="button"
@@ -467,7 +467,7 @@ export default function TonWalletPage() {
                   className="btn-secondary"
                   style={{ fontSize: '0.9rem', padding: '9px 20px', cursor: 'pointer' }}
                 >
-                  🔄 Liên kết ví khác
+                  {t('ton_bound_change_wallet', '🔄 Liên kết ví khác')}
                 </button>
               </div>
             </section>
@@ -546,7 +546,7 @@ export default function TonWalletPage() {
 
               {/* Network Mode Selector */}
               <div style={{ marginBottom: '1.5rem' }}>
-                <label className="form-label">1. Chọn Mạng Lưới Ví Bạn Muốn Liên Kết:</label>
+                <label className="form-label">{t('ton_step1_label', '1. Chọn Mạng Lưới Ví Bạn Muốn Liên Kết:')}</label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px' }}>
                   <button
                     type="button"
@@ -568,10 +568,10 @@ export default function TonWalletPage() {
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ fontSize: '1.2rem' }}>💎</span>
-                      <strong>Mạng The Open Network (TON)</strong>
+                      <strong>{t('ton_net_ton_title', 'Mạng The Open Network (TON)')}</strong>
                     </div>
                     <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                      Tonkeeper, Telegram @wallet, MyTonWallet (bắt đầu bằng EQ/UQ)
+                      {t('ton_net_ton_desc', 'Tonkeeper, Telegram @wallet, MyTonWallet (bắt đầu bằng EQ/UQ)')}
                     </div>
                   </button>
 
@@ -595,10 +595,10 @@ export default function TonWalletPage() {
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ fontSize: '1.2rem' }}>🔴</span>
-                      <strong>Mạng TRON (TRC-20 USDT)</strong>
+                      <strong>{t('ton_net_tron_title', 'Mạng TRON (TRC-20 USDT)')}</strong>
                     </div>
                     <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                      Binance, OKX, TronLink, Trust Wallet (bắt đầu bằng chữ T)
+                      {t('ton_net_tron_desc', 'Binance, OKX, TronLink, Trust Wallet (bắt đầu bằng chữ T)')}
                     </div>
                   </button>
                 </div>
@@ -607,7 +607,7 @@ export default function TonWalletPage() {
               {/* Wallet Provider Selector */}
               <div style={{ marginBottom: '1.5rem' }}>
                 <label className="form-label">
-                  2. Chọn ứng dụng ví bạn đang sử dụng:
+                  {t('ton_step2_label', '2. Chọn ứng dụng ví bạn đang sử dụng:')}
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
                   {(networkMode === 'TON'
@@ -660,7 +660,7 @@ export default function TonWalletPage() {
                     className="btn-secondary"
                     style={{ fontSize: '0.78rem', padding: '6px 12px', textDecoration: 'none', color: '#38bdf8' }}
                   >
-                    💎 Mở Tonkeeper Web (app.tonkeeper.com) ↗
+                    {t('ton_open_tonkeeper', '💎 Mở Tonkeeper Web (app.tonkeeper.com) ↗')}
                   </a>
                   <a
                     href="https://t.me/wallet"
@@ -669,7 +669,7 @@ export default function TonWalletPage() {
                     className="btn-secondary"
                     style={{ fontSize: '0.78rem', padding: '6px 12px', textDecoration: 'none', color: '#38bdf8' }}
                   >
-                    ✈️ Mở Telegram Wallet (@wallet) ↗
+                    {t('ton_open_telegram', '✈️ Mở Telegram Wallet (@wallet) ↗')}
                   </a>
                 </div>
               )}
@@ -677,7 +677,7 @@ export default function TonWalletPage() {
               {/* Address Input */}
               <div className="form-group">
                 <label className="form-label" htmlFor="tonAddr">
-                  3. Nhập Địa Chỉ Ví {networkMode === 'TON' ? 'TON (EQ... hoặc UQ...)' : 'TRON (bắt đầu bằng T...)'}:
+                  {t('ton_step3_label', '3. Nhập Địa Chỉ Ví {0}:').replace('{0}', networkMode === 'TON' ? 'TON (EQ... / UQ...)' : 'TRON (T...)')}
                 </label>
                 <input
                   id="tonAddr"
@@ -706,7 +706,7 @@ export default function TonWalletPage() {
                       marginTop: '8px',
                     }}
                   >
-                    💡 <strong>Phát hiện địa chỉ mạng TRON (TRC-20):</strong> Bạn đang nhập địa chỉ bắt đầu bằng chữ <code>T</code> (34 ký tự). Hệ thống tự động chấp nhận và định tuyến tra cứu qua <strong>Tronscan</strong>.
+                    {t('ton_tron_detected_alert', '💡 Phát hiện địa chỉ mạng TRON (TRC-20): Bạn đang nhập địa chỉ bắt đầu bằng chữ T (34 ký tự). Hệ thống tự động chấp nhận và định tuyến tra cứu qua Tronscan.')}
                   </div>
                 )}
               </div>
@@ -729,7 +729,7 @@ export default function TonWalletPage() {
                       textDecoration: 'underline',
                     }}
                   >
-                    Ví mẫu TON (Tonkeeper)
+                    {t('ton_sample_ton', 'Ví mẫu TON (Tonkeeper)')}
                   </button>
 
                   <button
@@ -747,7 +747,7 @@ export default function TonWalletPage() {
                       textDecoration: 'underline',
                     }}
                   >
-                    Ví mẫu TRON TRC-20 (TBztwg...)
+                    {t('ton_sample_tron', 'Ví mẫu TRON TRC-20 (TBztwg...)')}
                   </button>
                 </div>
               )}
@@ -767,7 +767,7 @@ export default function TonWalletPage() {
                   fontWeight: 700,
                 }}
               >
-                Tiếp tục: Ký mật mã Proof →
+                {t('ton_btn_continue_proof', 'Tiếp tục: Ký mật mã Proof →')}
               </button>
             </div>
           )}
@@ -794,7 +794,7 @@ export default function TonWalletPage() {
               >
                 <div>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>
-                    NONCE ĐỘC BẢN HỆ THỐNG PHÁT HÀNH:
+                    {t('ton_nonce_label', 'NONCE ĐỘC BẢN HỆ THỐNG PHÁT HÀNH:')}
                   </span>
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: '#f5d77f' }}>
                     {nonce}
@@ -803,7 +803,7 @@ export default function TonWalletPage() {
 
                 <div>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>
-                    CHỮ KÝ MẬT MÃ ED25519 TONPROOF ĐƯỢC TẠO:
+                    {t('ton_proof_signature_label', 'CHỮ KÝ MẬT MÃ ED25519 TONPROOF ĐƯỢC TẠO:')}
                   </span>
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: '#38bdf8' }}>
                     {signedNonce}
@@ -832,7 +832,7 @@ export default function TonWalletPage() {
                     fontWeight: 700,
                   }}
                 >
-                  Xác nhận chữ ký &amp; Nhận OTP Email →
+                  {t('ton_btn_confirm_proof', 'Xác nhận chữ ký & Nhận OTP Email →')}
                 </button>
               </div>
             </div>
@@ -848,7 +848,7 @@ export default function TonWalletPage() {
 
               <div className="form-group" style={{ maxWidth: '320px' }}>
                 <label className="form-label" htmlFor="otp">
-                  Nhập Mã OTP 6 Số:
+                  {t('ton_enter_otp_label', 'Nhập Mã OTP 6 Số:')}
                 </label>
                 <input
                   id="otp"
@@ -877,10 +877,10 @@ export default function TonWalletPage() {
                   className="btn-secondary"
                   style={{ fontSize: '0.82rem', padding: '6px 14px' }}
                 >
-                  {otpTimer > 0 ? `Gửi lại sau (${otpTimer}s)` : 'Gửi lại mã OTP'}
+                  {otpTimer > 0 ? t('ton_resend_otp_wait', 'Gửi lại sau ({0}s)').replace('{0}', String(otpTimer)) : t('ton_resend_otp_btn', 'Gửi lại mã OTP')}
                 </button>
                 <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                  Email nhận: {currentUser?.email}
+                  {t('ton_otp_email_dest', 'Email nhận:')} {currentUser?.email}
                 </span>
               </div>
 
@@ -907,7 +907,7 @@ export default function TonWalletPage() {
                   {verifying ? (
                     <>
                       <div className="spinner" />
-                      Đang xác minh giao dịch...
+                      {t('ton_verifying', 'Đang xác minh giao dịch...')}
                     </>
                   ) : (
                     `💎 ${t('ton_btn_bind')}`
@@ -933,10 +933,10 @@ export default function TonWalletPage() {
             <span style={{ fontSize: '1.8rem' }}>✈️</span>
             <div>
               <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#0088cc' }}>
-                Liên Kết Tài Khoản Telegram (Telegram Wallet & Mini App)
+                {t('ton_telegram_card_title', 'Liên Kết Tài Khoản Telegram (Telegram Wallet & Mini App)')}
               </h3>
               <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                Đồng bộ tài khoản CHIPCOIN với Telegram User ID để nhận diện và nạp/rút USDT tức thì qua bot
+                {t('ton_telegram_card_desc', 'Đồng bộ tài khoản CHIPCOIN với Telegram User ID để nhận diện và nạp/rút USDT tức thì qua bot')}
               </span>
             </div>
           </div>
@@ -952,20 +952,20 @@ export default function TonWalletPage() {
               border: `1px solid ${currentUser?.telegramUserId ? 'rgba(52, 211, 153, 0.35)' : 'rgba(251, 191, 36, 0.35)'}`,
             }}
           >
-            {currentUser?.telegramUserId ? '✓ ĐÃ LIÊN KẾT TELEGRAM' : 'CHƯA LIÊN KẾT'}
+            {currentUser?.telegramUserId ? t('ton_telegram_linked_badge', '✓ ĐÃ LIÊN KẾT TELEGRAM') : t('ton_telegram_not_linked_badge', 'CHƯA LIÊN KẾT')}
           </span>
         </div>
 
         <form onSubmit={handleBindTelegram} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', alignItems: 'flex-end' }}>
           <div>
             <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '6px' }}>
-              Telegram User ID (Định danh Telegram):
+              {t('ton_telegram_id_label', 'Telegram User ID (Định danh Telegram):')}
             </label>
             <input
               type="text"
               value={telegramId}
               onChange={(e) => setTelegramId(e.target.value)}
-              placeholder="Ví dụ: tg_982144912 hoặc 982144912"
+              placeholder={t('ton_telegram_id_ph', 'Ví dụ: tg_982144912 hoặc 982144912')}
               className="form-input"
               style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem' }}
             />
@@ -973,13 +973,13 @@ export default function TonWalletPage() {
 
           <div>
             <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '6px' }}>
-              Telegram Username (Tùy chọn):
+              {t('ton_telegram_user_label', 'Telegram Username (Tùy chọn):')}
             </label>
             <input
               type="text"
               value={telegramUsername}
               onChange={(e) => setTelegramUsername(e.target.value)}
-              placeholder="Ví dụ: @chipcoin_vip"
+              placeholder={t('ton_telegram_user_ph', 'Ví dụ: @chipcoin_vip')}
               className="form-input"
               style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem' }}
             />
@@ -999,14 +999,14 @@ export default function TonWalletPage() {
                 fontSize: '0.9rem',
               }}
             >
-              Lưu Liên Kết Telegram
+              {t('ton_btn_save_telegram', 'Lưu Liên Kết Telegram')}
             </button>
           </div>
         </form>
 
         {currentUser?.telegramUserId && (
           <div style={{ marginTop: '12px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-            Đang liên kết với: <b style={{ color: '#ffffff' }}>{currentUser.telegramUserId}</b>{' '}
+            {t('ton_telegram_current_bound', 'Đang liên kết với:')} <b style={{ color: '#ffffff' }}>{currentUser.telegramUserId}</b>{' '}
             {currentUser.telegramUsername && <span style={{ color: '#38bdf8' }}>({`@${currentUser.telegramUsername}`})</span>}
           </div>
         )}

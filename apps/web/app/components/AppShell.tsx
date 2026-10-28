@@ -193,10 +193,10 @@ export default function AppShell({ children }: AppShellProps) {
       >
         <div className="status-dot-pulse" style={{ width: '16px', height: '16px' }} />
         <div style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--accent-bronze)' }}>
-          Đang xác thực quyền truy cập Hệ Thống Quản Trị...
+          {t('authenticating_admin', 'Đang xác thực quyền truy cập Hệ Thống Quản Trị...')}
         </div>
         <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-          Hệ thống bảo vệ phân quyền 4 cấp độ CHIPCOIN
+          {t('auth_protection_4levels', 'Hệ thống bảo vệ phân quyền 4 cấp độ CHIPCOIN')}
         </div>
       </div>
     );

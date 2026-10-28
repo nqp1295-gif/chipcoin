@@ -334,14 +334,14 @@ export default function SystemReportsPage() {
                   transition: 'all 0.15s ease',
                 }}
               >
-                {p === '24h' ? '24 Giờ' : p === '7d' ? '7 Ngày' : p === '30d' ? '30 Ngày' : p === '90d' ? '90 Ngày' : 'Tất cả'}
+                {p === '24h' ? t('time_24h', '24 Giờ') : p === '7d' ? t('time_7d', '7 Ngày') : p === '30d' ? t('time_30d', '30 Ngày') : p === '90d' ? t('time_90d', '90 Ngày') : t('time_all', 'Tất cả')}
               </button>
             ))}
           </div>
 
           {/* Date Range Inputs */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Từ:</span>
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{t('report_from_label', 'Từ:')}</span>
             <input
               type="date"
               value={startDate}
@@ -352,7 +352,7 @@ export default function SystemReportsPage() {
               className="form-input"
               style={{ padding: '4px 8px', fontSize: '0.8rem', width: '130px' }}
             />
-            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Đến:</span>
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{t('report_to_label', 'Đến:')}</span>
             <input
               type="date"
               value={endDate}
@@ -377,55 +377,55 @@ export default function SystemReportsPage() {
       >
         <div className="glass-card glow-hover">
           <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-            TỔNG HỘI VIÊN ĐĂNG KÝ
+            {t('rep_kpi_total_members', 'TỔNG HỘI VIÊN ĐĂNG KÝ')}
           </div>
           <div style={{ fontSize: '1.9rem', fontWeight: 800, color: '#ffffff', marginTop: '6px' }}>
             {totalMembersCount}
           </div>
           <div style={{ fontSize: '0.8rem', color: '#34d399', marginTop: '4px' }}>
-            {filteredMembers.length} tài khoản trong kỳ lọc
+            {filteredMembers.length} {t('rep_accounts_in_period', 'tài khoản trong kỳ lọc')}
           </div>
         </div>
 
         <div className="glass-card glow-hover">
           <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-            LƯỢT THĂNG CẤP HỘI VIÊN
+            {t('rep_kpi_promotions', 'LƯỢT THĂNG CẤP HỘI VIÊN')}
           </div>
           <div style={{ fontSize: '1.9rem', fontWeight: 800, color: '#f5d77f', marginTop: '6px' }}>
             {filteredPromotions.length}
           </div>
           <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            Đạt chuẩn hạn mức chip &amp; F1
+            {t('rep_kpi_promotions_sub', 'Đạt chuẩn hạn mức chip & F1')}
           </div>
         </div>
 
         <div className="glass-card glow-hover">
           <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-            TỔNG CHIP ĐÃ PHÂN BỔ
+            {t('rep_kpi_total_chips', 'TỔNG CHIP ĐÃ PHÂN BỔ')}
           </div>
           <div style={{ fontSize: '1.9rem', fontWeight: 800, color: '#38bdf8', marginTop: '6px' }}>
             {totalAllocatedChips.toLocaleString()}
           </div>
           <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            Xuất phát từ Kho Quỹ Master Treasury
+            {t('rep_kpi_total_chips_sub', 'Xuất phát từ Kho Quỹ Master Treasury')}
           </div>
         </div>
 
         <div className="glass-card glow-hover">
           <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-            TỶ LỆ THÀNH CÔNG OUTBOX
+            {t('rep_kpi_outbox_rate', 'TỶ LỆ THÀNH CÔNG OUTBOX')}
           </div>
           <div style={{ fontSize: '1.9rem', fontWeight: 800, color: '#34d399', marginTop: '6px' }}>
             100%
           </div>
           <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            Không bản ghi lỗi, SLA &lt; 2s
+            {t('rep_kpi_outbox_sub', 'Không bản ghi lỗi, SLA < 2s')}
           </div>
         </div>
       </div>
 
       {/* =====================================================================
-          REPORT 1: LỊCH SỬ TẠO TÀI KHOẢN HỘI VIÊN
+          {t('rep_sec1_badge', 'REPORT 1: LỊCH SỬ TẠO TÀI KHOẢN HỘI VIÊN')}
           ===================================================================== */}
       <section className="glass-card" style={{ padding: '1.8rem' }}>
         <div
@@ -441,17 +441,17 @@ export default function SystemReportsPage() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '1.3rem' }}>👥</span>
-              <h2 style={{ fontSize: '1.3rem' }}>1. Lịch Sử Tạo Tài Khoản Hội Viên</h2>
+              <h2 style={{ fontSize: '1.3rem' }}>{t('rep_sec1_title', '1. Lịch Sử Tạo Tài Khoản Hội Viên')}</h2>
             </div>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '2px' }}>
-              Ghi nhận tất cả thành viên đăng ký qua cổng hội viên hoặc được khởi tạo trong hệ thống
+              {t('rep_sec1_desc', 'Ghi nhận tất cả thành viên đăng ký qua cổng hội viên hoặc được khởi tạo trong hệ thống')}
             </p>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             <input
               type="text"
-              placeholder="Tìm theo email, mã hoặc bảo trợ..."
+              placeholder={t('rep_sec1_search_ph', 'Tìm theo email, mã hoặc bảo trợ...')}
               value={userSearch}
               onChange={(e) => setUserSearch(e.target.value)}
               className="form-input"
@@ -462,7 +462,7 @@ export default function SystemReportsPage() {
               className="nav-btn"
               style={{ padding: '7px 16px', fontSize: '0.82rem' }}
             >
-              📥 Xuất CSV Hội Viên
+              📥 {t('rep_btn_export_members', 'Xuất CSV Hội Viên')}
             </button>
           </div>
         </div>
@@ -471,20 +471,20 @@ export default function SystemReportsPage() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>MÃ HỘI VIÊN</th>
-                <th>TÊN NGƯỜI DÙNG / EMAIL</th>
-                <th>MÃ GIỚI THIỆU</th>
-                <th>NGƯỜI BẢO TRỢ</th>
-                <th>THỜI GIAN TẠO</th>
-                <th>TRẠNG THÁI</th>
-                <th>HẠNG BAN ĐẦU</th>
+                <th>{t('rep_col_member_id', 'MÃ HỘI VIÊN')}</th>
+                <th>{t('rep_col_username_email', 'TÊN NGƯỜI DÙNG / EMAIL')}</th>
+                <th>{t('rep_col_ref_code', 'MÃ GIỚI THIỆU')}</th>
+                <th>{t('rep_col_sponsor', 'NGƯỜI BẢO TRỢ')}</th>
+                <th>{t('rep_col_created_at', 'THỜI GIAN TẠO')}</th>
+                <th>{t('rep_col_status', 'TRẠNG THÁI')}</th>
+                <th>{t('rep_col_init_tier', 'HẠNG BAN ĐẦU')}</th>
               </tr>
             </thead>
             <tbody>
               {filteredMembers.length === 0 ? (
                 <tr>
                   <td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
-                    Không có tài khoản hội viên nào trong khoảng thời gian đã chọn ({startDate} đến {endDate}).
+                    {t('rep_sec1_empty', 'Không có tài khoản hội viên nào trong khoảng thời gian đã chọn.')}
                   </td>
                 </tr>
               ) : (
@@ -501,7 +501,7 @@ export default function SystemReportsPage() {
                       {m.referralCode}
                     </td>
                     <td style={{ fontFamily: 'var(--font-mono)', color: m.referredBy ? '#38bdf8' : 'var(--text-muted)' }}>
-                      {m.referredBy || '— (Trực tiếp)'}
+                      {m.referredBy || t('rep_direct_referral', '— (Trực tiếp)')}
                     </td>
                     <td style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
                       {new Date(m.created_at).toLocaleDateString()} {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -544,7 +544,7 @@ export default function SystemReportsPage() {
       </section>
 
       {/* =====================================================================
-          REPORT 2: LỊCH SỬ THĂNG CẤP CỦA HỘI VIÊN
+          {t('rep_sec2_badge', 'REPORT 2: LỊCH SỬ THĂNG CẤP CỦA HỘI VIÊN')}
           ===================================================================== */}
       <section className="glass-card" style={{ padding: '1.8rem' }}>
         <div
@@ -560,10 +560,10 @@ export default function SystemReportsPage() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '1.3rem' }}>👑</span>
-              <h2 style={{ fontSize: '1.3rem' }}>2. Lịch Sử Thăng Cấp Của Hội Viên</h2>
+              <h2 style={{ fontSize: '1.3rem' }}>{t('rep_sec2_title', '2. Lịch Sử Thăng Cấp Của Hội Viên')}</h2>
             </div>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '2px' }}>
-              Theo dõi quá trình nâng bậc hạng thành viên dựa trên điều kiện tích lũy CHIP và mạng lưới F1
+              {t('rep_sec2_desc', 'Theo dõi quá trình nâng bậc hạng thành viên dựa trên điều kiện tích lũy CHIP và mạng lưới F1')}
             </p>
           </div>
 
@@ -574,7 +574,7 @@ export default function SystemReportsPage() {
               className="form-input"
               style={{ width: '180px', padding: '6px 10px', fontSize: '0.85rem' }}
             >
-              <option value="ALL">Tất cả hạng mức</option>
+              <option value="ALL">{t('rep_filter_all_tiers', 'Tất cả hạng mức')}</option>
               <option value="CHIP MEMBER">CHIP MEMBER</option>
               <option value="CHIP GOLD">CHIP GOLD</option>
               <option value="CHIP PLATINUM">CHIP PLATINUM</option>
@@ -587,7 +587,7 @@ export default function SystemReportsPage() {
               className="nav-btn"
               style={{ padding: '7px 16px', fontSize: '0.82rem' }}
             >
-              📥 Xuất CSV Thăng Cấp
+              📥 {t('rep_btn_export_promotions', 'Xuất CSV Thăng Cấp')}
             </button>
           </div>
         </div>
@@ -596,19 +596,19 @@ export default function SystemReportsPage() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>HỘI VIÊN</th>
-                <th>HẠNG TRƯỚC</th>
-                <th>HẠNG MỚI ĐẠT ĐƯỢC</th>
-                <th>ĐIỀU KIỆN ĐÃ ĐẠT</th>
-                <th>THỜI GIAN THĂNG CẤP</th>
-                <th>QUYỀN LỢI ÁP DỤNG</th>
+                <th>{t('rep_col_member', 'HỘI VIÊN')}</th>
+                <th>{t('rep_col_prev_tier', 'HẠNG TRƯỚC')}</th>
+                <th>{t('rep_col_new_tier', 'HẠNG MỚI ĐẠT ĐƯỢC')}</th>
+                <th>{t('rep_col_condition_met', 'ĐIỀU KIỆN ĐÃ ĐẠT')}</th>
+                <th>{t('rep_col_promoted_at', 'THỜI GIAN THĂNG CẤP')}</th>
+                <th>{t('rep_col_privileges_applied', 'QUYỀN LỢI ÁP DỤNG')}</th>
               </tr>
             </thead>
             <tbody>
               {filteredPromotions.length === 0 ? (
                 <tr>
                   <td colSpan={6} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
-                    Không có bản ghi thăng cấp nào trong khoảng thời gian đã chọn ({startDate} đến {endDate}).
+                    {t('rep_sec2_empty', 'Không có bản ghi thăng cấp nào trong khoảng thời gian đã chọn.')}
                   </td>
                 </tr>
               ) : (
@@ -651,7 +651,7 @@ export default function SystemReportsPage() {
       </section>
 
       {/* =====================================================================
-          REPORT 3: THỐNG KÊ CHIP PHÂN BỔ THEO HẠNG & THEO HỘI VIÊN
+          {t('rep_sec3_badge', 'REPORT 3: THỐNG KÊ CHIP PHÂN BỔ THEO HẠNG & THEO HỘI VIÊN')}
           ===================================================================== */}
       <section className="glass-card" style={{ padding: '1.8rem' }}>
         <div
@@ -667,10 +667,10 @@ export default function SystemReportsPage() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '1.3rem' }}>🪙</span>
-              <h2 style={{ fontSize: '1.3rem' }}>3. Thống Kê CHIP Phân Bổ Theo Hạng &amp; Theo Hội Viên</h2>
+              <h2 style={{ fontSize: '1.3rem' }}>{t('rep_sec3_title', '3. Thống Kê CHIP Phân Bổ Theo Hạng & Theo Hội Viên')}</h2>
             </div>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '2px' }}>
-              Đối soát số lượng CHIP đã cấp phát, hoa hồng giới thiệu và tỷ trọng phân bổ giữa các cấp bậc
+              {t('rep_sec3_desc', 'Đối soát số lượng CHIP đã cấp phát, hoa hồng giới thiệu và tỷ trọng phân bổ giữa các cấp bậc')}
             </p>
           </div>
 
@@ -679,44 +679,44 @@ export default function SystemReportsPage() {
             className="nav-btn"
             style={{ padding: '7px 16px', fontSize: '0.82rem' }}
           >
-            📥 Xuất CSV Phân Bổ CHIP
+            📥 {t('rep_btn_export_allocations', 'Xuất CSV Phân Bổ CHIP')}
           </button>
         </div>
 
         {/* 3A. Bảng Phân Bổ Theo Cấp Bậc Hạng */}
         <div style={{ marginBottom: '2rem' }}>
           <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#f5d77f', marginBottom: '10px' }}>
-            A. TỔNG HỢP PHÂN BỔ THEO CẤP BẬC HẠNG (TIER SUMMARY)
+            {t('rep_sec3a_heading', 'A. TỔNG HỢP PHÂN BỔ THEO CẤP BẬC HẠNG (TIER SUMMARY)')}
           </div>
 
           <div className="table-container">
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>CẤP BẬC HỘI VIÊN</th>
-                  <th>SỐ LƯỢNG HỘI VIÊN</th>
-                  <th>TỔNG CHIP ĐÃ CẤP</th>
-                  <th>% HOA HỒNG NHÁNH</th>
-                  <th>HOA HỒNG ĐÃ CHI TRẢ</th>
-                  <th>TỶ TRỌNG TRONG KỲ</th>
+                  <th>{t('rep_col_tier', 'CẤP BẬC HỘI VIÊN')}</th>
+                  <th>{t('rep_col_member_count', 'SỐ LƯỢNG HỘI VIÊN')}</th>
+                  <th>{t('rep_col_total_chips_issued', 'TỔNG CHIP ĐÃ CẤP')}</th>
+                  <th>{t('rep_col_branch_comm_rate', '% HOA HỒNG NHÁNH')}</th>
+                  <th>{t('rep_col_comm_paid', 'HOA HỒNG ĐÃ CHI TRẢ')}</th>
+                  <th>{t('rep_col_share_in_period', 'TỶ TRỌNG TRONG KỲ')}</th>
                 </tr>
               </thead>
               <tbody>
-                {tierAllocationsSummary.map((t) => (
-                  <tr key={t.tier}>
+                {tierAllocationsSummary.map((item) => (
+                  <tr key={item.tier}>
                     <td>
                       <span
                         style={{
                           fontWeight: 700,
-                          color: TIER_CONFIGS[t.tier].badgeColor,
+                          color: TIER_CONFIGS[item.tier].badgeColor,
                         }}
                       >
-                        {t.tier}
+                        {item.tier}
                       </span>
                     </td>
-                    <td style={{ color: '#ffffff', fontWeight: 600 }}>{t.memberCount} hội viên</td>
+                    <td style={{ color: '#ffffff', fontWeight: 600 }}>{item.memberCount} {t('rep_members_unit', 'hội viên')}</td>
                     <td style={{ color: '#ffffff', fontWeight: 700 }}>
-                      {t.totalAllocated.toLocaleString()} CHIP
+                      {item.totalAllocated.toLocaleString()} CHIP
                     </td>
                     <td>
                       <span
@@ -725,21 +725,21 @@ export default function SystemReportsPage() {
                           borderRadius: '6px',
                           fontSize: '0.75rem',
                           fontWeight: 700,
-                          background: t.bonusRate > 0 ? 'rgba(212, 175, 55, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-                          color: t.bonusRate > 0 ? '#f5d77f' : 'var(--text-muted)',
+                          background: item.bonusRate > 0 ? 'rgba(212, 175, 55, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                          color: item.bonusRate > 0 ? '#f5d77f' : 'var(--text-muted)',
                         }}
                       >
-                        +{t.bonusRate * 100}%
+                        +{item.bonusRate * 100}%
                       </span>
                     </td>
                     <td style={{ color: '#34d399', fontWeight: 600 }}>
-                      {t.totalCommission.toLocaleString()} CHIP
+                      {item.totalCommission.toLocaleString()} CHIP
                     </td>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '0.82rem', fontWeight: 700 }}>{t.percentage}%</span>
+                        <span style={{ fontSize: '0.82rem', fontWeight: 700 }}>{item.percentage}%</span>
                         <div style={{ width: '80px', height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '999px', overflow: 'hidden' }}>
-                          <div style={{ width: `${t.percentage}%`, height: '100%', background: TIER_CONFIGS[t.tier].badgeColor }} />
+                          <div style={{ width: `${item.percentage}%`, height: '100%', background: TIER_CONFIGS[item.tier].badgeColor }} />
                         </div>
                       </div>
                     </td>
@@ -763,7 +763,7 @@ export default function SystemReportsPage() {
             }}
           >
             <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#f5d77f' }}>
-              B. CHI TIẾT PHÂN BỔ THEO TỪNG HỘI VIÊN (MEMBER DETAILS)
+              {t('rep_sec3b_heading', 'B. CHI TIẾT PHÂN BỔ THEO TỪNG HỘI VIÊN (MEMBER DETAILS)')}
             </div>
 
             <select
@@ -772,7 +772,7 @@ export default function SystemReportsPage() {
               className="form-input"
               style={{ width: '180px', padding: '5px 10px', fontSize: '0.82rem' }}
             >
-              <option value="ALL">Lọc theo tất cả hạng</option>
+              <option value="ALL">{t('rep_filter_all_tiers_option', 'Lọc theo tất cả hạng')}</option>
               <option value="CHIP MEMBER">CHIP MEMBER</option>
               <option value="CHIP GOLD">CHIP GOLD</option>
               <option value="CHIP PLATINUM">CHIP PLATINUM</option>
@@ -786,18 +786,18 @@ export default function SystemReportsPage() {
               <thead>
                 <tr>
                   <th>HỘI VIÊN</th>
-                  <th>HẠNG HIỆN TẠI</th>
-                  <th>CHIP NHIỆM VỤ / HOẠT ĐỘNG</th>
-                  <th>CHIP HOA HỒNG NHÁNH F1</th>
+                  <th>{t('rep_col_current_tier', 'HẠNG HIỆN TẠI')}</th>
+                  <th>{t('rep_col_activity_chips', 'CHIP NHIỆM VỤ / HOẠT ĐỘNG')}</th>
+                  <th>{t('rep_col_f1_comm_chips', 'CHIP HOA HỒNG NHÁNH F1')}</th>
                   <th>TỔNG CHIP ĐÃ CẤP</th>
-                  <th>LẦN PHÂN BỔ GẦN NHẤT</th>
+                  <th>{t('rep_col_last_allocated_at', 'LẦN PHÂN BỔ GẦN NHẤT')}</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredMemberAllocations.length === 0 ? (
                   <tr>
                     <td colSpan={6} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
-                      Không có bản ghi phân bổ nào trong khoảng thời gian đã chọn ({startDate} đến {endDate}).
+                      {t('rep_sec3b_empty', 'Không có bản ghi phân bổ nào trong khoảng thời gian đã chọn.')}
                     </td>
                   </tr>
                 ) : (

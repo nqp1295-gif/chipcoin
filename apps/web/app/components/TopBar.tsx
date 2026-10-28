@@ -108,7 +108,7 @@ export default function TopBar({ onOpenMobileMenu }: TopBarProps) {
             type="button"
             className="topbar-mobile-toggle"
             onClick={onOpenMobileMenu}
-            aria-label="Mở menu"
+            aria-label={t('nav_menu', 'Mở menu')}
           >
             <svg
               width="22"
@@ -162,7 +162,7 @@ export default function TopBar({ onOpenMobileMenu }: TopBarProps) {
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
               }}
-              title="Chuyển đổi ngôn ngữ / Change Language"
+              title={t('change_language', 'Chuyển đổi ngôn ngữ / Change Language')}
             >
               <span style={{ fontSize: '1rem' }}>{currentLangMeta.flag}</span>
               <span className="hide-mobile" style={{ textTransform: 'uppercase' }}>
@@ -251,7 +251,7 @@ export default function TopBar({ onOpenMobileMenu }: TopBarProps) {
                     type="button"
                     className="topbar-logout-btn"
                     onClick={handleSystemLogout}
-                    title="Đăng xuất khỏi cổng quản trị"
+                    title={t('topbar_logout', 'Đăng xuất khỏi cổng quản trị')}
                   >
                     {t('btn_logout')}
                   </button>
@@ -334,7 +334,7 @@ export default function TopBar({ onOpenMobileMenu }: TopBarProps) {
                       type="button"
                       className="topbar-logout-btn"
                       onClick={handleMemberLogout}
-                      title="Đăng xuất khỏi tài khoản hội viên"
+                      title={t('topbar_logout', 'Đăng xuất khỏi tài khoản hội viên')}
                     >
                       {t('btn_logout')}
                     </button>

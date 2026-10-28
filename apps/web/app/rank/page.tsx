@@ -29,6 +29,18 @@ const IS_LOCAL_DEV =
 
 export default function RankPage() {
   const { t } = useI18n();
+
+  const getTierDesc = (tierKey: string) => {
+    switch (tierKey) {
+      case 'MEMBER': return t('rank_desc_member');
+      case 'GOLD': return t('rank_desc_gold');
+      case 'PLATINUM': return t('rank_desc_platinum');
+      case 'DIAMOND': return t('rank_desc_diamond');
+      case 'SPECIAL': return t('rank_desc_special');
+      default: return '';
+    }
+  };
+
   const [currentUser, setCurrentUser] = useState<StoredUser | null>(null);
   const [promotions, setPromotions] = useState<TierPromotionRecord[]>([]);
 
@@ -359,7 +371,7 @@ export default function RankPage() {
                         )}
                       </div>
                       <div style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginTop: '2px' }}>
-                        {config.description}
+                        {getTierDesc(tierKey)}
                       </div>
                     </div>
                   </div>
@@ -401,7 +413,7 @@ export default function RankPage() {
                     <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.88rem' }}>
                       <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ color: '#34d399' }}>✓</span>
-                        <span>Đã đăng ký tài khoản xác thực email</span>
+                        <span>{t('rank_req_verified_email')}</span>
                       </li>
                       {config.minChips > 0 && (
                         <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -409,7 +421,7 @@ export default function RankPage() {
                             {chips >= config.minChips ? '✓' : '○'}
                           </span>
                           <span>
-                            Thu thập &gt; <strong>{config.minChips.toLocaleString()} CHIP</strong> (Hiện có: {chips.toLocaleString()})
+                            {t('rank_req_collect_prefix')} <strong>{config.minChips.toLocaleString()} CHIP</strong> ({t('rank_req_current')} {chips.toLocaleString()})
                           </span>
                         </li>
                       )}
@@ -419,7 +431,7 @@ export default function RankPage() {
                             {verifiedReferrals >= config.minVerifiedReferrals ? '✓' : '○'}
                           </span>
                           <span>
-                            Giới thiệu được <strong>{config.minVerifiedReferrals} người</strong> đăng ký xác thực email (Hiện có: {verifiedReferrals})
+                            {t('rank_req_refer_prefix')} <strong>{config.minVerifiedReferrals}</strong> {t('rank_req_refer_suffix')} ({t('rank_req_current')} {verifiedReferrals})
                           </span>
                         </li>
                       )}
@@ -438,8 +450,8 @@ export default function RankPage() {
                         </span>
                         <span>
                           {config.bonusRate > 0
-                            ? `Thưởng ${config.bonusRate * 100}% chip từ người được giới thiệu kiếm được`
-                            : 'Không có thưởng thêm'}
+                            ? `${t('rank_priv_commission_prefix')} ${config.bonusRate * 100}% ${t('rank_priv_commission_suffix')}`
+                            : t('ref_tier_rule_member')}
                         </span>
                       </li>
                       <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -448,8 +460,8 @@ export default function RankPage() {
                         </span>
                         <span>
                           {config.canTransferAndWithdraw
-                            ? 'Được phép gửi / nhận chip và rút chip khỏi hệ thống'
-                            : 'Chưa hỗ trợ rút chip (cần đạt từ CHIP PLATINUM trở lên)'}
+                            ? t('rank_priv_withdraw_allowed')
+                            : t('rank_priv_withdraw_locked')}
                         </span>
                       </li>
                       <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -458,8 +470,8 @@ export default function RankPage() {
                         </span>
                         <span>
                           {config.extendedPrivileges
-                            ? 'Đặc quyền mở rộng từ hệ thống (Hạn mức cao, ưu tiên đối soát giao dịch)'
-                            : 'Đặc quyền cơ bản'}
+                            ? t('rank_priv_extended')
+                            : t('rank_priv_basic')}
                         </span>
                       </li>
                     </ul>
@@ -487,11 +499,11 @@ export default function RankPage() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>HỘI VIÊN</th>
-                <th>HẠNG CŨ</th>
-                <th>HẠNG MỚI</th>
-                <th>ĐIỀU KIỆN ĐẠT ĐƯỢC</th>
-                <th>THỜI GIAN</th>
+                <th>{t('rank_col_member')}</th>
+                <th>{t('rank_col_old_tier')}</th>
+                <th>{t('rank_col_new_tier')}</th>
+                <th>{t('rank_col_condition')}</th>
+                <th>{t('rank_col_time')}</th>
               </tr>
             </thead>
             <tbody>

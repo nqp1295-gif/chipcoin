@@ -178,7 +178,7 @@ export default function SystemTrackingPage() {
         <div className="glass-card glow-hover">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-              TRẠNG THÁI WORKER
+              {t('sys_worker_status')}
             </span>
             <span className="status-dot-pulse" />
           </div>
@@ -191,7 +191,7 @@ export default function SystemTrackingPage() {
               fontFamily: 'Outfit, sans-serif',
             }}
           >
-            Hoạt Động 100%
+            {t('sys_worker_active_100')}
           </div>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
             PostgreSQL Advisory Lock Active
@@ -200,7 +200,7 @@ export default function SystemTrackingPage() {
 
         <div className="glass-card glow-hover">
           <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-            TẦN SUẤT QUÉT
+            SCAN FREQUENCY
           </div>
           <div
             style={{
@@ -211,16 +211,16 @@ export default function SystemTrackingPage() {
               fontFamily: 'Outfit, sans-serif',
             }}
           >
-            2.0 Giây / Chu kỳ
+            2.0s / Cycle
           </div>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            Batch size: 50 bản ghi / lần
+            Batch size: 50 records / scan
           </div>
         </div>
 
         <div className="glass-card glow-hover">
           <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-            ĐỘ TRỄ TRUNG BÌNH
+            AVG LATENCY
           </div>
           <div
             style={{
@@ -240,7 +240,7 @@ export default function SystemTrackingPage() {
 
         <div className="glass-card glow-hover">
           <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-            HÀNG ĐỢI NGHẼN (DLQ)
+            DEAD LETTER QUEUE (DLQ)
           </div>
           <div
             style={{
@@ -251,10 +251,10 @@ export default function SystemTrackingPage() {
               fontFamily: 'Outfit, sans-serif',
             }}
           >
-            0 Bản ghi
+            0 Records
           </div>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            Không có thông điệp lỗi tồn đọng
+            Zero unhandled errors
           </div>
         </div>
       </div>
@@ -262,7 +262,7 @@ export default function SystemTrackingPage() {
       {/* 5-Step Pipeline Architecture Visualization */}
       <div className="glass-card" style={{ padding: '1.8rem' }}>
         <h3 style={{ fontSize: '1.15rem', marginBottom: '1.4rem' }}>
-          Quy Trình Xử Lý 5 Bước Của Transactional Outbox
+          5-Step Transactional Outbox Pipeline
         </h3>
 
         <div
@@ -274,38 +274,38 @@ export default function SystemTrackingPage() {
         >
           {[
             {
-              step: 'Bước 1',
-              title: 'Tạo Event DB',
-              desc: 'Ghi bản ghi nghiệp vụ & outbox trong cùng 1 Transaction ACID',
+              stepNum: '1',
+              title: t('track_step_1_title', 'Tạo Event DB'),
+              desc: t('track_step_1_desc', 'Ghi bản ghi nghiệp vụ & outbox trong cùng 1 Transaction ACID'),
               icon: '💾',
             },
             {
-              step: 'Bước 2',
-              title: 'Mã Hoá Payload',
-              desc: 'Khoá mã hoá AES-256-GCM bảo vệ an toàn token trong CSDL',
+              stepNum: '2',
+              title: t('track_step_2_title', 'Mã Hoá Payload'),
+              desc: t('track_step_2_desc', 'Khoá mã hoá AES-256-GCM bảo vệ an toàn token trong CSDL'),
               icon: '🔐',
             },
             {
-              step: 'Bước 3',
-              title: 'Khóa Hàng Đợi',
-              desc: 'Advisory Lock loại trừ xung đột đa worker chạy song song',
+              stepNum: '3',
+              title: t('track_step_3_title', 'Khóa Hàng Đợi'),
+              desc: t('track_step_3_desc', 'Advisory Lock loại trừ xung đột đa worker chạy song song'),
               icon: '🔒',
             },
             {
-              step: 'Bước 4',
-              title: 'Gửi Email Resend',
-              desc: 'Gọi HTTP client gửi email chứa đường dẫn xác thực',
+              stepNum: '4',
+              title: t('track_step_4_title', 'Gửi Email Resend'),
+              desc: t('track_step_4_desc', 'Gọi HTTP client gửi email chứa đường dẫn xác thực'),
               icon: '🚀',
             },
             {
-              step: 'Bước 5',
-              title: 'Đóng Dấu Sent',
-              desc: 'Cập nhật processed_at, lưu lịch sử kiểm toán hoàn tất',
+              stepNum: '5',
+              title: t('track_step_5_title', 'Đóng Dấu Sent'),
+              desc: t('track_step_5_desc', 'Cập nhật processed_at, lưu lịch sử kiểm toán hoàn tất'),
               icon: '✅',
             },
           ].map((item) => (
             <div
-              key={item.step}
+              key={item.stepNum}
               style={{
                 background: 'rgba(0,0,0,0.4)',
                 border: '1px solid var(--border-bronze)',
@@ -329,7 +329,7 @@ export default function SystemTrackingPage() {
                     color: '#f5d77f',
                   }}
                 >
-                  {item.step}
+                  {t('track_step_prefix', 'Bước')} {item.stepNum}
                 </span>
               </div>
               <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#ffffff' }}>
@@ -356,9 +356,9 @@ export default function SystemTrackingPage() {
           }}
         >
           <div>
-            <h3 style={{ fontSize: '1.15rem' }}>Nhật Ký Sự Kiện Outbox Thời Gian Thực</h3>
+            <h3 style={{ fontSize: '1.15rem' }}>{t('track_realtime_heading', 'Nhật Ký Sự Kiện Outbox Thời Gian Thực')}</h3>
             <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-              Theo dõi chi tiết các email xác minh và sự kiện phân quyền được chuyển tiếp
+              {t('track_realtime_desc', 'Theo dõi chi tiết các email xác minh và sự kiện phân quyền được chuyển tiếp')}
             </span>
           </div>
 
@@ -378,7 +378,7 @@ export default function SystemTrackingPage() {
                   cursor: 'pointer',
                 }}
               >
-                {f === 'ALL' ? 'Tất cả' : f === 'SENT' ? 'Đã Gửi (Sent)' : 'Chờ Quét'}
+                {f === 'ALL' ? t('time_all', 'Tất cả') : f === 'SENT' ? t('sys_email_filter_sent', 'Đã Gửi (Sent)') : t('track_filter_pending', 'Chờ Quét')}
               </button>
             ))}
           </div>
@@ -388,13 +388,13 @@ export default function SystemTrackingPage() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>MÃ SỰ KIỆN</th>
-                <th>LOẠI SỰ KIỆN</th>
-                <th>NGƯỜI NHẬN</th>
-                <th>THỜI GIAN TẠO</th>
-                <th>ĐỘ TRỄ</th>
-                <th>THỬ LẠI</th>
-                <th>TRẠNG THÁI</th>
+                <th>{t('track_col_event_id', 'MÃ SỰ KIỆN')}</th>
+                <th>{t('track_col_event_type', 'LOẠI SỰ KIỆN')}</th>
+                <th>{t('track_col_recipient', 'NGƯỜI NHẬN')}</th>
+                <th>{t('rep_col_created_at', 'THỜI GIAN TẠO')}</th>
+                <th>{t('track_col_latency', 'ĐỘ TRỄ')}</th>
+                <th>{t('track_col_retry', 'THỬ LẠI')}</th>
+                <th>{t('rep_col_status', 'TRẠNG THÁI')}</th>
               </tr>
             </thead>
             <tbody>
@@ -411,7 +411,7 @@ export default function SystemTrackingPage() {
                   <td style={{ fontFamily: 'JetBrains Mono, monospace', color: '#34d399', fontSize: '0.82rem' }}>
                     {ev.latencyMs} ms
                   </td>
-                  <td>{ev.retryCount} lần</td>
+                  <td>{ev.retryCount} {t('track_retry_count_unit', 'lần')}</td>
                   <td>
                     <span
                       style={{

@@ -872,17 +872,17 @@ export default function Sidebar({
               <Link href="/system/tracking" className="sidebar-system-card" onClick={onCloseMobile}>
                 <div className="system-status-indicator">
                   <span className="status-dot-pulse" />
-                  <span className="system-status-text">Outbox: 100% Hoạt Động</span>
+                  <span className="system-status-text">{t('sidebar_sys_status')}</span>
                   <span className="system-live-chip">LIVE</span>
                 </div>
-                <div className="system-meta-text">PostgreSQL Worker &amp; Quản Trị Hệ Thống</div>
-                <div className="system-meta-sub">Chu kỳ quét 2s • 0 bản ghi tồn</div>
+                <div className="system-meta-text">{t('sidebar_sys_meta')}</div>
+                <div className="system-meta-sub">{t('sidebar_sys_sub')}</div>
               </Link>
             ) : (
               <Link
                 href="/system/tracking"
                 className="sidebar-collapsed-indicator"
-                title="Hệ thống Quản Trị: Outbox Worker 100% Live"
+                title="Outbox Worker Live"
               >
                 <span className="status-dot-pulse" />
               </Link>
@@ -900,16 +900,16 @@ export default function Sidebar({
                 <div className="system-status-indicator">
                   <span style={{ fontSize: '0.9rem' }}>🛡️</span>
                   <span className="system-status-text" style={{ color: '#ffffff' }}>
-                    Ví Điểm Hội Viên Active
+                    {t('sidebar_status_active')}
                   </span>
                 </div>
-                <div className="system-meta-text">Tích lũy điểm CHIP nội bộ</div>
-                <div className="system-meta-sub">An toàn • Minh bạch • Khép kín</div>
+                <div className="system-meta-text">{t('sidebar_status_meta')}</div>
+                <div className="system-meta-sub">{t('sidebar_status_sub')}</div>
               </div>
             ) : (
               <div
                 className="sidebar-collapsed-indicator"
-                title="Hội viên CHIPCOIN: Hệ thống điểm thưởng an toàn"
+                title="CHIPCOIN Member"
               >
                 <span>🛡️</span>
               </div>

@@ -267,63 +267,63 @@ export default function SystemEmailMonitoringPage() {
         {/* Card 1: SMTP Config */}
         <div className="glass-card">
           <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '8px' }}>
-            MÁY CHỦ SMTP GMAIL
+            {t('sys_email_smtp_card_title', 'MÁY CHỦ SMTP GMAIL')}
           </div>
           <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#38bdf8', marginBottom: '6px' }}>
             smtp.gmail.com:587
           </div>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-            <div>Giao thức: <strong>STARTTLS (Port 587 / 465)</strong></div>
-            <div>Bảo mật: <strong>AES-256 GCM Cipher</strong></div>
-            <div style={{ color: '#4ade80', marginTop: '4px' }}>● Sẵn sàng kết nối</div>
+            <div>{t('sys_email_proto_label', 'Giao thức:')} <strong>STARTTLS (Port 587 / 465)</strong></div>
+            <div>{t('sys_email_security_label', 'Bảo mật:')} <strong>AES-256 GCM Cipher</strong></div>
+            <div style={{ color: '#4ade80', marginTop: '4px' }}>{t('sys_email_ready_label', '● Sẵn sàng kết nối')}</div>
           </div>
         </div>
 
         {/* Card 2: Sender Identity */}
         <div className="glass-card">
           <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '8px' }}>
-            DANH TÍNH NGƯỜI GỬI (FROM)
+            {t('sys_email_sender_card_title', 'DANH TÍNH NGƯỜI GỬI (FROM)')}
           </div>
           <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#f5d77f', marginBottom: '6px', wordBreak: 'break-all' }}>
             jinofc.ytb@gmail.com
           </div>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-            <div>Tên hiển thị: <strong>CHIPCOIN | Xác thực tài khoản</strong></div>
-            <div>App Password: <strong>Đã mã hóa trong biến môi trường</strong></div>
-            <div style={{ color: '#4ade80', marginTop: '4px' }}>● Xác thực SMTP AUTH OK</div>
+            <div>{t('sys_email_disp_name', 'Tên hiển thị:')} <strong>CHIPCOIN | Accounts</strong></div>
+            <div>{t('sys_email_app_pwd', 'App Password:')} <strong>{t('sys_email_env_encrypted', 'Đã mã hóa trong biến môi trường')}</strong></div>
+            <div style={{ color: '#4ade80', marginTop: '4px' }}>{t('sys_email_smtp_auth_ok', '● Xác thực SMTP AUTH OK')}</div>
           </div>
         </div>
 
         {/* Card 3: Outbox Queue */}
         <div className="glass-card">
           <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '8px' }}>
-            HÀNG ĐỢI TRANSACTIONAL OUTBOX
+            {t('sys_email_queue_card_title', 'HÀNG ĐỢI TRANSACTIONAL OUTBOX')}
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '6px' }}>
             <span style={{ fontSize: '1.6rem', fontWeight: 800, color: '#4ade80' }}>
               {statusData?.outbox_counts?.sent ?? 142}
             </span>
-            <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>đã gửi thành công</span>
+            <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{t('sys_email_sent_success', 'đã gửi thành công')}</span>
           </div>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-            <div>Đang chờ (Pending): <strong>{statusData?.outbox_counts?.pending ?? 0}</strong></div>
-            <div>Đang phát (Processing): <strong>{statusData?.outbox_counts?.processing ?? 0}</strong></div>
-            <div>Thất bại (Failed): <strong>{statusData?.outbox_counts?.failed ?? 0}</strong></div>
+            <div>{t('sys_email_pending_count', 'Đang chờ (Pending):')} <strong>{statusData?.outbox_counts?.pending ?? 0}</strong></div>
+            <div>{t('sys_email_processing_count', 'Đang phát (Processing):')} <strong>{statusData?.outbox_counts?.processing ?? 0}</strong></div>
+            <div>{t('sys_email_failed_count', 'Thất bại (Failed):')} <strong>{statusData?.outbox_counts?.failed ?? 0}</strong></div>
           </div>
         </div>
 
         {/* Card 4: Policy & Protection */}
         <div className="glass-card">
           <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '8px' }}>
-            CHÍNH SÁCH BẢO MẬT &amp; HẠN MỨC
+            {t('sys_email_sec_card_title', 'CHÍNH SÁCH BẢO MẬT & HẠN MỨC')}
           </div>
           <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f5d77f', marginBottom: '6px' }}>
             TTL 15 Phút / Single-Use
           </div>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-            <div>Cooldown gửi lại: <strong>60 giây</strong></div>
-            <div>Hạn mức yêu cầu: <strong>Tối đa 3 lần/giờ</strong></div>
-            <div>Bảo vệ Link Scanner: <strong style={{ color: '#4ade80' }}>BẬT (User Action Required)</strong></div>
+            <div>{t('sys_email_cooldown_label', 'Cooldown gửi lại:')} <strong>60s</strong></div>
+            <div>{t('sys_email_hourly_limit', 'Hạn mức yêu cầu:')} <strong>3x / hour</strong></div>
+            <div>{t('sys_email_link_scanner_label', 'Bảo vệ Link Scanner:')} <strong style={{ color: '#4ade80' }}>{t('sys_email_user_action_req', 'BẬT (User Action Required)')}</strong></div>
           </div>
         </div>
       </div>
@@ -348,10 +348,10 @@ export default function SystemEmailMonitoringPage() {
           </div>
           <div>
             <h2 style={{ fontSize: '1.25rem', margin: 0, color: '#fff' }}>
-              Công Cụ Kiểm Thử Gửi Email Trực Tiếp (Live SMTP Dispatcher)
+              {t('sys_email_tester_title', 'Công Cụ Kiểm Thử Gửi Email Trực Tiếp (Live SMTP Dispatcher)')}
             </h2>
             <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-              Phát hành thử nghiệm các mẫu email chính thức từ <strong>jinofc.ytb@gmail.com</strong> để kiểm tra kết nối mạng và độ trễ.
+              {t('sys_email_tester_desc', 'Phát hành thử nghiệm các mẫu email chính thức từ jinofc.ytb@gmail.com để kiểm tra kết nối mạng và độ trễ.')}
             </p>
           </div>
         </div>
@@ -361,7 +361,7 @@ export default function SystemEmailMonitoringPage() {
             {/* Template Selection */}
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: 'var(--text-secondary)' }}>
-                Chọn Mẫu Email (Template):
+                {t('sys_email_select_tpl_label', 'Chọn Mẫu Email (Template):')}
               </label>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <label
@@ -385,10 +385,10 @@ export default function SystemEmailMonitoringPage() {
                   />
                   <div>
                     <div style={{ fontSize: '0.9rem', fontWeight: 600, color: testTemplate === 'A' ? '#38bdf8' : '#fff' }}>
-                      Mẫu A: Xác thực địa chỉ email (Token 15 phút)
+                      {t('sys_email_tpl_a_title', 'Mẫu A: Xác thực địa chỉ email (Token 15 phút)')}
                     </div>
                     <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                      [CHIPCOIN] Xác thực địa chỉ email của bạn — Kèm mã xác minh một lần và nút kích hoạt an toàn.
+                      {t('sys_email_tpl_a_desc', '[CHIPCOIN] Xác thực địa chỉ email của bạn — Kèm mã xác minh một lần và nút kích hoạt an toàn.')}
                     </div>
                   </div>
                 </label>
@@ -414,10 +414,10 @@ export default function SystemEmailMonitoringPage() {
                   />
                   <div>
                     <div style={{ fontSize: '0.9rem', fontWeight: 600, color: testTemplate === 'B' ? '#4ade80' : '#fff' }}>
-                      Mẫu B: Xác thực thành công (Active Confirmation)
+                      {t('sys_email_tpl_b_title', 'Mẫu B: Xác thực thành công (Active Confirmation)')}
                     </div>
                     <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                      [CHIPCOIN] Tài khoản của bạn đã được xác thực thành công — Chào mừng phân hạng CHIP MEMBER.
+                      {t('sys_email_tpl_b_desc', '[CHIPCOIN] Tài khoản của bạn đã được xác thực thành công — Chào mừng phân hạng CHIP MEMBER.')}
                     </div>
                   </div>
                 </label>
@@ -443,10 +443,10 @@ export default function SystemEmailMonitoringPage() {
                   />
                   <div>
                     <div style={{ fontSize: '0.9rem', fontWeight: 600, color: testTemplate === 'C' ? '#f5d77f' : '#fff' }}>
-                      Mẫu C: Kiểm thử kỹ thuật (SMTP Health Check Ping)
+                      {t('sys_email_tpl_c_title', 'Mẫu C: Kiểm thử kỹ thuật (SMTP Health Check Ping)')}
                     </div>
                     <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                      [CHIPCOIN] Thư Kiểm Thử Hệ Thống — Đo lường độ trễ mạng và tính toàn vẹn của kết nối SMTP.
+                      {t('sys_email_tpl_c_desc', '[CHIPCOIN] Thư Kiểm Thử Hệ Thống — Đo lường độ trễ mạng và tính toàn vẹn của kết nối SMTP.')}
                     </div>
                   </div>
                 </label>
@@ -460,7 +460,7 @@ export default function SystemEmailMonitoringPage() {
                   htmlFor="testRecipient"
                   style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: 'var(--text-secondary)' }}
                 >
-                  Địa Chỉ Email Người Nhận (Test Recipient):
+                  {t('sys_email_recipient_label', 'Địa Chỉ Email Người Nhận (Test Recipient):')}
                 </label>
                 <input
                   id="testRecipient"
@@ -468,11 +468,11 @@ export default function SystemEmailMonitoringPage() {
                   className="form-input"
                   value={testRecipient}
                   onChange={(e) => setTestRecipient(e.target.value)}
-                  placeholder="vd: jinofc.ytb@gmail.com hoặc email cá nhân"
+                  placeholder={t('sys_email_recipient_ph', 'vd: jinofc.ytb@gmail.com hoặc email cá nhân')}
                   required
                 />
                 <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '6px' }}>
-                  💡 Gợi ý: Bạn có thể nhập <code>jinofc.ytb@gmail.com</code> để gửi thử nghiệm vào chính hòm thư hệ thống hoặc bất kỳ email nào của quản trị viên.
+                  {t('sys_email_hint_tip', '💡 Gợi ý: Bạn có thể nhập jinofc.ytb@gmail.com để gửi thử nghiệm vào chính hòm thư hệ thống hoặc bất kỳ email nào của quản trị viên.')}
                 </p>
               </div>
 
@@ -486,7 +486,7 @@ export default function SystemEmailMonitoringPage() {
                   {sendingTest ? (
                     <>
                       <div className="spinner" style={{ width: '18px', height: '18px' }} />
-                      Đang Kết Nối SMTP &amp; Phát Thư...
+                      {t('sys_email_btn_sending', 'Đang Kết Nối SMTP & Phát Thư...')}
                     </>
                   ) : (
                     <>
@@ -494,7 +494,7 @@ export default function SystemEmailMonitoringPage() {
                         <line x1="22" y1="2" x2="11" y2="13" />
                         <polygon points="22 2 15 22 11 13 2 9 22 2" />
                       </svg>
-                      Gửi Thử Nghiệm Ngay Qua Gmail SMTP
+                      {t('sys_email_btn_send_test', 'Gửi Thử Nghiệm Ngay Qua Gmail SMTP')}
                     </>
                   )}
                 </button>
@@ -531,10 +531,10 @@ export default function SystemEmailMonitoringPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
           <div>
             <h2 style={{ fontSize: '1.25rem', margin: 0, color: '#fff' }}>
-              Nhật Ký Hàng Đợi Email (Outbox Queue Jobs)
+              {t('sys_email_outbox_title', 'Nhật Ký Hàng Đợi Email (Outbox Queue Jobs)')}
             </h2>
             <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-              Theo dõi lịch sử phát hành email xác thực, độ trễ gửi thư và trạng thái gửi của từng phiên
+              {t('sys_email_outbox_desc', 'Theo dõi lịch sử phát hành email xác thực, độ trễ gửi thư và trạng thái gửi của từng phiên')}
             </p>
           </div>
 
@@ -573,12 +573,12 @@ export default function SystemEmailMonitoringPage() {
           <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', textAlign: 'left' }}>
-                <th style={{ padding: '10px 12px', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>MÃ JOB</th>
-                <th style={{ padding: '10px 12px', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>LOẠI MẪU</th>
-                <th style={{ padding: '10px 12px', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>NGƯỜI NHẬN</th>
-                <th style={{ padding: '10px 12px', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>ĐỘ TRỄ</th>
-                <th style={{ padding: '10px 12px', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>TRẠNG THÁI</th>
-                <th style={{ padding: '10px 12px', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>THỜI GIAN</th>
+                <th style={{ padding: '10px 12px', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{t('sys_email_col_job_id', 'MÃ JOB')}</th>
+                <th style={{ padding: '10px 12px', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{t('sys_email_col_template', 'LOẠI MẪU')}</th>
+                <th style={{ padding: '10px 12px', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{t('sys_email_col_recipient', 'NGƯỜI NHẬN')}</th>
+                <th style={{ padding: '10px 12px', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{t('sys_email_col_latency', 'ĐỘ TRỄ')}</th>
+                <th style={{ padding: '10px 12px', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{t('sys_email_col_status', 'TRẠNG THÁI')}</th>
+                <th style={{ padding: '10px 12px', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{t('sys_email_col_time', 'THỜI GIAN')}</th>
               </tr>
             </thead>
             <tbody>
@@ -623,7 +623,7 @@ export default function SystemEmailMonitoringPage() {
                               : '#ef4444',
                       }}
                     >
-                      {log.status === 'SENT' ? '✓ ĐÃ GỬI' : log.status}
+                      {log.status === 'SENT' ? t('sys_email_status_sent_badge', '✓ ĐÃ GỬI') : log.status}
                     </span>
                   </td>
                   <td style={{ padding: '12px', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
@@ -639,7 +639,7 @@ export default function SystemEmailMonitoringPage() {
       {/* Technical Architecture Specs Callout */}
       <div className="glass-card" style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.12)' }}>
         <h3 style={{ fontSize: '1.05rem', color: '#f5d77f', marginBottom: '8px' }}>
-          🛡️ Tiêu Chuẩn Kỹ Thuật Xác Thực Email CHIPCOIN (RFC / OWASP Compliant)
+          {t('sys_email_rfc_heading', '🛡️ Tiêu Chuẩn Kỹ Thuật Xác Thực Email CHIPCOIN (RFC / OWASP Compliant)')}
         </h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
           <div>

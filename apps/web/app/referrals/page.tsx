@@ -271,18 +271,18 @@ export default function ReferralsPage() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>HỘI VIÊN ĐƯỢC GIỚI THIỆU</th>
-                <th>NGÀY THAM GIA</th>
-                <th>XÁC THỰC EMAIL</th>
-                <th>ĐIỂM F1 ĐÃ TÍCH LŨY</th>
-                <th>HOA HỒNG PHÂN BỔ BẠN NHẬN</th>
+                <th>{t('ref_col_member')}</th>
+                <th>{t('ref_col_joined_at')}</th>
+                <th>{t('ref_col_email_verified')}</th>
+                <th>{t('ref_col_f1_chips')}</th>
+                <th>{t('ref_col_commission_earned')}</th>
               </tr>
             </thead>
             <tbody>
               {referrals.length === 0 ? (
                 <tr>
                   <td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
-                    Chưa có hội viên nào trong nhánh giới thiệu. Hãy chia sẻ mã của bạn để nhận ngay +10,000 CHIP!
+                    {t('ref_empty_branches')}
                   </td>
                 </tr>
               ) : (
@@ -358,11 +358,11 @@ export default function ReferralsPage() {
             fontSize: '0.85rem',
           }}
         >
-          <div>• <strong>CHIP MEMBER</strong>: 0% thưởng thêm</div>
-          <div>• <strong>CHIP GOLD</strong>: 3% thưởng chip F1 kiếm được</div>
-          <div>• <strong>CHIP PLATINUM</strong>: 5% thưởng chip F1 + Quyền rút chip</div>
-          <div>• <strong>CHIP DIAMOND</strong>: 10% thưởng chip F1 + Đặc quyền mở rộng</div>
-          <div>• <strong>CHIP SPECIAL</strong>: 20% thưởng chip F1 + Đặc quyền tối đa</div>
+          <div>• <strong>CHIP MEMBER</strong>: {t('ref_tier_rule_member')}</div>
+          <div>• <strong>CHIP GOLD</strong>: {t('ref_tier_rule_gold')}</div>
+          <div>• <strong>CHIP PLATINUM</strong>: {t('ref_tier_rule_platinum')}</div>
+          <div>• <strong>CHIP DIAMOND</strong>: {t('ref_tier_rule_diamond')}</div>
+          <div>• <strong>CHIP SPECIAL</strong>: {t('ref_tier_rule_special')}</div>
         </div>
       </section>
     </div>

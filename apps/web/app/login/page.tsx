@@ -134,16 +134,16 @@ export default function LoginPage() {
           <div>
             <div className="alert-box alert-success" style={{ display: 'block' }}>
               <div style={{ fontWeight: 700, fontSize: '1.05rem', marginBottom: '6px' }}>
-                👋 Chào mừng trở lại, {loggedInUser.username || loggedInUser.email}!
+                👋 {t('login_welcome_back', 'Chào mừng trở lại')}, {loggedInUser.username || loggedInUser.email}!
               </div>
               <p style={{ fontSize: '0.9rem' }}>
-                Đang chuyển hướng vào Bảng Tổng Quan Cá Nhân...
+                {t('login_redirecting', 'Đang chuyển hướng vào Bảng Tổng Quan Cá Nhân...')}
               </p>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '1.5rem' }}>
               <Link href="/" className="btn-primary" style={{ textAlign: 'center' }}>
-                Về bảng điều khiển ngay →
+                {t('login_goto_dash', 'Về bảng điều khiển ngay →')}
               </Link>
             </div>
           </div>

@@ -30,6 +30,23 @@ export default function SystemAccountsPage() {
   const router = useRouter();
   const { t } = useI18n();
 
+  const roleToTitle = (role: string): string => {
+    switch (role) {
+      case 'ADMIN':
+        return '👑 ' + t('role_admin', 'Quản Trị Viên');
+      case 'ASSISTANT':
+        return '💼 ' + t('role_assistant', 'Trợ Lý');
+      case 'SPECIALIST':
+        return '🔍 ' + t('role_specialist', 'Chuyên Viên');
+      case 'USER':
+        return '👤 ' + t('role_user', 'Người Dùng');
+      case 'OWNER':
+        return '👑 ' + t('role_owner', 'Sở Hữu');
+      default:
+        return role;
+    }
+  };
+
   // Current session
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [loadingSession, setLoadingSession] = useState(true);
@@ -532,16 +549,16 @@ export default function SystemAccountsPage() {
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '1.5rem' }}>👑</span>
-            <span className="badge badge-role-admin">Cấp 1 &bull; Tối Cao</span>
+            <span className="badge badge-role-admin">{t('sys_role_card_admin_badge', 'Cấp 1 • Tối Cao')}</span>
           </div>
           <div style={{ fontSize: '1.4rem', fontWeight: 800, marginTop: '8px', color: '#f5d77f' }}>
             {adminCount}
           </div>
           <div style={{ fontWeight: 700, fontSize: '1rem', color: '#ffffff', marginTop: '2px' }}>
-            Quản Trị Viên (ADMIN)
+            {t('sys_role_card_admin_title', 'Quản Trị Viên (ADMIN)')}
           </div>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-            Toàn quyền hệ thống: quản lý tài khoản, tạo &amp; phân quyền, cấu hình outbox.
+            {t('sys_role_card_admin_desc', 'Toàn quyền hệ thống: quản lý tài khoản, tạo & phân quyền, cấu hình outbox.')}
           </div>
         </div>
 
@@ -556,16 +573,16 @@ export default function SystemAccountsPage() {
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '1.5rem' }}>💼</span>
-            <span className="badge badge-role-assistant">Cấp 2 &bull; Điều Hành</span>
+            <span className="badge badge-role-assistant">{t('sys_role_card_asst_badge', 'Cấp 2 • Điều Hành')}</span>
           </div>
           <div style={{ fontSize: '1.4rem', fontWeight: 800, marginTop: '8px', color: '#a5b4fc' }}>
             {assistantCount}
           </div>
           <div style={{ fontWeight: 700, fontSize: '1rem', color: '#ffffff', marginTop: '2px' }}>
-            Trợ Lý (ASSISTANT)
+            {t('sys_role_card_asst_title', 'Trợ Lý (ASSISTANT)')}
           </div>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-            Hỗ trợ ban quản trị, giám sát trạng thái tài khoản &amp; phê duyệt quy trình.
+            {t('sys_role_card_asst_desc', 'Hỗ trợ ban quản trị, giám sát trạng thái tài khoản & phê duyệt quy trình.')}
           </div>
         </div>
 
@@ -580,16 +597,16 @@ export default function SystemAccountsPage() {
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '1.5rem' }}>🔍</span>
-            <span className="badge badge-role-specialist">Cấp 3 &bull; Nghiệp Vụ</span>
+            <span className="badge badge-role-specialist">{t('sys_role_card_spec_badge', 'Cấp 3 • Nghiệp Vụ')}</span>
           </div>
           <div style={{ fontSize: '1.4rem', fontWeight: 800, marginTop: '8px', color: '#7dd3fc' }}>
             {specialistCount}
           </div>
           <div style={{ fontWeight: 700, fontSize: '1rem', color: '#ffffff', marginTop: '2px' }}>
-            Chuyên Viên (SPECIALIST)
+            {t('sys_role_card_spec_title', 'Chuyên Viên (SPECIALIST)')}
           </div>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-            Thực hiện nghiệp vụ chuyên sâu, kiểm soát số dư điểm thưởng &amp; đối soát.
+            {t('sys_role_card_spec_desc', 'Thực hiện nghiệp vụ chuyên sâu, kiểm soát số dư điểm thưởng & đối soát.')}
           </div>
         </div>
 
@@ -604,16 +621,16 @@ export default function SystemAccountsPage() {
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '1.5rem' }}>👤</span>
-            <span className="badge badge-role-user">Cấp 4 &bull; Thành Viên</span>
+            <span className="badge badge-role-user">{t('sys_role_card_user_badge', 'Cấp 4 • Thành Viên')}</span>
           </div>
           <div style={{ fontSize: '1.4rem', fontWeight: 800, marginTop: '8px', color: '#cbd5e1' }}>
             {userCount}
           </div>
           <div style={{ fontWeight: 700, fontSize: '1rem', color: '#ffffff', marginTop: '2px' }}>
-            Người Dùng (USER)
+            {t('sys_role_card_user_title', 'Người Dùng (USER)')}
           </div>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-            Thành viên thông thường nhận điểm thưởng, không có quyền quản lý hệ thống.
+            {t('sys_role_card_user_desc', 'Thành viên thông thường nhận điểm thưởng, không có quyền quản lý hệ thống.')}
           </div>
         </div>
       </div>
@@ -647,10 +664,10 @@ export default function SystemAccountsPage() {
             style={{ maxWidth: '220px' }}
           >
             <option value="ALL">{t('sys_filter_role_all', 'Tất Cả Vai Trò')} ({totalAccounts})</option>
-            <option value="ADMIN">👑 Quản Trị Viên ({adminCount})</option>
-            <option value="ASSISTANT">💼 Trợ Lý ({assistantCount})</option>
-            <option value="SPECIALIST">🔍 Chuyên Viên ({specialistCount})</option>
-            <option value="USER">👤 Người Dùng ({userCount})</option>
+            <option value="ADMIN">👑 {t('role_admin', 'Quản Trị Viên')} ({adminCount})</option>
+            <option value="ASSISTANT">💼 {t('role_assistant', 'Trợ Lý')} ({assistantCount})</option>
+            <option value="SPECIALIST">🔍 {t('role_specialist', 'Chuyên Viên')} ({specialistCount})</option>
+            <option value="USER">👤 {t('role_user', 'Người Dùng')} ({userCount})</option>
           </select>
         </div>
 
@@ -672,8 +689,8 @@ export default function SystemAccountsPage() {
               <th>{t('sys_col_acc_email', 'Tài Khoản / Email')}</th>
               <th>{t('sys_col_role', 'Cấp Phân Quyền')}</th>
               <th>{t('sys_col_status', 'Trạng Thái')}</th>
-              <th>Xác Minh Email</th>
-              <th>Thời Gian Tạo</th>
+              <th>{t('sys_col_email_verified', 'Xác Minh Email')}</th>
+              <th>{t('sys_col_created_at', 'Thời Gian Tạo')}</th>
               <th>{t('sys_col_updated_at', 'Thời Gian Cập Nhật')}</th>
               <th style={{ textAlign: 'center' }}>{t('sys_col_actions', 'Thao Tác')}</th>
             </tr>
@@ -684,14 +701,14 @@ export default function SystemAccountsPage() {
                 <td colSpan={7} style={{ textAlign: 'center', padding: '3rem' }}>
                   <div style={{ display: 'inline-block' }} className="spinner" />
                   <div style={{ marginTop: '10px', color: 'var(--text-muted)' }}>
-                    Đang tải danh sách tài khoản hệ thống...
+                    {t('sys_loading_accounts', 'Đang tải danh sách tài khoản hệ thống...')}
                   </div>
                 </td>
               </tr>
             ) : filteredAccounts.length === 0 ? (
               <tr>
                 <td colSpan={7} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                  Không tìm thấy tài khoản nào phù hợp bộ lọc.
+                  {t('sys_no_accounts_found', 'Không tìm thấy tài khoản nào phù hợp bộ lọc.')}
                 </td>
               </tr>
             ) : (
@@ -700,7 +717,7 @@ export default function SystemAccountsPage() {
                   <td>
                     <div style={{ fontWeight: 600, color: '#ffffff' }}>{account.email}</div>
                     <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                      {account.username || 'Chưa đặt tên'} &bull; ID: {account.id.substring(0, 8)}...
+                      {account.username || t('sys_unnamed_user', 'Chưa đặt tên')} &bull; ID: {account.id.substring(0, 8)}...
                     </div>
                   </td>
                   <td>
@@ -712,27 +729,27 @@ export default function SystemAccountsPage() {
                           </span>
                         ))
                       ) : (
-                        <span className="badge badge-role-user">👤 Người Dùng</span>
+                        <span className="badge badge-role-user">👤 {t('role_user', 'Người Dùng')}</span>
                       )}
                     </div>
                   </td>
                   <td>
                     {account.status === 'ACTIVE' ? (
-                      <span className="badge badge-active">Hoạt động</span>
+                      <span className="badge badge-active">{t('status_active', 'Hoạt động')}</span>
                     ) : (
                       <span className="badge badge-draft" style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-                        {account.status === 'SUSPENDED' ? 'Tạm Dừng' : account.status}
+                        {account.status === 'SUSPENDED' ? t('status_suspended', 'Tạm Dừng') : account.status}
                       </span>
                     )}
                   </td>
                   <td>
                     {account.email_verified_at ? (
                       <span style={{ color: 'var(--success)', fontSize: '0.85rem' }}>
-                        ✓ Đã xác minh
+                        ✓ {t('status_verified', 'Đã xác minh')}
                       </span>
                     ) : (
                       <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                        Chưa xác minh
+                        {t('status_unverified', 'Chưa xác minh')}
                       </span>
                     )}
                   </td>
@@ -747,7 +764,7 @@ export default function SystemAccountsPage() {
                       {/* 1. Reset Password */}
                       <button
                         onClick={() => handleOpenResetModal(account)}
-                        title="Đặt lại mật khẩu và tự động gửi email"
+                        title={t('sys_act_reset_pwd_tip', 'Đặt lại mật khẩu và tự động gửi email')}
                         className="btn-secondary"
                         style={{
                           padding: '5px 10px',
@@ -769,7 +786,7 @@ export default function SystemAccountsPage() {
                       {account.status === 'ACTIVE' ? (
                         <button
                           onClick={() => handleOpenStatusModal(account)}
-                          title="Tạm dừng hoạt động tài khoản (Yêu cầu ghi chú lý do)"
+                          title={t('sys_act_suspend_tip', 'Tạm dừng hoạt động tài khoản (Yêu cầu ghi chú lý do)')}
                           className="btn-secondary"
                           style={{
                             padding: '5px 10px',
@@ -789,7 +806,7 @@ export default function SystemAccountsPage() {
                       ) : (
                         <button
                           onClick={() => handleOpenStatusModal(account)}
-                          title="Kích hoạt lại tài khoản (Yêu cầu ghi chú lý do)"
+                          title={t('sys_act_activate_tip', 'Kích hoạt lại tài khoản (Yêu cầu ghi chú lý do)')}
                           className="btn-secondary"
                           style={{
                             padding: '5px 10px',
@@ -811,7 +828,7 @@ export default function SystemAccountsPage() {
                       {/* 3. Xóa Vĩnh Viễn */}
                       <button
                         onClick={() => handleOpenDeleteModal(account)}
-                        title="Xóa vĩnh viễn tài khoản & hoàn quỹ về ví TON quản trị"
+                        title={t('sys_act_delete_tip', 'Xóa vĩnh viễn tài khoản & hoàn quỹ về ví TON quản trị')}
                         className="btn-secondary"
                         style={{
                           padding: '5px 10px',
@@ -863,9 +880,9 @@ export default function SystemAccountsPage() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem' }}>
               <div>
-                <h2 style={{ fontSize: '1.3rem', margin: 0, color: '#f5d77f' }}>🔑 Đặt Lại Mật Khẩu Hội Viên</h2>
+                <h2 style={{ fontSize: '1.3rem', margin: 0, color: '#f5d77f' }}>{t('sys_modal_reset_title', '🔑 Đặt Lại Mật Khẩu Hội Viên')}</h2>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px' }}>
-                  Tài khoản: <strong style={{ color: '#ffffff' }}>{resetModalAccount.email}</strong>
+                  {t('sys_account_label', 'Tài khoản:')} <strong style={{ color: '#ffffff' }}>{resetModalAccount.email}</strong>
                 </p>
               </div>
               <button
@@ -878,7 +895,7 @@ export default function SystemAccountsPage() {
 
             <div style={{ background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '14px', borderRadius: '8px', marginBottom: '1.4rem' }}>
               <div style={{ fontSize: '0.78rem', color: '#38bdf8', textTransform: 'uppercase', fontWeight: 700, marginBottom: '6px' }}>
-                Mật Khẩu Tạm Thời Được Tạo Tự Động:
+                {t('sys_auto_temp_pwd_label', 'Mật Khẩu Tạm Thời Được Tạo Tự Động:')}
               </div>
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                 <input
@@ -896,17 +913,17 @@ export default function SystemAccountsPage() {
                   }}
                   className="btn-secondary"
                   style={{ padding: '8px 12px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
-                  title="Tạo chuỗi mật khẩu ngẫu nhiên khác"
+                  title={t('sys_btn_generate_random', 'Tạo chuỗi mật khẩu ngẫu nhiên khác')}
                 >
-                  🎲 Tạo mới
+                  {t('sys_btn_generate_random', '🎲 Tạo mới')}
                 </button>
               </div>
             </div>
 
             <div style={{ background: 'rgba(212, 175, 55, 0.08)', borderLeft: '4px solid #d4af37', padding: '12px', borderRadius: '4px', marginBottom: '1.5rem', fontSize: '0.82rem', color: '#cbd5e1', lineHeight: 1.5 }}>
-              <strong style={{ color: '#f5d77f' }}>Cơ chế tự động gửi email:</strong>
+              <strong style={{ color: '#f5d77f' }}>{t('sys_auto_email_mechanism', 'Cơ chế tự động gửi email:')}</strong>
               <p style={{ margin: '4px 0 0 0' }}>
-                Khi bạn xác nhận reset, hệ thống sẽ tự động gửi một email thông báo đến <strong>{resetModalAccount.email}</strong> chứa thông tin mật khẩu tạm thời trên kèm nội dung nhắc nhở hội viên đăng nhập và đổi lại password khác ngay để đảm bảo bảo mật.
+                {t('sys_reset_email_desc', 'Khi bạn xác nhận reset, hệ thống sẽ tự động gửi một email thông báo chứa thông tin mật khẩu tạm thời trên kèm nội dung nhắc nhở hội viên đăng nhập và đổi lại password khác ngay để đảm bảo bảo mật.')}
               </p>
             </div>
 
@@ -927,7 +944,7 @@ export default function SystemAccountsPage() {
                 disabled={isResetting || !tempPassword.trim()}
                 style={{ flex: 2 }}
               >
-                {isResetting ? 'Đang hạch toán & Gửi email...' : '✓ Xác Nhận Reset & Gửi Email'}
+                {isResetting ? t('sys_btn_resetting', 'Đang hạch toán & Gửi email...') : t('sys_btn_confirm_reset', '✓ Xác Nhận Reset & Gửi Email')}
               </button>
             </div>
           </div>
@@ -961,10 +978,10 @@ export default function SystemAccountsPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem' }}>
               <div>
                 <h2 style={{ fontSize: '1.3rem', margin: 0, color: statusModalAccount.status === 'ACTIVE' ? '#fbbf24' : '#34d399' }}>
-                  {statusModalAccount.status === 'ACTIVE' ? '⏸️ Tạm Dừng Hoạt Động Tài Khoản' : '▶️ Kích Hoạt Lại Tài Khoản'}
+                  {statusModalAccount.status === 'ACTIVE' ? t('sys_modal_suspend_title', '⏸️ Tạm Dừng Hoạt Động Tài Khoản') : t('sys_modal_activate_title', '▶️ Kích Hoạt Lại Tài Khoản')}
                 </h2>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px' }}>
-                  Tài khoản: <strong style={{ color: '#ffffff' }}>{statusModalAccount.email}</strong>
+                  {t('sys_account_label', 'Tài khoản:')} <strong style={{ color: '#ffffff' }}>{statusModalAccount.email}</strong>
                 </p>
               </div>
               <button
@@ -977,21 +994,21 @@ export default function SystemAccountsPage() {
 
             <div style={{ marginBottom: '1.2rem' }}>
               <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Lý Do Thực Hiện Hành Động <span style={{ color: '#f43f5e' }}>* (Bắt buộc)</span></span>
+                <span>{t('sys_reason_label', 'Lý Do Thực Hiện Hành Động')} <span style={{ color: '#f43f5e' }}>* ({t('sys_required', 'Bắt buộc')})</span></span>
                 <span style={{ fontSize: '0.78rem', color: statusReason.trim().length >= 5 ? '#34d399' : '#f87171' }}>
-                  {statusReason.trim().length}/5 ký tự tối thiểu
+                  {statusReason.trim().length}/5 {t('sys_min_chars', 'ký tự tối thiểu')}
                 </span>
               </label>
               <textarea
                 className="form-input"
                 rows={4}
-                placeholder="Ghi chú cụ thể lý do (VD: Phát hiện hoạt động bất thường / Đã xác minh hoàn tất giải trình...)"
+                placeholder={t('sys_status_reason_ph', 'Ghi chú cụ thể lý do (VD: Phát hiện hoạt động bất thường / Đã xác minh hoàn tất giải trình...')}
                 value={statusReason}
                 onChange={(e) => setStatusReason(e.target.value)}
                 style={{ width: '100%', resize: 'vertical' }}
               />
               <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '6px', lineHeight: 1.4 }}>
-                ℹ️ Hệ thống sẽ tự động gửi email thông báo chính thức đến hộp thư của hội viên kèm lý do bạn đã ghi chú ở trên.
+                ℹ️ {t('sys_status_email_note', 'Hệ thống sẽ tự động gửi email thông báo chính thức đến hộp thư của hội viên kèm lý do bạn đã ghi chú ở trên.')}
               </div>
             </div>
 
@@ -1016,10 +1033,10 @@ export default function SystemAccountsPage() {
                   style={{ flex: 2, cursor: 'pointer', border: 'none' }}
                 >
                   {isUpdatingStatus
-                    ? 'Đang xử lý & Gửi email...'
+                    ? t('sys_btn_processing_email', 'Đang xử lý & Gửi email...')
                     : statusModalAccount.status === 'ACTIVE'
-                    ? '⏸️ Xác Nhận Tạm Dừng & Gửi Email'
-                    : '▶️ Xác Nhận Kích Hoạt & Gửi Email'}
+                    ? t('sys_btn_confirm_suspend', '⏸️ Xác Nhận Tạm Dừng & Gửi Email')
+                    : t('sys_btn_confirm_activate', '▶️ Xác Nhận Kích Hoạt & Gửi Email')}
                 </button>
               ) : (
                 <div
@@ -1034,7 +1051,7 @@ export default function SystemAccountsPage() {
                     border: '1px dashed var(--border-medium)',
                   }}
                 >
-                  🔒 Nhập lý do (≥ 5 ký tự) để mở nút xác nhận
+                  {t('sys_reason_min_warning', '🔒 Nhập lý do (≥ 5 ký tự) để mở nút xác nhận')}
                 </div>
               )}
             </div>
@@ -1069,10 +1086,10 @@ export default function SystemAccountsPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem' }}>
               <div>
                 <h2 style={{ fontSize: '1.35rem', margin: 0, color: '#f87171', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>⚠️</span> Xóa Vĩnh Viễn Tài Khoản
+                  <span>⚠️</span> {t('sys_modal_delete_title', 'Xóa Vĩnh Viễn Tài Khoản')}
                 </h2>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px' }}>
-                  Tài khoản: <strong style={{ color: '#ffffff' }}>{deleteModalAccount.email}</strong>
+                  {t('sys_account_label', 'Tài khoản:')} <strong style={{ color: '#ffffff' }}>{deleteModalAccount.email}</strong>
                 </p>
               </div>
               <button
@@ -1094,19 +1111,19 @@ export default function SystemAccountsPage() {
               }}
             >
               <div style={{ fontSize: '0.78rem', color: '#f87171', fontWeight: 700, textTransform: 'uppercase', marginBottom: '8px' }}>
-                HẠCH TOÁN THU HỒI TÀI SẢN KHI XÓA VĨNH VIỄN:
+                {t('sys_refund_title', 'HẠCH TOÁN THU HỒI TÀI SẢN KHI XÓA VĨNH VIỄN:')}
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.85rem' }}>
                 <div style={{ background: 'rgba(0,0,0,0.4)', padding: '10px', borderRadius: '6px' }}>
-                  <div style={{ color: 'var(--text-muted)', fontSize: '0.74rem' }}>Số dư CHIP hoàn về hệ thống:</div>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.74rem' }}>{t('sys_refund_chip_label', 'Số dư CHIP hoàn về hệ thống:')}</div>
                   <div style={{ color: '#f5d77f', fontWeight: 800, fontSize: '1.1rem', marginTop: '2px' }}>
                     +{(deleteModalAccount.chipsBalance || 0).toLocaleString()} CHIP
                   </div>
-                  <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>&rarr; Kho Quỹ Master CHIP</div>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>&rarr; {t('sys_refund_chip_dest', 'Kho Quỹ Master CHIP')}</div>
                 </div>
 
                 <div style={{ background: 'rgba(0,0,0,0.4)', padding: '10px', borderRadius: '6px' }}>
-                  <div style={{ color: 'var(--text-muted)', fontSize: '0.74rem' }}>Số dư USDT hoàn về ví Quản Trị:</div>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.74rem' }}>{t('sys_refund_usdt_label', 'Số dư USDT hoàn về ví Quản Trị:')}</div>
                   <div style={{ color: '#38bdf8', fontWeight: 800, fontSize: '1.1rem', marginTop: '2px' }}>
                     +{(deleteModalAccount.usdtBalance || 0).toFixed(4)} USDT
                   </div>
@@ -1125,7 +1142,7 @@ export default function SystemAccountsPage() {
                   const meta = detectWalletNetwork(currentAdminWallet);
                   return (
                     <>
-                      {meta.icon} <strong>Địa chỉ Ví {meta.shortName} Quản Trị nhận hoàn số dư USDT:</strong>
+                      {meta.icon} <strong>{t('sys_refund_usdt_dest_label', 'Địa chỉ Ví Quản Trị nhận hoàn số dư USDT:')}</strong>
                       <div style={{ fontFamily: 'var(--font-mono)', color: meta.isTron ? '#fca5a5' : '#38bdf8', fontSize: '0.8rem', marginTop: '2px', wordBreak: 'break-all' }}>
                         {currentAdminWallet}{' '}
                         <a
@@ -1134,7 +1151,7 @@ export default function SystemAccountsPage() {
                           rel="noopener noreferrer"
                           style={{ color: meta.isTron ? '#f87171' : '#38bdf8', fontWeight: 600, textDecoration: 'underline', marginLeft: '6px' }}
                         >
-                          (Xem trên {meta.explorerName} ↗)
+                          ({t('sys_view_on_explorer', 'Xem trên explorer')} ↗)
                         </a>
                       </div>
                     </>
@@ -1145,21 +1162,21 @@ export default function SystemAccountsPage() {
 
             <div style={{ marginBottom: '1.2rem' }}>
               <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Lý Do Xóa Vĩnh Viễn <span style={{ color: '#f43f5e' }}>* (Bắt buộc ghi chú cụ thể)</span></span>
+                <span>{t('sys_delete_reason_label', 'Lý Do Xóa Vĩnh Viễn')} <span style={{ color: '#f43f5e' }}>* ({t('sys_delete_reason_req', 'Bắt buộc ghi chú cụ thể')})</span></span>
                 <span style={{ fontSize: '0.78rem', color: deleteReason.trim().length >= 5 ? '#34d399' : '#f87171' }}>
-                  {deleteReason.trim().length}/5 ký tự tối thiểu
+                  {deleteReason.trim().length}/5 {t('sys_min_chars', 'ký tự tối thiểu')}
                 </span>
               </label>
               <textarea
                 className="form-input"
                 rows={3}
-                placeholder="Ghi chú cụ thể lý do xóa vĩnh viễn (VD: Vi phạm điều khoản gian lận hoa hồng hệ thống / Yêu cầu hủy tài khoản...)"
+                placeholder={t('sys_delete_reason_ph', 'Ghi chú cụ thể lý do xóa vĩnh viễn (VD: Vi phạm điều khoản gian lận hoa hồng hệ thống / Yêu cầu hủy tài khoản...')}
                 value={deleteReason}
                 onChange={(e) => setDeleteReason(e.target.value)}
                 style={{ width: '100%', resize: 'vertical' }}
               />
               <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '6px' }}>
-                ℹ️ Hệ thống sẽ tự động gửi email thông báo chính thức đến hội viên về việc xóa vĩnh viễn và lý do tương ứng đã ghi chú.
+                ℹ️ {t('sys_delete_email_note', 'Hệ thống sẽ tự động gửi email thông báo chính thức đến hội viên về việc xóa vĩnh viễn và lý do tương ứng đã ghi chú.')}
               </div>
             </div>
 
@@ -1192,7 +1209,7 @@ export default function SystemAccountsPage() {
                     boxShadow: '0 4px 14px rgba(239, 68, 68, 0.4)',
                   }}
                 >
-                  {isDeleting ? 'Đang quyết toán & Gửi email...' : '🔥 Xác Nhận Xóa Vĩnh Viễn & Hoàn Quỹ'}
+                  {isDeleting ? t('sys_btn_liquidating', 'Đang quyết toán & Gửi email...') : t('sys_btn_confirm_delete', '🔥 Xác Nhận Xóa Vĩnh Viễn & Hoàn Quỹ')}
                 </button>
               ) : (
                 <div
@@ -1207,7 +1224,7 @@ export default function SystemAccountsPage() {
                     border: '1px dashed var(--border-medium)',
                   }}
                 >
-                  🔒 Nhập lý do (≥ 5 ký tự) để mở nút xác nhận xóa
+                  {t('sys_delete_min_warning', '🔒 Nhập lý do (≥ 5 ký tự) để mở nút xác nhận xóa')}
                 </div>
               )}
             </div>
@@ -1248,9 +1265,9 @@ export default function SystemAccountsPage() {
               }}
             >
               <div>
-                <h2 style={{ fontSize: '1.4rem', margin: 0 }}>Tạo Tài Khoản Quản Trị Mới</h2>
+                <h2 style={{ fontSize: '1.4rem', margin: 0 }}>{t('sys_modal_create_title', 'Tạo Tài Khoản Quản Trị Mới')}</h2>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px' }}>
-                  Tài khoản hệ thống được kích hoạt ngay và gán quyền trực tiếp.
+                  {t('sys_modal_create_sub', 'Tài khoản hệ thống được kích hoạt ngay và gán quyền trực tiếp.')}
                 </p>
               </div>
               <button
@@ -1284,7 +1301,7 @@ export default function SystemAccountsPage() {
             <form onSubmit={handleCreateAccount}>
               <div className="form-group">
                 <label className="form-label" htmlFor="new-role">
-                  Cấp Phân Quyền Quản Trị
+                  {t('sys_field_role', 'Cấp Phân Quyền Quản Trị')}
                 </label>
                 <select
                   id="new-role"
@@ -1292,15 +1309,15 @@ export default function SystemAccountsPage() {
                   value={newRole}
                   onChange={(e: any) => setNewRole(e.target.value)}
                 >
-                  <option value="ADMIN">👑 Quản Trị Viên (ADMIN) — Toàn quyền</option>
-                  <option value="ASSISTANT">💼 Trợ Lý (ASSISTANT) — Điều hành &amp; Giám sát</option>
-                  <option value="SPECIALIST">🔍 Chuyên Viên (SPECIALIST) — Nghiệp vụ &amp; Đối soát</option>
+                  <option value="ADMIN">{t('sys_role_admin_opt', '👑 Quản Trị Viên (ADMIN) — Toàn quyền')}</option>
+                  <option value="ASSISTANT">{t('sys_role_asst_opt', '💼 Trợ Lý (ASSISTANT) — Điều hành & Giám sát')}</option>
+                  <option value="SPECIALIST">{t('sys_role_spec_opt', '🔍 Chuyên Viên (SPECIALIST) — Nghiệp vụ & Đối soát')}</option>
                 </select>
               </div>
 
               <div className="form-group">
                 <label className="form-label" htmlFor="new-email">
-                  Email Tài Khoản
+                  {t('sys_field_email', 'Email Tài Khoản')}
                 </label>
                 <input
                   id="new-email"
@@ -1316,7 +1333,7 @@ export default function SystemAccountsPage() {
 
               <div className="form-group">
                 <label className="form-label" htmlFor="new-username">
-                  Tên Hiển Thị / Bí danh (Không bắt buộc)
+                  {t('sys_field_name', 'Tên Hiển Thị / Bí danh (Không bắt buộc)')}
                 </label>
                 <input
                   id="new-username"
@@ -1331,7 +1348,7 @@ export default function SystemAccountsPage() {
 
               <div className="form-group">
                 <label className="form-label" htmlFor="new-password">
-                  Mật Khẩu Khởi Tạo (Tối thiểu 12 ký tự)
+                  {t('sys_field_init_pwd', 'Mật Khẩu Khởi Tạo (Tối thiểu 12 ký tự)')}
                 </label>
                 <input
                   id="new-password"
@@ -1344,7 +1361,7 @@ export default function SystemAccountsPage() {
                   required
                 />
                 <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  Độ dài tối thiểu 12 ký tự theo tiêu chuẩn bảo mật hệ thống.
+                  {t('sys_pwd_min_hint', 'Độ dài tối thiểu 12 ký tự theo tiêu chuẩn bảo mật hệ thống.')}
                 </div>
               </div>
 
@@ -1363,7 +1380,7 @@ export default function SystemAccountsPage() {
                   disabled={creating}
                   style={{ flex: 2 }}
                 >
-                  {creating ? 'Đang tạo...' : 'Tạo Tài Khoản Hệ Thống'}
+                  {creating ? t('sys_btn_creating', 'Đang tạo...') : t('sys_btn_create_acc', 'Tạo Tài Khoản Hệ Thống')}
                 </button>
               </div>
             </form>
@@ -1372,23 +1389,6 @@ export default function SystemAccountsPage() {
       )}
     </div>
   );
-}
-
-function roleToTitle(role: string): string {
-  switch (role) {
-    case 'ADMIN':
-      return '👑 Quản Trị Viên';
-    case 'ASSISTANT':
-      return '💼 Trợ Lý';
-    case 'SPECIALIST':
-      return '🔍 Chuyên Viên';
-    case 'USER':
-      return '👤 Người Dùng';
-    case 'OWNER':
-      return '👑 Sở Hữu';
-    default:
-      return role;
-  }
 }
 
 function formatDateTime(iso?: string | null): string {

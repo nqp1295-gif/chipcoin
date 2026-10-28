@@ -180,7 +180,7 @@ export default function WithdrawPage() {
             🔄 {t('tab_convert')}
           </Link>
           <Link href="/rank" className="btn-secondary" style={{ fontSize: '0.88rem', padding: '8px 16px' }}>
-            👑 Kiểm tra Hạng
+            👑 {t('wallet_check_rank', 'Kiểm tra Hạng')}
           </Link>
         </div>
       </div>
@@ -221,7 +221,7 @@ export default function WithdrawPage() {
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem' }}>
             <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#f5d77f' }}>
-              Phiếu Rút USDT Về Ví TON
+              {t('withdraw_form_title')}
             </h3>
             <span
               style={{
@@ -242,7 +242,7 @@ export default function WithdrawPage() {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                 <label style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                  Địa chỉ ví nhận USDT (Mạng TON / Telegram Wallet):
+                  {t('withdraw_dest_label')}
                 </label>
                 {currentUser?.tonWalletAddress && (
                   <button
@@ -257,7 +257,7 @@ export default function WithdrawPage() {
                       padding: 0,
                     }}
                   >
-                    Dùng ví đã liên kết
+                    {t('withdraw_use_linked_btn')}
                   </button>
                 )}
               </div>
@@ -265,7 +265,7 @@ export default function WithdrawPage() {
                 type="text"
                 value={destAddress}
                 onChange={(e) => setDestAddress(e.target.value)}
-                placeholder="EQ... hoặc UQ... (48 ký tự)"
+                placeholder={t('wallet_ton_addr_placeholder', 'EQ... hoặc UQ... (48 ký tự)')}
                 style={{
                   width: '100%',
                   background: 'rgba(0,0,0,0.5)',
@@ -283,9 +283,9 @@ export default function WithdrawPage() {
             {/* Amount */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <label style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Số lượng USDT muốn rút:</label>
+                <label style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{t('withdraw_amount_label')}</label>
                 <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                  Khả dụng: <b style={{ color: '#38bdf8' }}>{(currentUser?.usdtBalance || 0).toFixed(4)} USDT</b>
+                  {t('convert_available')} <b style={{ color: '#38bdf8' }}>{(currentUser?.usdtBalance || 0).toFixed(4)} USDT</b>
                 </span>
               </div>
               <div
@@ -329,7 +329,7 @@ export default function WithdrawPage() {
                     cursor: 'pointer',
                   }}
                 >
-                  Tối đa
+                  {t('convert_max')}
                 </button>
               </div>
             </div>
@@ -348,18 +348,18 @@ export default function WithdrawPage() {
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
-                <span>Phí giao dịch hệ thống (1% khối lượng):</span>
+                <span>{t('withdraw_sys_fee_label')}</span>
                 <span style={{ color: '#f5d77f', fontWeight: 600 }}>{fee1Percent.toFixed(4)} USDT</span>
               </div>
               <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontStyle: 'italic', paddingLeft: '8px', borderLeft: '2px solid var(--accent-bronze)' }}>
-                ↳ Phí 1% được chuyển về Ví Quản Trị: <span style={{ fontFamily: 'var(--font-mono)', color: '#38bdf8' }}>TBzt...4KPhh</span>
+                {t('convert_fee_treasury_note')} <span style={{ fontFamily: 'var(--font-mono)', color: '#38bdf8' }}>TBzt...4KPhh</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
-                <span>Phí mạng blockchain TON (Gas & Jetton):</span>
+                <span>{t('withdraw_ton_gas_label')}</span>
                 <span>{gasFee.toFixed(2)} USDT</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ffffff', fontWeight: 700, borderTop: '1px solid var(--border-medium)', paddingTop: '8px' }}>
-                <span>Thực nhận về ví TON:</span>
+                <span>{t('withdraw_net_label')}</span>
                 <span style={{ color: '#34d399', fontSize: '1.05rem' }}>{netAmount.toFixed(4)} USDT</span>
               </div>
             </div>
@@ -367,7 +367,7 @@ export default function WithdrawPage() {
             {/* 2FA OTP Code */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                <label style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Mã OTP xác thực email bảo mật:</label>
+                <label style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{t('withdraw_otp_label')}</label>
                 <button
                   type="button"
                   onClick={handleSendOtp}
@@ -382,7 +382,7 @@ export default function WithdrawPage() {
                     padding: 0,
                   }}
                 >
-                  {otpTimer > 0 ? `Gửi lại sau (${otpTimer}s)` : 'Gửi mã OTP'}
+                  {otpTimer > 0 ? `Resend (${otpTimer}s)` : t('withdraw_btn_otp')}
                 </button>
               </div>
               <input
@@ -390,7 +390,7 @@ export default function WithdrawPage() {
                 maxLength={6}
                 value={otpCode}
                 onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                placeholder="654321 (Nhập 6 số)"
+                placeholder="654321"
                 style={{
                   width: '100%',
                   background: 'rgba(0,0,0,0.5)',
@@ -424,10 +424,10 @@ export default function WithdrawPage() {
               }}
             >
               {!canWithdraw
-                ? '🔒 Chưa Đủ Hạng Rút Tiền'
+                ? `🔒 ${t('withdraw_locked_btn')}`
                 : isSubmitting
-                ? 'Đang phát lệnh thanh toán on-chain...'
-                : 'Xác Nhận Rút USDT Về Ví TON'}
+                ? t('state_loading')
+                : t('withdraw_btn_submit')}
             </button>
           </form>
         </div>
@@ -448,17 +448,17 @@ export default function WithdrawPage() {
               <span style={{ fontSize: '1.6rem' }}>{canWithdraw ? '🔓' : '🔒'}</span>
               <div>
                 <h4 style={{ margin: 0, fontSize: '1.05rem', color: canWithdraw ? '#34d399' : '#fbbf24' }}>
-                  {canWithdraw ? 'Quyền Rút Tiền Đang Mở' : 'Quyền Rút Tiền Đang Khóa'}
+                  {canWithdraw ? t('withdraw_status_unlocked') : t('withdraw_status_locked')}
                 </h4>
                 <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                  Hạng hiện tại: <b>{currentUser?.tier || defaultTier}</b>
+                  {t('rank_current_tier')}: <b>{currentUser?.tier || defaultTier}</b>
                 </span>
               </div>
             </div>
 
             <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
               {canWithdraw
-                ? 'Tài khoản của bạn đã đạt điều kiện từ hạng CHIP PLATINUM trở lên, được phép tự do chuyển đổi và rút USDT về ví TON hoặc Telegram Wallet.'
+                ? t('withdraw_unlocked_msg')
                 : t('withdraw_locked_msg')}
             </p>
 
@@ -472,12 +472,12 @@ export default function WithdrawPage() {
               }}
             >
               <div style={{ fontWeight: 700, color: '#f5d77f', marginBottom: '4px' }}>
-                Điều kiện mở khóa rút USDT:
+                {t('withdraw_cond_title')}
               </div>
               <ul style={{ margin: 0, paddingLeft: '18px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                <li>Thu thập tích luỹ tối thiểu: <b>5,000,000 CHIP</b></li>
-                <li>Giới thiệu thành công: <b>10 hội viên xác thực email</b></li>
-                <li>Hạng đạt được: <b>CHIP PLATINUM</b>, <b>DIAMOND</b>, hoặc <b>SPECIAL</b></li>
+                <li>{t('withdraw_cond_1')}</li>
+                <li>{t('withdraw_cond_2')}</li>
+                <li>{t('withdraw_cond_3')}</li>
               </ul>
             </div>
 
@@ -493,17 +493,17 @@ export default function WithdrawPage() {
                 textDecoration: 'none',
               }}
             >
-              Xem Tiến Trình Nâng Hạng →
+              {t('withdraw_view_progress')}
             </Link>
           </div>
 
           {/* Security & Cooldown Notice */}
           <div className="glass-card" style={{ padding: '1.4rem' }}>
             <h4 style={{ margin: '0 0 8px 0', color: 'var(--accent-bronze-light)', fontSize: '0.95rem' }}>
-              🛡️ Bảo Mật Giao Dịch Đa Tầng
+              🛡️ {t('withdraw_sec_title')}
             </h4>
             <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
-              Mọi lệnh rút tiền đều được kiểm tra chữ ký mật mã, đối soát số dư trên PostgreSQL Master Treasury và tuân thủ giới hạn an toàn để đảm bảo tính toàn vẹn tuyệt đối của hệ sinh thái CHIPCOIN.
+              {t('withdraw_sec_desc')}
             </p>
           </div>
         </div>
@@ -513,9 +513,9 @@ export default function WithdrawPage() {
       <div className="glass-card" style={{ padding: '1.4rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', flexWrap: 'wrap', gap: '10px' }}>
           <div>
-            <h3 style={{ fontSize: '1.15rem' }}>Lịch Sử Lệnh Rút USDT Mạng TON</h3>
+            <h3 style={{ fontSize: '1.15rem' }}>{t('withdraw_history_title')}</h3>
             <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-              Nhật ký các lệnh chi trả qua ví TON và Telegram Wallet
+              {t('withdraw_history_sub')}
             </span>
           </div>
           <span className="badge badge-active">Double-Entry Settled</span>
@@ -525,21 +525,21 @@ export default function WithdrawPage() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>MÃ LỆNH</th>
-                <th>THỜI GIAN</th>
-                <th>ĐỊA CHỈ ĐÍCH (TON)</th>
-                <th>SỐ LƯỢNG RÚT</th>
-                <th>PHÍ GAS TON</th>
-                <th>THỰC NHẬN</th>
-                <th>MÃ BÚT TOÁN TON</th>
-                <th>TRẠNG THÁI</th>
+                <th>{t('withdraw_col_order')}</th>
+                <th>{t('convert_col_time')}</th>
+                <th>{t('withdraw_col_dest')}</th>
+                <th>{t('withdraw_col_amount')}</th>
+                <th>{t('withdraw_col_gas')}</th>
+                <th>{t('withdraw_col_net')}</th>
+                <th>{t('withdraw_col_txhash')}</th>
+                <th>{t('col_status')}</th>
               </tr>
             </thead>
             <tbody>
               {withdrawals.length === 0 ? (
                 <tr>
                   <td colSpan={8} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '24px' }}>
-                    Chưa có lệnh rút nào được tạo.
+                    {t('withdraw_no_records')}
                   </td>
                 </tr>
               ) : (
@@ -578,7 +578,7 @@ export default function WithdrawPage() {
                           border: '1px solid rgba(52, 211, 153, 0.3)',
                         }}
                       >
-                        ĐÃ CHI TRẢ
+                        {t('status_settled')}
                       </span>
                     </td>
                   </tr>

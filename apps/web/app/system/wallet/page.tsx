@@ -234,11 +234,11 @@ export default function SystemWalletPage() {
               marginBottom: '4px',
             }}
           >
-            🏛️ QUẢN TRỊ HỆ THỐNG — VÍ QUẢN TRỊ &amp; QUỸ PHÍ GIAO DỊCH 1%
+            {t('sys_wal_page_badge', '🏛️ QUẢN TRỊ HỆ THỐNG — VÍ QUẢN TRỊ & QUỸ PHÍ GIAO DỊCH 1%')}
           </div>
-          <h1 style={{ fontSize: '2rem', margin: 0 }}>Ví Quản Trị Hệ Thống &amp; Quỹ Thu Phí</h1>
+          <h1 style={{ fontSize: '2rem', margin: 0 }}>{t('sys_wal_page_title', 'Ví Quản Trị Hệ Thống & Quỹ Thu Phí')}</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', marginTop: '4px' }}>
-            Quản trị địa chỉ ví TON thu phí giao dịch 1% (USDT), theo dõi doanh thu phí và hạn mức kho quỹ tổng.
+            {t('sys_wal_page_desc', 'Quản trị địa chỉ ví TON thu phí giao dịch 1% (USDT), theo dõi doanh thu phí và hạn mức kho quỹ tổng.')}
           </p>
         </div>
 
@@ -248,7 +248,7 @@ export default function SystemWalletPage() {
             className="btn-secondary"
             style={{ fontSize: '0.88rem', padding: '8px 16px', cursor: 'pointer' }}
           >
-            🔄 Làm mới số dư
+            {t('sys_wal_btn_refresh', '🔄 Làm mới số dư')}
           </button>
 
           {IS_LOCAL_DEV && (
@@ -258,7 +258,7 @@ export default function SystemWalletPage() {
               className="nav-btn"
               style={{ cursor: 'pointer', border: 'none', gap: '8px', fontSize: '0.88rem', padding: '8px 16px' }}
             >
-              {simulating ? 'Đang hạch toán...' : '🧪 Điều chuyển 100k CHIP'}
+              {simulating ? t('sys_wal_btn_simulating', 'Đang hạch toán...') : t('sys_wal_btn_simulate', '🧪 Điều chuyển 100k CHIP')}
             </button>
           )}
         </div>
@@ -297,17 +297,17 @@ export default function SystemWalletPage() {
                   border: `1px solid ${activeWalletMeta.isTron ? '#f87171' : '#38bdf8'}`,
                 }}
               >
-                {activeWalletMeta.icon} VÍ {activeWalletMeta.shortName.toUpperCase()} QUẢN TRỊ CHÍNH THỨC
+                {activeWalletMeta.icon} {t('sys_wal_address_box_label', 'VÍ')} {activeWalletMeta.shortName.toUpperCase()} {t('sys_wal_official_badge', 'QUẢN TRỊ CHÍNH THỨC')}
               </span>
               <span style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 600 }}>
-                ● Đang kết nối trực tiếp
+                {t('sys_wal_connected_live', '● Đang kết nối trực tiếp')}
               </span>
             </div>
             <h2 style={{ fontSize: '1.4rem', margin: '4px 0 6px 0', color: '#ffffff' }}>
-              Địa Chỉ Ví Quản Trị Nhận Toàn Bộ Phí Giao Dịch Hội Viên
+              {t('sys_wal_fee_collector_title', 'Địa Chỉ Ví Quản Trị Nhận Toàn Bộ Phí Giao Dịch Hội Viên')}
             </h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: 0, maxWidth: '720px', lineHeight: 1.5 }}>
-              Mọi giao dịch USDT của hội viên trên toàn bộ nền tảng (quy đổi CHIP ↔ USDT, rút tiền) đều tự động chịu mức phí <b>1% * khối lượng giao dịch</b> và được ghi nhận trực tiếp vào địa chỉ ví dưới đây ({activeWalletMeta.networkName}).
+              {t('sys_wal_fee_collector_desc', 'Mọi giao dịch USDT của hội viên trên toàn bộ nền tảng đều tự động chịu mức phí 1% và được ghi nhận trực tiếp vào địa chỉ ví dưới đây.')}
             </p>
           </div>
 
@@ -333,7 +333,7 @@ export default function SystemWalletPage() {
                 color: activeWalletMeta.isTron ? '#fca5a5' : '#7dd3fc',
               }}
             >
-              🔍 Xem trên {activeWalletMeta.explorerName} ({activeWalletMeta.shortName}) ↗
+              {t('sys_wal_view_explorer_btn', '🔍 Tra cứu trên Explorer ↗')}
             </a>
           </div>
         </div>
@@ -357,7 +357,7 @@ export default function SystemWalletPage() {
             <span style={{ fontSize: '1.5rem' }}>{activeWalletMeta.icon}</span>
             <div>
               <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                ĐỊA CHỈ VÍ QUẢN TRỊ ({activeWalletMeta.networkName.toUpperCase()})
+                {t('sys_wal_address_box_label', 'ĐỊA CHỈ VÍ QUẢN TRỊ')} ({activeWalletMeta.networkName.toUpperCase()})
               </div>
               <div
                 style={{
@@ -385,7 +385,7 @@ export default function SystemWalletPage() {
                 border: 'none',
               }}
             >
-              {copiedAddr ? '✓ Đã sao chép ví!' : '📋 Sao chép địa chỉ ví'}
+              {copiedAddr ? t('sys_wal_btn_copied', '✓ Đã sao chép ví!') : t('sys_wal_btn_copy', '📋 Sao chép địa chỉ ví')}
             </button>
           </div>
         </div>
@@ -405,10 +405,10 @@ export default function SystemWalletPage() {
         >
           <span style={{ fontSize: '1.3rem' }}>💡</span>
           <div style={{ fontSize: '0.82rem', color: '#fef08a', lineHeight: 1.55 }}>
-            <strong>Hướng dẫn tra cứu Blockchain Explorer &amp; Tránh lỗi 404:</strong><br />
-            &bull; <strong>Mạng TRON (TRC-20 USDT)</strong>: Địa chỉ bắt đầu bằng chữ <code>T...</code> (34 ký tự như <code>TBztwgxtz...</code>). Phải tra cứu trên <strong>Tronscan.org</strong>.<br />
-            &bull; <strong>Mạng TON (The Open Network)</strong>: Địa chỉ bắt đầu bằng <code>EQ...</code> hoặc <code>UQ...</code> (48 ký tự). Tra cứu trên <strong>Tonviewer.com</strong>.<br />
-            <em>* Lưu ý: Nếu mở địa chỉ mạng TRON trên Tonviewer sẽ bị lỗi <strong>404 Invalid address</strong> vì hai blockchain hoạt động độc lập. Hệ thống đã tự động liên kết chính xác sang <strong>Tronscan</strong>.</em>
+            <strong>{t('sys_wal_guide_title', 'Hướng dẫn tra cứu Blockchain Explorer & Tránh lỗi 404:')}</strong><br />
+            {t('sys_wal_guide_tron', 'Mạng TRON (TRC-20 USDT): Địa chỉ bắt đầu bằng chữ T... (34 ký tự). Phải tra cứu trên Tronscan.org.')}<br />
+            {t('sys_wal_guide_ton', 'Mạng TON (The Open Network): Địa chỉ bắt đầu bằng EQ... hoặc UQ... (48 ký tự). Tra cứu trên Tonviewer.com.')}<br />
+            <em>{t('sys_wal_guide_note', '* Lưu ý: Nếu mở địa chỉ mạng TRON trên Tonviewer sẽ bị lỗi 404 Invalid address vì hai blockchain hoạt động độc lập. Hệ thống đã tự động liên kết chính xác.')}</em>
           </div>
         </div>
 
@@ -440,31 +440,31 @@ export default function SystemWalletPage() {
               {treasuryStats.totalVolumeUsdt.toFixed(2)} <span style={{ fontSize: '0.9rem' }}>USDT</span>
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-              Tổng Volume phát sinh giao dịch
+              {t('sys_wal_kpi_volume_sub', 'Tổng Volume phát sinh giao dịch')}
             </div>
           </div>
 
           <div style={{ background: 'rgba(0,0,0,0.4)', padding: '14px', borderRadius: '10px', border: '1px solid var(--border-subtle)' }}>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
-              TỶ LỆ PHÍ MẶC ĐỊNH
+              {t('sys_wal_kpi_rate_title', 'TỶ LỆ PHÍ MẶC ĐỊNH')}
             </div>
             <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#f5d77f', fontFamily: 'Outfit, sans-serif', marginTop: '4px' }}>
               1.00%
             </div>
             <div style={{ fontSize: '0.75rem', color: '#34d399', marginTop: '2px' }}>
-              Áp dụng cho mọi giao dịch USDT
+              {t('sys_wal_kpi_rate_sub', 'Áp dụng cho mọi giao dịch USDT')}
             </div>
           </div>
 
           <div style={{ background: 'rgba(0,0,0,0.4)', padding: '14px', borderRadius: '10px', border: '1px solid var(--border-subtle)' }}>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
-              TỔNG LỆNH THU PHÍ
+              {t('sys_wal_kpi_tx_title', 'TỔNG LỆNH THU PHÍ')}
             </div>
             <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#34d399', fontFamily: 'Outfit, sans-serif', marginTop: '4px' }}>
-              {treasuryStats.totalTxCount} <span style={{ fontSize: '0.9rem' }}>lệnh</span>
+              {treasuryStats.totalTxCount} <span style={{ fontSize: '0.9rem' }}>{t('sys_wal_orders_unit', 'lệnh')}</span>
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-              Đã ghi nhận vào ví TON quản trị
+              {t('sys_wal_kpi_tx_sub', 'Đã ghi nhận vào ví TON quản trị')}
             </div>
           </div>
         </div>
@@ -527,14 +527,14 @@ export default function SystemWalletPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', flexWrap: 'wrap', gap: '10px' }}>
             <div>
               <h3 style={{ fontSize: '1.18rem', margin: 0, color: '#f5d77f' }}>
-                Sổ Nhật Ký Thu Phí Giao Dịch 1% Về Ví Quản Trị
+                {t('sys_wallet_journal_heading', 'Sổ Nhật Ký Thu Phí Giao Dịch 1% Về Ví Quản Trị')}
               </h3>
               <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                Tất cả các khoản phí 1% phát sinh từ giao dịch của hội viên đều được ghi nhận tự động vào ví <b>{activeAddress}</b>
+                {t('sys_wallet_journal_desc', 'Tất cả các khoản phí 1% phát sinh từ giao dịch của hội viên đều được ghi nhận tự động vào ví')} <b>{activeAddress}</b>
               </p>
             </div>
             <span className="badge badge-success">
-              ✓ 100% Ghi nhận chính xác
+              {t('sys_wallet_accurate_badge', '✓ 100% Ghi nhận chính xác')}
             </span>
           </div>
 
@@ -556,7 +556,7 @@ export default function SystemWalletPage() {
                 {feeRecords.length === 0 ? (
                   <tr>
                     <td colSpan={9} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-muted)' }}>
-                      Chưa phát sinh giao dịch thu phí nào từ hội viên.
+                      {t('sys_wallet_no_fees', 'Chưa phát sinh giao dịch thu phí nào từ hội viên.')}
                     </td>
                   </tr>
                 ) : (
@@ -594,10 +594,10 @@ export default function SystemWalletPage() {
                         >
                           {fee.txTypeLabel ||
                             (fee.txType === 'CONVERT_CHIP_TO_USDT'
-                              ? 'Quy đổi CHIP ➔ USDT'
+                              ? t('sys_wallet_swap_chip_usdt', 'Quy đổi CHIP ➔ USDT')
                               : fee.txType === 'CONVERT_USDT_TO_CHIP'
-                              ? 'Quy đổi USDT ➔ CHIP'
-                              : 'Rút USDT về ví TON')}
+                              ? t('sys_wallet_swap_usdt_chip', 'Quy đổi USDT ➔ CHIP')
+                              : t('sys_wallet_withdraw_ton', 'Rút USDT về ví TON'))}
                         </span>
                       </td>
                       <td style={{ fontWeight: 600, color: '#ffffff', fontFamily: 'Outfit, sans-serif' }}>
@@ -624,7 +624,7 @@ export default function SystemWalletPage() {
                             border: '1px solid rgba(52, 211, 153, 0.3)',
                           }}
                         >
-                          ✓ ĐÃ GHI NHẬN
+                          {t('sys_wallet_recorded_badge', '✓ ĐÃ GHI NHẬN')}
                         </span>
                       </td>
                     </tr>
@@ -665,7 +665,7 @@ export default function SystemWalletPage() {
                     textTransform: 'uppercase',
                   }}
                 >
-                  KHO QUỸ TỔNG (SYSTEM TREASURY)
+                  {t('sys_wallet_treasury_title', 'KHO QUỸ TỔNG (SYSTEM TREASURY)')}
                 </span>
                 <span className="badge badge-gold">MASTER TREASURY</span>
               </div>
@@ -684,7 +684,7 @@ export default function SystemWalletPage() {
                   <span style={{ fontSize: '1.2rem', color: 'var(--accent-bronze)' }}>CHIP</span>
                 </div>
                 <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                  Quy đổi nội bộ: ≈ ${(treasuryBalance / 5000000).toLocaleString('en-US', { minimumFractionDigits: 2 })} USDT
+                  {t('sys_wallet_internal_peg', 'Quy đổi nội bộ: ≈')} ${(treasuryBalance / 5000000).toLocaleString('en-US', { minimumFractionDigits: 2 })} USDT
                 </div>
               </div>
 
@@ -698,15 +698,15 @@ export default function SystemWalletPage() {
                   color: 'var(--text-muted)',
                 }}
               >
-                <span>Tài khoản gốc: SYSTEM_TREASURY_001</span>
-                <span style={{ color: '#34d399', fontWeight: 600 }}>Cân đối 100% ACID</span>
+                <span>{t('sys_wallet_master_acc', 'Tài khoản gốc: SYSTEM_TREASURY_001')}</span>
+                <span style={{ color: '#34d399', fontWeight: 600 }}>{t('sys_wallet_acid_badge', 'Cân đối 100% ACID')}</span>
               </div>
             </div>
 
             <div className="glass-card">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                  PHÂN BỔ QUỸ CON (SUB-POOLS)
+                  {t('sys_wallet_subpools_title', 'PHÂN BỔ QUỸ CON (SUB-POOLS)')}
                 </span>
                 <span className="status-dot-pulse" />
               </div>
@@ -714,7 +714,7 @@ export default function SystemWalletPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '1.2rem' }}>
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '4px' }}>
-                    <span>Quỹ Kích Hoạt (Welcome Pool)</span>
+                    <span>{t('sys_wallet_pool_welcome', 'Quỹ Kích Hoạt (Welcome Pool)')}</span>
                     <span style={{ color: '#34d399', fontWeight: 600 }}>
                       {(IS_LOCAL_DEV ? 25000000 : 0).toLocaleString()} CHIP
                     </span>
@@ -726,7 +726,7 @@ export default function SystemWalletPage() {
 
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '4px' }}>
-                    <span>Quỹ Nhiệm Vụ &amp; Streak (Missions Pool)</span>
+                    <span>{t('sys_wallet_pool_missions', 'Quỹ Nhiệm Vụ & Streak (Missions Pool)')}</span>
                     <span style={{ color: 'var(--accent-bronze)', fontWeight: 600 }}>
                       {(IS_LOCAL_DEV ? 60000000 : 0).toLocaleString()} CHIP
                     </span>
@@ -738,7 +738,7 @@ export default function SystemWalletPage() {
 
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '4px' }}>
-                    <span>Quỹ Dự Phòng Hệ Thống (Reserve Pool)</span>
+                    <span>{t('sys_wallet_pool_reserve', 'Quỹ Dự Phòng Hệ Thống (Reserve Pool)')}</span>
                     <span style={{ color: '#818cf8', fontWeight: 600 }}>
                       {(IS_LOCAL_DEV ? 414985000 : 0).toLocaleString()} CHIP
                     </span>
@@ -756,26 +756,26 @@ export default function SystemWalletPage() {
       {/* TAB 3: NHẬT KÝ HẠCH TOÁN SỔ CÁI */}
       {activeTab === 'JOURNAL' && (
         <div className="glass-card" style={{ padding: '1.4rem' }}>
-          <h3 style={{ fontSize: '1.15rem', marginBottom: '1.2rem' }}>Nhật Ký Hạch Toán Toàn Hệ Thống</h3>
+          <h3 style={{ fontSize: '1.15rem', marginBottom: '1.2rem' }}>{t('sys_wallet_ledger_heading', 'Nhật Ký Hạch Toán Toàn Hệ Thống')}</h3>
 
           <div className="table-container">
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>MÃ GD (TXID)</th>
-                  <th>THỜI GIAN</th>
-                  <th>LOẠI HẠCH TOÁN</th>
-                  <th>TÀI KHOẢN NỢ (DEBIT)</th>
-                  <th>TÀI KHOẢN CÓ (CREDIT)</th>
-                  <th>SỐ TIỀN (CHIP)</th>
-                  <th>TRẠNG THÁI</th>
+                  <th>{t('wallet_col_txid', 'MÃ GD (TXID)')}</th>
+                  <th>{t('wallet_col_time', 'THỜI GIAN')}</th>
+                  <th>{t('wallet_col_action', 'LOẠI HẠCH TOÁN')}</th>
+                  <th>{t('sys_wallet_col_debit', 'TÀI KHOẢN NỢ (DEBIT)')}</th>
+                  <th>{t('sys_wallet_col_credit', 'TÀI KHOẢN CÓ (CREDIT)')}</th>
+                  <th>{t('wallet_col_amount', 'SỐ TIỀN (CHIP)')}</th>
+                  <th>{t('wallet_col_status', 'TRẠNG THÁI')}</th>
                 </tr>
               </thead>
               <tbody>
                 {transactions.length === 0 ? (
                   <tr>
                     <td colSpan={7} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-muted)' }}>
-                      Chưa có giao dịch hạch toán nào trong hệ thống.
+                      {t('sys_wallet_no_ledger', 'Chưa có giao dịch hạch toán nào trong hệ thống.')}
                     </td>
                   </tr>
                 ) : (
@@ -846,10 +846,10 @@ export default function SystemWalletPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem' }}>
               <div>
                 <h2 style={{ fontSize: '1.3rem', margin: 0, color: '#f5d77f' }}>
-                  ⚙️ Cấu Hình Địa Chỉ Ví Quản Trị Hệ Thống
+                  {t('sys_wallet_modal_title', '⚙️ Cấu Hình Địa Chỉ Ví Quản Trị Hệ Thống')}
                 </h2>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', marginTop: '4px', margin: 0 }}>
-                  Quản lý địa chỉ nhận phí 1% USDT và hoàn quỹ tài sản khi xóa tài khoản.
+                  {t('sys_wallet_modal_desc', 'Quản lý địa chỉ nhận phí 1% USDT và hoàn quỹ tài sản khi xóa tài khoản.')}
                 </p>
               </div>
               <button
@@ -873,7 +873,7 @@ export default function SystemWalletPage() {
             <form onSubmit={handleSaveConfig} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
               {/* Network Choice */}
               <div className="form-group">
-                <label className="form-label">Chọn Mạng Lưới Quản Trị Mặc Định:</label>
+                <label className="form-label">{t('sys_wallet_default_net_label', 'Chọn Mạng Lưới Quản Trị Mặc Định:')}</label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                   <button
                     type="button"
@@ -922,7 +922,7 @@ export default function SystemWalletPage() {
               {/* TRON Address */}
               <div className="form-group">
                 <label className="form-label" htmlFor="tron-addr">
-                  Địa Chỉ Ví TRON TRC-20 (bắt đầu bằng T, 34 ký tự):
+                  {t('sys_wallet_tron_label', 'Địa Chỉ Ví TRON TRC-20 (bắt đầu bằng T, 34 ký tự):')}
                 </label>
                 <input
                   id="tron-addr"
@@ -935,14 +935,14 @@ export default function SystemWalletPage() {
                   required
                 />
                 <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  Tra cứu tại: <a href={`https://tronscan.org/#/address/${editTron.trim()}`} target="_blank" rel="noreferrer" style={{ color: '#f87171' }}>tronscan.org</a>
+                  {t('sys_wal_lookup_at', 'Tra cứu tại:')} <a href={`https://tronscan.org/#/address/${editTron.trim()}`} target="_blank" rel="noreferrer" style={{ color: '#f87171' }}>tronscan.org</a>
                 </div>
               </div>
 
               {/* TON Address */}
               <div className="form-group">
                 <label className="form-label" htmlFor="ton-addr">
-                  Địa Chỉ Ví TON (bắt đầu bằng EQ... hoặc UQ..., 48 ký tự):
+                  {t('sys_wallet_ton_label', 'Địa Chỉ Ví TON (bắt đầu bằng EQ... hoặc UQ..., 48 ký tự):')}
                 </label>
                 <input
                   id="ton-addr"
@@ -955,7 +955,7 @@ export default function SystemWalletPage() {
                   required
                 />
                 <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  Tra cứu tại: <a href={`https://tonviewer.com/${editTon.trim()}`} target="_blank" rel="noreferrer" style={{ color: '#38bdf8' }}>tonviewer.com</a>
+                  {t('sys_wal_lookup_at', 'Tra cứu tại:')} <a href={`https://tonviewer.com/${editTon.trim()}`} target="_blank" rel="noreferrer" style={{ color: '#38bdf8' }}>tonviewer.com</a>
                 </div>
               </div>
 
@@ -969,7 +969,7 @@ export default function SystemWalletPage() {
                   Đóng
                 </button>
                 <button type="submit" className="btn-primary" style={{ flex: 2 }}>
-                  💾 Lưu Cấu Hình Ví Quản Trị
+                  {t('sys_wallet_btn_save', '💾 Lưu Cấu Hình Ví Quản Trị')}
                 </button>
               </div>
             </form>

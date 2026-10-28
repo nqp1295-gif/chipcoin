@@ -299,7 +299,7 @@ export default function WalletPage() {
           </div>
 
           <div style={{ fontSize: '0.84rem', color: '#38bdf8', marginBottom: '12px' }}>
-            ≈ {chipToUsdt(balance).toFixed(4)} USDT (Tỷ giá 1 USDT = 5,000,000 CHIP)
+            ≈ {chipToUsdt(balance).toFixed(4)} USDT ({t('wallet_fixed_rate_note', 'Tỷ giá 1 USDT = 5,000,000 CHIP')})
           </div>
 
           <div
@@ -324,7 +324,7 @@ export default function WalletPage() {
               </div>
             </div>
             <div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Hạch toán</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{t('wallet_booked', 'Hạch toán')}</div>
               <div style={{ fontSize: '0.98rem', fontWeight: 700, color: 'var(--accent-bronze-light)' }}>
                 Double-Entry
               </div>
@@ -354,7 +354,7 @@ export default function WalletPage() {
                 textTransform: 'uppercase',
               }}
             >
-              SỐ DƯ USDT NỘI BỘ (TON NETWORK)
+              {t('wallet_usdt_card_title', 'SỐ DƯ USDT NỘI BỘ (TON NETWORK)')}
             </span>
             <span
               style={{
@@ -405,11 +405,11 @@ export default function WalletPage() {
             }}
           >
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Ví TON liên kết:</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{t('wallet_linked_ton', 'Ví TON liên kết:')}</div>
               <div style={{ fontSize: '0.82rem', fontFamily: 'JetBrains Mono, monospace', color: currentUser?.tonWalletAddress ? '#34d399' : '#fbbf24' }}>
                 {currentUser?.tonWalletAddress
                   ? `${currentUser.tonWalletAddress.slice(0, 8)}...${currentUser.tonWalletAddress.slice(-6)}`
-                  : 'Chưa liên kết ví TON'}
+                  : t('wallet_not_linked_ton', 'Chưa liên kết ví TON')}
               </div>
             </div>
 
@@ -418,7 +418,7 @@ export default function WalletPage() {
               className="nav-btn"
               style={{ fontSize: '0.78rem', padding: '6px 12px' }}
             >
-              + Nạp USDT
+              {t('wallet_btn_deposit_usdt', '+ Nạp USDT')}
             </Link>
           </div>
         </div>
@@ -482,8 +482,8 @@ export default function WalletPage() {
 
             <div style={{ marginTop: '8px', fontSize: '0.8rem', color: canWithdraw ? '#34d399' : '#fbbf24', fontWeight: 600 }}>
               {canWithdraw
-                ? '✓ Hạng hiện tại cho phép gửi/nhận và rút USDT sang mạng TON'
-                : '🔒 Rút USDT yêu cầu đạt từ hạng CHIP PLATINUM trở lên'}
+                ? t('wallet_withdraw_allowed', '✓ Hạng hiện tại cho phép gửi/nhận và rút USDT sang mạng TON')
+                : t('wallet_withdraw_locked', '🔒 Rút USDT yêu cầu đạt từ hạng CHIP PLATINUM trở lên')}
             </div>
           </div>
 
@@ -503,7 +503,7 @@ export default function WalletPage() {
                 textDecoration: 'none',
               }}
             >
-              🔄 Đổi CHIP ↔ USDT
+              🔄 {t('wallet_btn_swap', 'Đổi CHIP ↔ USDT')}
             </Link>
             <Link
               href="/wallet/withdraw"
@@ -519,7 +519,7 @@ export default function WalletPage() {
                 textDecoration: 'none',
               }}
             >
-              📤 Rút USDT (TON)
+              📤 {t('wallet_btn_withdraw_ton', 'Rút USDT (TON)')}
             </Link>
           </div>
         </div>
@@ -538,10 +538,10 @@ export default function WalletPage() {
           <span style={{ fontSize: '1.4rem' }}>🏛️</span>
           <div>
             <h3 style={{ margin: 0, fontSize: '1.18rem', color: '#f5d77f' }}>
-              Kiến Trúc Ví Song Song: Ví CHIP & Ví USDT
+              {t('wallet_dual_title')}
             </h3>
             <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-              Mô hình quản lý tài sản độc lập, an toàn và tối ưu cho toàn bộ hệ sinh thái
+              {t('wallet_dual_sub')}
             </span>
           </div>
         </div>
@@ -558,13 +558,13 @@ export default function WalletPage() {
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
               <span style={{ fontSize: '1.3rem' }}>🪙</span>
-              <h4 style={{ margin: 0, color: '#f5d77f', fontSize: '1rem' }}>VÍ ĐIỂM THƯỞNG CHIP</h4>
+              <h4 style={{ margin: 0, color: '#f5d77f', fontSize: '1rem' }}>{t('wallet_chip_title')}</h4>
             </div>
             <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              <li><b>Nhận thưởng:</b> Điểm danh hàng ngày, hoàn thành nhiệm vụ, hoa hồng giới thiệu nhánh.</li>
-              <li><b>Thanh toán:</b> Dùng để mua các sản phẩm, gói hỗ trợ claim Chip trên web.</li>
-              <li><b>Chuyển đổi:</b> Quy đổi tự do sang ví USDT theo tỷ giá cố định <b>1 USDT = 5,000,000 CHIP</b>.</li>
-              <li style={{ color: 'var(--text-muted)' }}><i>Lưu ý: Không hỗ trợ nạp/rút trực tiếp on-chain.</i></li>
+              <li>{t('wallet_chip_feat_1')}</li>
+              <li>{t('wallet_chip_feat_2')}</li>
+              <li>{t('wallet_chip_feat_3')}</li>
+              <li style={{ color: 'var(--text-muted)' }}><i>{t('wallet_chip_note')}</i></li>
             </ul>
           </div>
 
@@ -579,13 +579,13 @@ export default function WalletPage() {
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
               <span style={{ fontSize: '1.3rem' }}>💵</span>
-              <h4 style={{ margin: 0, color: '#38bdf8', fontSize: '1rem' }}>VÍ TIỀN USDT (TON NETWORK)</h4>
+              <h4 style={{ margin: 0, color: '#38bdf8', fontSize: '1rem' }}>{t('wallet_usdt_title')}</h4>
             </div>
             <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              <li><b>Nạp tiền:</b> Mọi khoản nạp từ bên ngoài vào tài khoản bắt buộc nạp vào ví USDT.</li>
-              <li><b>Rút tiền:</b> Rút USDT trực tiếp về ví TON cá nhân hoặc Telegram Wallet (từ hạng PLATINUM).</li>
-              <li><b>Chuyển đổi sang CHIP:</b> Nạp USDT sau đó chuyển đổi sang ví CHIP để thanh toán mua sản phẩm web.</li>
-              <li><b>Phí giao dịch:</b> Phí <b>1%</b> trên mọi giao dịch USDT, tự động ghi nhận về <b>Ví Quản Trị Hệ Thống</b>.</li>
+              <li>{t('wallet_usdt_feat_1')}</li>
+              <li>{t('wallet_usdt_feat_2')}</li>
+              <li>{t('wallet_usdt_feat_3')}</li>
+              <li>{t('wallet_usdt_feat_4')}</li>
             </ul>
           </div>
         </div>
@@ -610,21 +610,21 @@ export default function WalletPage() {
             </span>
           </div>
 
-          <span className="badge badge-active">Xác Thực Bảo Mật PostgreSQL</span>
+          <span className="badge badge-active">PostgreSQL Secured</span>
         </div>
 
         <div className="table-container">
           <table className="data-table">
             <thead>
               <tr>
-                <th>MÃ BÚT TOÁN (TXID)</th>
-                <th>THỜI GIAN</th>
-                <th>NGHIỆP VỤ</th>
-                <th>TÀI KHOẢN ĐỐI ỨNG (NỢ &rarr; CÓ)</th>
-                <th>SỐ LƯỢNG</th>
-                <th>SỐ DƯ SAU</th>
+                <th>{t('wallet_col_txid')}</th>
+                <th>{t('wallet_col_time')}</th>
+                <th>{t('wallet_col_action')}</th>
+                <th>{t('wallet_col_accounts')}</th>
+                <th>{t('wallet_col_amount')}</th>
+                <th>{t('wallet_col_balance_after')}</th>
                 <th>HASH</th>
-                <th>TRẠNG THÁI</th>
+                <th>{t('wallet_col_status')}</th>
               </tr>
             </thead>
             <tbody>
@@ -663,7 +663,7 @@ export default function WalletPage() {
                         border: '1px solid rgba(52, 211, 153, 0.35)',
                       }}
                     >
-                      ĐÃ GHI SỔ
+                      {t('wallet_status_booked')}
                     </span>
                   </td>
                 </tr>

@@ -234,7 +234,7 @@ export default function ConvertPage() {
             }}
           >
             <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--accent-bronze-light)' }}>
-              {direction === 'CHIP_TO_USDT' ? 'QUY ĐỔI: CHIP ➔ USDT' : 'QUY ĐỔI: USDT ➔ CHIP'}
+              {direction === 'CHIP_TO_USDT' ? t('convert_swap_chip_to_usdt') : t('convert_swap_usdt_to_chip')}
             </span>
             <button
               onClick={toggleDirection}
@@ -252,7 +252,7 @@ export default function ConvertPage() {
                 fontWeight: 600,
               }}
             >
-              ⇅ Đổi chiều quy đổi
+              ⇅ {t('convert_toggle_dir')}
             </button>
           </div>
 
@@ -260,9 +260,9 @@ export default function ConvertPage() {
             {/* Source Input */}
             <div style={{ background: 'rgba(0,0,0,0.5)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-medium)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: '8px' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Bạn chuyển:</span>
+                <span style={{ color: 'var(--text-muted)' }}>{t('convert_you_send')}</span>
                 <span style={{ color: 'var(--text-secondary)' }}>
-                  Khả dụng:{' '}
+                  {t('convert_available')}{' '}
                   <b style={{ color: '#ffffff' }}>
                     {availableSourceBalance.toLocaleString()}{' '}
                     {direction === 'CHIP_TO_USDT' ? 'CHIP' : 'USDT'}
@@ -323,7 +323,7 @@ export default function ConvertPage() {
                       cursor: 'pointer',
                     }}
                   >
-                    {p === 100 ? 'Tối đa' : `${p}%`}
+                    {p === 100 ? t('convert_max') : `${p}%`}
                   </button>
                 ))}
               </div>
@@ -332,8 +332,8 @@ export default function ConvertPage() {
             {/* Target Display */}
             <div style={{ background: 'rgba(0,0,0,0.5)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-medium)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: '8px' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Bạn nhận được (ước tính):</span>
-                <span style={{ color: '#34d399', fontWeight: 600 }}>Tỷ giá cố định 1:5,000,000</span>
+                <span style={{ color: 'var(--text-muted)' }}>{t('convert_you_receive')}</span>
+                <span style={{ color: '#34d399', fontWeight: 600 }}>{t('convert_fixed_rate')}</span>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -378,18 +378,18 @@ export default function ConvertPage() {
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Tỷ giá quy ước:</span>
+                <span style={{ color: 'var(--text-muted)' }}>{t('convert_official_rate')}</span>
                 <span style={{ fontWeight: 700, color: '#f5d77f' }}>1 USDT = 5,000,000 CHIP</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Phí giao dịch hệ thống (1% USDT):</span>
+                <span style={{ color: 'var(--text-muted)' }}>{t('convert_sys_fee')}</span>
                 <span style={{ fontWeight: 700, color: '#38bdf8' }}>{fee1PercentUsdt.toFixed(4)} USDT</span>
               </div>
               <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontStyle: 'italic', paddingLeft: '8px', borderLeft: '2px solid var(--accent-bronze)' }}>
-                ↳ Phí 1% được chuyển về Ví Quản Trị Hệ Thống: <span style={{ fontFamily: 'var(--font-mono)', color: '#38bdf8' }}>TBzt...4KPhh</span>
+                {t('convert_fee_treasury_note')} <span style={{ fontFamily: 'var(--font-mono)', color: '#38bdf8' }}>TBzt...4KPhh</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border-medium)', paddingTop: '6px' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Thực nhận sau phí:</span>
+                <span style={{ color: 'var(--text-muted)' }}>{t('convert_net_receive')}</span>
                 <span style={{ fontWeight: 800, color: '#34d399', fontSize: '0.95rem' }}>
                   {calculatedTarget.toLocaleString()} {direction === 'CHIP_TO_USDT' ? 'USDT' : 'CHIP'}
                 </span>
@@ -408,7 +408,7 @@ export default function ConvertPage() {
                 cursor: 'pointer',
               }}
             >
-              Xác Nhận Quy Đổi Tức Thì
+              {t('convert_btn_confirm')}
             </button>
           </form>
         </div>
@@ -417,28 +417,18 @@ export default function ConvertPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
           <div className="glass-card" style={{ padding: '1.4rem' }}>
             <h3 style={{ fontSize: '1.05rem', color: '#f5d77f', marginBottom: '8px' }}>
-              📜 Quy Định Chuyển Đổi Giá CHIP sang USDT
+              📜 {t('convert_rules_title')}
             </h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.6 }}>
-              Căn cứ theo tài liệu <b>CHIPCOIN_TELEGRAM_WALLET.md</b>, hệ thống áp dụng tỷ giá nội bộ bất biến:
+              {t('convert_rules_intro')}
             </p>
 
             <ul style={{ color: 'var(--text-secondary)', fontSize: '0.84rem', lineHeight: 1.7, paddingLeft: '20px' }}>
-              <li>
-                <b>Tỷ giá chuẩn:</b> <code>1 USDT = 5,000,000 CHIP</code>.
-              </li>
-              <li>
-                <b>Đơn vị nguyên tử:</b> <code>1 micro-USDT = 5 CHIP</code> (1 USDT có 6 chữ số thập phân trên TON).
-              </li>
-              <li>
-                <b>Cơ chế hai chiều:</b> Thành viên có thể đổi CHIP sang USDT nội bộ hoặc dùng USDT đổi lấy CHIP để tăng cấp bậc hội viên.
-              </li>
-              <li>
-                <b>Hạch toán tự động:</b> Mọi lệnh quy đổi được cập nhật đồng thời và an toàn giữa tài khoản cá nhân và quỹ thanh khoản của hệ thống.
-              </li>
-              <li>
-                <b>Quyền rút tiền ra ngoài:</b> Số dư USDT quy đổi có thể rút về ví TON cá nhân hoặc Telegram Wallet khi thành viên đạt từ hạng <b>CHIP PLATINUM</b> trở lên.
-              </li>
+              <li>{t('convert_rule_1')}</li>
+              <li>{t('convert_rule_2')}</li>
+              <li>{t('convert_rule_3')}</li>
+              <li>{t('convert_rule_4')}</li>
+              <li>{t('convert_rule_5')}</li>
             </ul>
           </div>
 
@@ -453,17 +443,17 @@ export default function ConvertPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
               <span style={{ fontSize: '1.4rem' }}>💎</span>
               <h4 style={{ margin: 0, color: '#38bdf8', fontSize: '0.98rem' }}>
-                Hệ Sinh Thái TON & Telegram Wallet
+                {t('convert_ton_eco_title')}
               </h4>
             </div>
             <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
-              Địa chỉ ví TON đã liên kết:{' '}
+              {t('convert_ton_linked_addr')}{' '}
               {currentUser?.tonWalletAddress ? (
                 <code style={{ color: '#38bdf8' }}>
                   {currentUser.tonWalletAddress.slice(0, 8)}...{currentUser.tonWalletAddress.slice(-6)}
                 </code>
               ) : (
-                <span style={{ color: '#fbbf24' }}>Chưa liên kết</span>
+                <span style={{ color: '#fbbf24' }}>{t('convert_ton_not_linked')}</span>
               )}
             </p>
             {!currentUser?.tonWalletAddress && (
@@ -477,7 +467,7 @@ export default function ConvertPage() {
                   padding: '6px 14px',
                 }}
               >
-                Kết nối ví TON ngay →
+                {t('convert_ton_connect_now')}
               </Link>
             )}
           </div>
@@ -488,9 +478,9 @@ export default function ConvertPage() {
       <div className="glass-card" style={{ padding: '1.4rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', flexWrap: 'wrap', gap: '10px' }}>
           <div>
-            <h3 style={{ fontSize: '1.15rem' }}>Lịch Sử Quy Đổi CHIP ↔ USDT</h3>
+            <h3 style={{ fontSize: '1.15rem' }}>{t('convert_history_title')}</h3>
             <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-              Nhật ký các giao dịch hoán đổi tài sản nội bộ
+              {t('convert_history_sub')}
             </span>
           </div>
           <span className="badge badge-active">Double-Entry Settled</span>
@@ -500,20 +490,20 @@ export default function ConvertPage() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>MÃ LỆNH</th>
-                <th>THỜI GIAN</th>
-                <th>CHIỀU ĐỔI</th>
-                <th>SỐ LƯỢNG CHUYỂN</th>
-                <th>SỐ LƯỢNG NHẬN</th>
-                <th>TỶ GIÁ ÁP DỤNG</th>
-                <th>TRẠNG THÁI</th>
+                <th>{t('convert_col_order_id')}</th>
+                <th>{t('convert_col_time')}</th>
+                <th>{t('convert_col_direction')}</th>
+                <th>{t('convert_col_send')}</th>
+                <th>{t('convert_col_receive')}</th>
+                <th>{t('convert_col_rate')}</th>
+                <th>{t('col_status')}</th>
               </tr>
             </thead>
             <tbody>
               {conversions.length === 0 ? (
                 <tr>
                   <td colSpan={7} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '24px' }}>
-                    Chưa có giao dịch quy đổi nào được thực hiện.
+                    {t('convert_no_orders')}
                   </td>
                 </tr>
               ) : (
@@ -558,7 +548,7 @@ export default function ConvertPage() {
                           border: '1px solid rgba(52, 211, 153, 0.3)',
                         }}
                       >
-                        ĐÃ HẠCH TOÁN
+                        {t('status_settled')}
                       </span>
                     </td>
                   </tr>
@@ -596,7 +586,7 @@ export default function ConvertPage() {
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ margin: 0, color: '#f5d77f', fontSize: '1.2rem' }}>🔐 Xác Thực Giao Dịch 2FA</h3>
+              <h3 style={{ margin: 0, color: '#f5d77f', fontSize: '1.2rem' }}>🔐 2FA Security Challenge</h3>
               <button
                 onClick={() => setShowTwoFactorModal(false)}
                 style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.2rem' }}
@@ -606,15 +596,7 @@ export default function ConvertPage() {
             </div>
 
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.5, marginBottom: '16px' }}>
-              Bạn đang yêu cầu chuyển đổi{' '}
-              <b style={{ color: '#ffffff' }}>
-                {numSource.toLocaleString()} {direction === 'CHIP_TO_USDT' ? 'CHIP' : 'USDT'}
-              </b>{' '}
-              thành{' '}
-              <b style={{ color: '#34d399' }}>
-                {calculatedTarget.toLocaleString()} {direction === 'CHIP_TO_USDT' ? 'USDT' : 'CHIP'}
-              </b>{' '}
-              (đã khấu trừ 1% phí hệ thống: <b>{fee1PercentUsdt.toFixed(4)} USDT</b> chuyển về Ví Quản Trị Hệ Thống). Vui lòng nhập mã bảo mật 6 số:
+              {numSource.toLocaleString()} {direction === 'CHIP_TO_USDT' ? 'CHIP' : 'USDT'} ➔ {calculatedTarget.toLocaleString()} {direction === 'CHIP_TO_USDT' ? 'USDT' : 'CHIP'} (Fee 1%: {fee1PercentUsdt.toFixed(4)} USDT)
             </p>
 
             <div style={{ marginBottom: '16px' }}>
@@ -638,9 +620,6 @@ export default function ConvertPage() {
                   outline: 'none',
                 }}
               />
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: '6px' }}>
-                (Mẹo thử nghiệm: Có thể nhập bất kỳ 6 số nào hoặc 123456)
-              </div>
             </div>
 
             <div style={{ display: 'flex', gap: '10px' }}>
@@ -650,7 +629,7 @@ export default function ConvertPage() {
                 className="btn-secondary"
                 style={{ flex: 1, padding: '10px' }}
               >
-                Hủy
+                {t('btn_cancel')}
               </button>
               <button
                 type="button"
@@ -659,7 +638,7 @@ export default function ConvertPage() {
                 className="nav-btn"
                 style={{ flex: 1, padding: '10px', border: 'none', cursor: 'pointer' }}
               >
-                {isConverting ? 'Đang hạch toán...' : 'Xác Nhận'}
+                {isConverting ? t('state_loading') : t('btn_confirm')}
               </button>
             </div>
           </div>

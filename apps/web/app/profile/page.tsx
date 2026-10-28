@@ -270,11 +270,11 @@ export default function ProfilePage() {
               </h2>
               {fullName.trim().length >= 2 && phoneNumber.trim().length >= 8 ? (
                 <span className="badge badge-success" style={{ fontSize: '0.78rem', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', border: '1px solid #10b981' }}>
-                  ✓ Đã Đủ Điều Kiện Nhận +20k CHIP
+                  {t('profile_progress_eligible', '✓ Đã Đủ Điều Kiện Nhận +20k CHIP')}
                 </span>
               ) : (
                 <span className="badge badge-gold" style={{ fontSize: '0.78rem' }}>
-                  ⚠️ Cần điền Họ tên & SĐT để hoàn tất
+                  {t('profile_progress_need_info', '⚠️ Cần điền Họ tên & SĐT để hoàn tất')}
                 </span>
               )}
             </div>
@@ -282,7 +282,7 @@ export default function ProfilePage() {
             {/* Profile completeness meter */}
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 14px', borderRadius: '8px', border: '1px solid var(--border-subtle)', marginBottom: '1.2rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '6px' }}>
-                <span style={{ color: 'var(--text-secondary)' }}>Tiến độ hoàn thiện hồ sơ & bảo mật</span>
+                <span style={{ color: 'var(--text-secondary)' }}>{t('profile_progress_title', 'Tiến độ hoàn thiện hồ sơ & bảo mật')}</span>
                 <span style={{ fontWeight: 700, color: (fullName.trim().length >= 2 && phoneNumber.trim().length >= 8) ? '#34d399' : 'var(--accent-bronze-light)' }}>
                   {((fullName.trim().length >= 2 ? 1 : 0) + (phoneNumber.trim().length >= 8 ? 1 : 0) + (currentUser?.email ? 1 : 0) + (twoFactorEnabled ? 1 : 0)) * 25}%
                 </span>
@@ -299,11 +299,11 @@ export default function ProfilePage() {
               </div>
               <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                 <span style={{ color: fullName.trim().length >= 2 ? '#34d399' : 'inherit' }}>
-                  {fullName.trim().length >= 2 ? '✓' : '○'} Họ tên
+                  {fullName.trim().length >= 2 ? '✓ ' : '○ '} {t('profile_step_fullname', 'Họ tên')}
                 </span>
                 <span>•</span>
                 <span style={{ color: phoneNumber.trim().length >= 8 ? '#34d399' : 'inherit' }}>
-                  {phoneNumber.trim().length >= 8 ? '✓' : '○'} Số điện thoại
+                  {phoneNumber.trim().length >= 8 ? '✓ ' : '○ '} {t('profile_step_phone', 'Số điện thoại')}
                 </span>
                 <span>•</span>
                 <span style={{ color: currentUser?.email ? '#34d399' : 'inherit' }}>
@@ -311,7 +311,7 @@ export default function ProfilePage() {
                 </span>
                 <span>•</span>
                 <span style={{ color: twoFactorEnabled ? '#34d399' : 'inherit' }}>
-                  {twoFactorEnabled ? '✓' : '○'} Bảo mật 2FA
+                  {twoFactorEnabled ? '✓ ' : '○ '} {t('profile_step_2fa', 'Bảo mật 2FA')}
                 </span>
               </div>
             </div>
@@ -320,7 +320,7 @@ export default function ProfilePage() {
               {/* Full Name */}
               <div className="form-group" style={{ margin: 0 }}>
                 <label className="form-label" htmlFor="fullName">
-                  Họ và Tên Đầy Đủ <span style={{ color: '#f59e0b' }}>*</span>
+                  {t('profile_fullname_label', 'Họ và Tên Đầy Đủ')} <span style={{ color: '#f59e0b' }}>*</span>
                 </label>
                 <input
                   id="fullName"
@@ -328,18 +328,18 @@ export default function ProfilePage() {
                   className="form-input"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="vd: Nguyễn Quốc Phúc"
+                  placeholder={t('profile_fullname_ph', 'vd: Nguyễn Quốc Phúc')}
                   required
                 />
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  Bắt buộc để hoàn tất hồ sơ và nhận thưởng +20,000 CHIP.
+                  {t('profile_fullname_hint', 'Bắt buộc để hoàn tất hồ sơ và nhận thưởng +20,000 CHIP.')}
                 </span>
               </div>
 
               {/* Phone Number */}
               <div className="form-group" style={{ margin: 0 }}>
                 <label className="form-label" htmlFor="phoneNumber">
-                  Số Điện Thoại Bảo Mật <span style={{ color: '#f59e0b' }}>*</span>
+                  {t('profile_phone_label', 'Số Điện Thoại Bảo Mật')} <span style={{ color: '#f59e0b' }}>*</span>
                 </label>
                 <input
                   id="phoneNumber"
@@ -347,11 +347,11 @@ export default function ProfilePage() {
                   className="form-input"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
-                  placeholder="vd: 0987654321 hoặc +84987654321"
+                  placeholder={t('profile_phone_ph', 'vd: 0987654321 hoặc +84987654321')}
                   required
                 />
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  Dùng để liên hệ xác minh giao dịch bảo mật và hỗ trợ tài khoản.
+                  {t('profile_phone_hint', 'Dùng để liên hệ xác minh giao dịch bảo mật và hỗ trợ tài khoản.')}
                 </span>
               </div>
 
@@ -386,10 +386,10 @@ export default function ProfilePage() {
               >
                 <div>
                   <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#f5d77f' }}>
-                    🛡️ Xác Thực Bảo Mật 2 Lớp (2FA)
+                    {t('profile_2fa_title', '🛡️ Xác Thực Bảo Mật 2 Lớp (2FA)')}
                   </div>
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                    Tăng cường bảo vệ tài khoản khi rút tiền và chuyển đổi số dư
+                    {t('profile_2fa_desc', 'Tăng cường bảo vệ tài khoản khi rút tiền và chuyển đổi số dư')}
                   </div>
                 </div>
                 <label style={{ position: 'relative', display: 'inline-block', width: '48px', height: '26px', cursor: 'pointer', flexShrink: 0 }}>
@@ -430,7 +430,7 @@ export default function ProfilePage() {
               {/* Password Section */}
               <div style={{ paddingTop: '1rem', borderTop: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f5d77f' }}>
-                  🔒 Đổi Mật Khẩu Đăng Nhập (Bỏ trống nếu không đổi)
+                  {t('profile_pwd_change_title', '🔒 Đổi Mật Khẩu Đăng Nhập (Bỏ trống nếu không đổi)')}
                 </div>
 
                 <div className="form-group" style={{ margin: 0 }}>
@@ -488,7 +488,7 @@ export default function ProfilePage() {
                 {saving ? (
                   <>
                     <div className="spinner" />
-                    Đang lưu thay đổi...
+                    {t('profile_saving', 'Đang lưu thay đổi...')}
                   </>
                 ) : (
                   `💾 ${t('profile_btn_save')}`
@@ -512,7 +512,7 @@ export default function ProfilePage() {
               <h2 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span>🔒</span> {t('profile_readonly_title')}
               </h2>
-              <span className="badge badge-gold">Đã Khóa Bảo Mật</span>
+              <span className="badge badge-gold">{t('profile_locked_badge', 'Đã Khóa Bảo Mật')}</span>
             </div>
 
             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', lineHeight: 1.5, marginBottom: '1.5rem' }}>
@@ -577,7 +577,7 @@ export default function ProfilePage() {
               {/* Connected TON Wallet */}
               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 14px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
-                  VÍ TON ĐÃ KẾT NỐI
+                  {t('profile_ton_connected_title', 'VÍ TON ĐÃ KẾT NỐI')}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px', gap: '8px' }}>
                   {currentUser?.tonWalletAddress ? (
@@ -586,11 +586,11 @@ export default function ProfilePage() {
                     </span>
                   ) : (
                     <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                      Chưa liên kết ví TON
+                      {t('profile_ton_not_connected', 'Chưa liên kết ví TON')}
                     </span>
                   )}
                   <Link href="/ton-wallet" className="glance-link" style={{ fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
-                    {currentUser?.tonWalletAddress ? 'Quản lý →' : 'Liên kết ngay →'}
+                    {currentUser?.tonWalletAddress ? t('profile_ton_manage', 'Quản lý →') : t('profile_ton_connect_now', 'Liên kết ngay →')}
                   </Link>
                 </div>
               </div>
@@ -647,7 +647,7 @@ export default function ProfilePage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h3 style={{ fontSize: '1.3rem', margin: 0 }}>Trung Tâm Hỗ Trợ Hội Viên</h3>
+              <h3 style={{ fontSize: '1.3rem', margin: 0 }}>{t('profile_support_title', 'Trung Tâm Hỗ Trợ Hội Viên')}</h3>
               <button
                 type="button"
                 onClick={() => setShowSupportModal(false)}
@@ -658,19 +658,19 @@ export default function ProfilePage() {
             </div>
 
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '1.4rem' }}>
-              Để bảo vệ an toàn số dư tài sản và tính bảo mật của tài khoản, các thông tin định danh như Email, User ID,
+              {t('profile_support_desc', 'Để bảo vệ an toàn số dư tài sản và tính bảo mật của tài khoản, các thông tin định danh như Email, User ID, hoặc yêu cầu hủy liên kết ví cần được xác minh trực tiếp bởi Bộ phận Quản trị An ninh Hệ thống:')}
               hoặc yêu cầu hủy liên kết ví cần được xác minh trực tiếp bởi Bộ phận Quản trị An ninh Hệ thống:
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.88rem' }}>
               <div style={{ background: 'rgba(255,255,255,0.04)', padding: '10px 14px', borderRadius: '8px' }}>
-                📧 <strong>Email Hỗ Trợ:</strong> support@chipcoin.io
+                📧 <strong>{t('profile_support_email', 'Email Hỗ Trợ:')}</strong> support@chipcoin.io
               </div>
               <div style={{ background: 'rgba(255,255,255,0.04)', padding: '10px 14px', borderRadius: '8px' }}>
                 💬 <strong>Telegram Security Desk:</strong> @ChipcoinSecurity247
               </div>
               <div style={{ background: 'rgba(255,255,255,0.04)', padding: '10px 14px', borderRadius: '8px' }}>
-                ⏱️ <strong>Thời gian phản hồi:</strong> Trong vòng 15-30 phút (24/7)
+                ⏱️ {t('profile_support_response_time', 'Thời gian phản hồi: Trong vòng 15-30 phút (24/7)')}
               </div>
             </div>
 
@@ -680,7 +680,7 @@ export default function ProfilePage() {
               className="btn-primary"
               style={{ width: '100%', marginTop: '1.5rem', textAlign: 'center' }}
             >
-              Đã hiểu &amp; Đóng
+              {t('profile_support_btn_close', 'Đã hiểu & Đóng')}
             </button>
           </div>
         </div>

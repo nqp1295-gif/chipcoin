@@ -83,7 +83,7 @@ export default function SystemSettingsPage() {
       {savedSuccess && (
         <div className="alert-box alert-success" style={{ marginBottom: 0 }}>
           <span>✅</span>
-          <div>Đã lưu thành công các tham số cấu hình hệ thống! Các thiết lập đã có hiệu lực ngay.</div>
+          <div>{t('sys_set_saved_success')}</div>
         </div>
       )}
 
@@ -92,7 +92,7 @@ export default function SystemSettingsPage() {
         <div className="glass-card">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.2rem' }}>
             <span style={{ fontSize: '1.4rem' }}>🌐</span>
-            <h3 style={{ fontSize: '1.2rem' }}>Cấu Hình Chung & Nhãn Thương Hiệu</h3>
+            <h3 style={{ fontSize: '1.2rem' }}>{t('sys_set_sec_general')}</h3>
           </div>
 
           <div
@@ -103,7 +103,7 @@ export default function SystemSettingsPage() {
             }}
           >
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Tên Nền Tảng</label>
+              <label className="form-label">{t('sys_set_platform_name')}</label>
               <input
                 type="text"
                 className="form-input"
@@ -113,7 +113,7 @@ export default function SystemSettingsPage() {
             </div>
 
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Mã Đơn Vị Điểm Thưởng</label>
+              <label className="form-label">{t('sys_set_point_symbol')}</label>
               <input
                 type="text"
                 className="form-input"
@@ -123,14 +123,14 @@ export default function SystemSettingsPage() {
             </div>
 
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Cho Phép Người Dùng Đăng Ký Mới</label>
+              <label className="form-label">{t('sys_set_allow_register')}</label>
               <select
                 className="form-input"
                 value={allowRegistration ? 'true' : 'false'}
                 onChange={(e) => setAllowRegistration(e.target.value === 'true')}
               >
-                <option value="true">Bật (Mở đăng ký tự do)</option>
-                <option value="false">Tắt (Chỉ cho phép quản trị viên cấp)</option>
+                <option value="true">{t('sys_set_opt_enabled')}</option>
+                <option value="false">{t('sys_set_opt_disabled')}</option>
               </select>
             </div>
           </div>
@@ -140,7 +140,7 @@ export default function SystemSettingsPage() {
         <div className="glass-card">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.2rem' }}>
             <span style={{ fontSize: '1.4rem' }}>🛡️</span>
-            <h3 style={{ fontSize: '1.2rem' }}>Chính Sách Bảo Mật & Xác Thực</h3>
+            <h3 style={{ fontSize: '1.2rem' }}>{t('sys_set_sec_security')}</h3>
           </div>
 
           <div
@@ -151,7 +151,7 @@ export default function SystemSettingsPage() {
             }}
           >
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Độ Dài Mật Khẩu Tối Thiểu</label>
+              <label className="form-label">{t('sys_set_min_password')}</label>
               <input
                 type="number"
                 min={8}
@@ -163,7 +163,7 @@ export default function SystemSettingsPage() {
             </div>
 
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Thời Hạn Phiên Đăng Nhập (Giờ)</label>
+              <label className="form-label">{t('sys_set_session_hours')}</label>
               <input
                 type="number"
                 min={1}
@@ -175,7 +175,7 @@ export default function SystemSettingsPage() {
             </div>
 
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Số Lần Thử Mật Khẩu Sai Tối Đa</label>
+              <label className="form-label">{t('sys_set_max_attempts')}</label>
               <input
                 type="number"
                 min={3}
@@ -192,7 +192,7 @@ export default function SystemSettingsPage() {
         <div className="glass-card">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.2rem' }}>
             <span style={{ fontSize: '1.4rem' }}>⏱️</span>
-            <h3 style={{ fontSize: '1.2rem' }}>Kiểm Soát Lạm Dụng & Rate Limiting</h3>
+            <h3 style={{ fontSize: '1.2rem' }}>Rate Limiting & Anti-Abuse</h3>
           </div>
 
           <div
@@ -203,7 +203,7 @@ export default function SystemSettingsPage() {
             }}
           >
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Thời Gian Chờ Giữa 2 Lần Gửi Lại Mã (Giây)</label>
+              <label className="form-label">Resend Cooldown (Seconds)</label>
               <input
                 type="number"
                 min={10}
@@ -213,19 +213,19 @@ export default function SystemSettingsPage() {
                 onChange={(e) => setResendCooldownSeconds(Number(e.target.value))}
               />
               <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                Thời gian cooldown để tránh spam email token (Mặc định: 60s)
+                Anti-spam cooldown (Default: 60s)
               </span>
             </div>
 
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Yêu Cầu Xác Minh Email Trước Khi Đăng Nhập</label>
+              <label className="form-label">Email Verification Enforcement</label>
               <select
                 className="form-input"
                 value={requireEmailVerification ? 'true' : 'false'}
                 onChange={(e) => setRequireEmailVerification(e.target.value === 'true')}
               >
-                <option value="true">Bắt buộc (Tài khoản phải kích hoạt qua email)</option>
-                <option value="false">Không bắt buộc</option>
+                <option value="true">Required</option>
+                <option value="false">Optional</option>
               </select>
             </div>
           </div>
@@ -235,7 +235,7 @@ export default function SystemSettingsPage() {
         <div className="glass-card">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.2rem' }}>
             <span style={{ fontSize: '1.4rem' }}>⚡</span>
-            <h3 style={{ fontSize: '1.2rem' }}>Transactional Outbox & Email Worker</h3>
+            <h3 style={{ fontSize: '1.2rem' }}>{t('sys_set_sec_outbox')}</h3>
           </div>
 
           <div
@@ -246,7 +246,7 @@ export default function SystemSettingsPage() {
             }}
           >
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Chu Kỳ Quét Outbox Hàng Đợi (ms)</label>
+              <label className="form-label">{t('sys_set_polling_interval')}</label>
               <input
                 type="number"
                 min={500}
@@ -259,7 +259,7 @@ export default function SystemSettingsPage() {
             </div>
 
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Số Lần Thử Lại Tối Đa (Max Retries)</label>
+              <label className="form-label">{t('sys_set_max_retries')}</label>
               <input
                 type="number"
                 min={1}
@@ -271,7 +271,7 @@ export default function SystemSettingsPage() {
             </div>
 
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Địa Chỉ Email Gửi Tin (Sender Email)</label>
+              <label className="form-label">{t('sys_set_sender_email')}</label>
               <input
                 type="email"
                 className="form-input"
@@ -289,7 +289,7 @@ export default function SystemSettingsPage() {
             className="nav-btn"
             style={{ padding: '12px 32px', fontSize: '1rem', cursor: 'pointer', border: 'none' }}
           >
-            {saving ? 'Đang lưu cấu hình...' : 'Lưu Tất Cả Cấu Hình Hệ Thống'}
+            {saving ? t('sys_saving') : t('sys_btn_save_config')}
           </button>
         </div>
       </form>

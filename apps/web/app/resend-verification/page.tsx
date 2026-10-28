@@ -96,7 +96,7 @@ function ResendVerificationContent() {
         {message && (
           <div className="alert-box alert-success" style={{ display: 'block' }}>
             <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '6px' }}>
-              📩 Đã ghi nhận yêu cầu!
+              {t('resend_noted', '📩 Đã ghi nhận yêu cầu!')}
             </div>
             <p style={{ fontSize: '0.9rem', lineHeight: 1.5 }}>{message}</p>
           </div>
@@ -106,9 +106,9 @@ function ResendVerificationContent() {
           <div className="alert-box alert-warning">
             <span>⏳</span>
             <div>
-              Hệ thống đang áp dụng giới hạn tốc độ yêu cầu (Rate Limit).
+              {t('resend_rate_limit_desc', 'Hệ thống đang áp dụng giới hạn tốc độ yêu cầu (Rate Limit).')}
               <br />
-              Vui lòng chờ: <strong>{retryAfter}s</strong>
+              {t('resend_please_wait', 'Vui lòng chờ:')} <strong>{retryAfter}s</strong>
             </div>
           </div>
         )}
@@ -143,7 +143,7 @@ function ResendVerificationContent() {
                 {t('resend_submitting')}
               </>
             ) : retryAfter !== null && retryAfter > 0 ? (
-              `Thử lại sau (${retryAfter}s)`
+              t('resend_btn_wait', 'Thử lại sau ({0}s)').replace('{0}', String(retryAfter))
             ) : (
               t('resend_btn_submit')
             )}
@@ -163,17 +163,17 @@ function ResendVerificationContent() {
           }}
         >
           <div style={{ color: '#f5d77f', fontWeight: 700, marginBottom: '4px' }}>
-            ℹ️ Lưu ý khi nhận email:
+            {t('resend_notes_title', 'ℹ️ Lưu ý khi nhận email:')}
           </div>
-          <div>• Thư được gửi chính thức từ địa chỉ: <strong style={{ color: '#fff' }}>jinofc.ytb@gmail.com</strong></div>
-          <div>• Hãy kiểm tra kỹ hộp thư đến (Inbox) và mục Thư rác (Spam / Junk).</div>
-          <div>• Mã xác minh có hiệu lực trong <strong>15 phút</strong>. Giới hạn yêu cầu gửi lại <strong>60 giây/lần</strong> (tối đa 3 lần/giờ).</div>
+          <div>{t('resend_notes_from', '• Thư được gửi chính thức từ địa chỉ: jinofc.ytb@gmail.com')}</div>
+          <div>{t('resend_notes_spam', '• Hãy kiểm tra kỹ hộp thư đến (Inbox) và mục Thư rác (Spam / Junk).')}</div>
+          <div>{t('resend_notes_ttl', '• Mã xác minh có hiệu lực trong 15 phút. Giới hạn yêu cầu gửi lại 60 giây/lần (tối đa 3 lần/giờ).')}</div>
         </div>
 
         <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-          Đã nhận được mã xác nhận?{' '}
+          {t('resend_have_code', 'Đã nhận được mã xác nhận?')}{' '}
           <Link href="/verify-email" style={{ color: 'var(--accent-bronze)', fontWeight: 600 }}>
-            Nhập mã tại đây
+            {t('resend_enter_here', 'Nhập mã tại đây')}
           </Link>
         </div>
       </div>
