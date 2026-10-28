@@ -120,6 +120,9 @@ export interface StoredUser {
   status: 'ACTIVE' | 'PENDING' | 'SUSPENDED';
   email_verified_at: string | null;
   created_at: string;
+  updated_at?: string; // Thời gian cập nhật gần nhất
+  statusReason?: string; // Lý do cập nhật trạng thái gần nhất
+  password?: string; // Mật khẩu người dùng (nếu lưu local)
   tier: MemberTier;
   referralCode: string;
   referredBy?: string;
@@ -956,6 +959,113 @@ export const ChipStore = {
     safeSet(STORAGE_KEYS.USERS, users);
     this.syncSessionIfActive(u);
     return u;
+  },
+
+  // 4b. Reset User Password (by Admin)
+  resetUserPassword(userId: string, newPassword?: string): { user: StoredUser; tempPassword: string } {
+    const users = this.getUsers();
+    const idx = users.findIndex((u) => u.id === userId || u.email.toLowerCase() === userId.toLowerCase());
+    if (idx === -1) throw new Error('Không tìm thấy tài khoản người dùng.');
+
+    const u = users[idx];
+    const generated = newPassword && newPassword.trim() 
+      ? newPassword.trim() 
+      : `Chip@${Math.floor(100000 + Math.random() * 900000)}#Pass`;
+
+    u.password = generated;
+    u.updated_at = new Date().toISOString();
+
+    users[idx] = u;
+    safeSet(STORAGE_KEYS.USERS, users);
+    this.syncSessionIfActive(u);
+    return { user: u, tempPassword: generated };
+  },
+
+  // 4c. Update User Status (Dừng hoạt động / Kích hoạt với lý do cụ thể)
+  updateUserStatus(
+    userId: string,
+    newStatus: 'ACTIVE' | 'SUSPENDED',
+    reason: string
+  ): StoredUser {
+    if (!reason || reason.trim().length < 3) {
+      throw new Error('Vui lòng ghi chú cụ thể lý do thay đổi trạng thái tài khoản.');
+    }
+
+    const users = this.getUsers();
+    const idx = users.findIndex((u) => u.id === userId || u.email.toLowerCase() === userId.toLowerCase());
+    if (idx === -1) throw new Error('Không tìm thấy tài khoản người dùng.');
+
+    const u = users[idx];
+    u.status = newStatus;
+    u.statusReason = reason.trim();
+    u.updated_at = new Date().toISOString();
+
+    users[idx] = u;
+    safeSet(STORAGE_KEYS.USERS, users);
+    this.syncSessionIfActive(u);
+    return u;
+  },
+
+  // 4d. Xóa Vĩnh Viễn Tài Khoản
+  // Lưu ý: Toàn bộ số dư CHIP hoàn về hệ thống, toàn bộ số dư USDT hoàn về 💎 VÍ TON QUẢN TRỊ CHÍNH THỨC
+  deleteUserPermanently(
+    userId: string,
+    reason: string
+  ): {
+    user: StoredUser;
+    chipsRefunded: number;
+    usdtRefunded: number;
+    destinationTonWallet: string;
+  } {
+    if (!reason || reason.trim().length < 3) {
+      throw new Error('Vui lòng ghi chú cụ thể lý do xóa vĩnh viễn tài khoản.');
+    }
+
+    const users = this.getUsers();
+    const idx = users.findIndex((u) => u.id === userId || u.email.toLowerCase() === userId.toLowerCase());
+    if (idx === -1) throw new Error('Không tìm thấy tài khoản người dùng để xóa.');
+
+    const targetUser = users[idx];
+    const chipsRefunded = targetUser.chipsBalance || 0;
+    const usdtRefunded = targetUser.usdtBalance || 0;
+
+    // 1. Hoàn toàn bộ số dư USDT về VÍ TON QUẢN TRỊ CHÍNH THỨC
+    if (usdtRefunded > 0) {
+      const feeRecord: AdminFeeRecord = {
+        id: `fee-del-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`,
+        timestamp: new Date().toISOString(),
+        userId: targetUser.id,
+        userEmail: targetUser.email,
+        txType: 'CONVERT_USDT_TO_CHIP',
+        txTypeLabel: `Hoàn số dư USDT về Ví TON Quản Trị khi xóa tài khoản (${reason.trim()})`,
+        volumeUsdt: usdtRefunded,
+        feeRate: 1.0,
+        feeUsdt: usdtRefunded,
+        beneficiaryWallet: ADMIN_TON_WALLET,
+        orderId: `del-acc-${targetUser.id}`,
+        status: 'RECORDED',
+      };
+      this.addAdminFeeRecord(feeRecord);
+    }
+
+    // 2. Xóa khỏi danh sách tài khoản
+    const updatedUsers = users.filter(
+      (u) => u.id !== targetUser.id && u.email.toLowerCase() !== targetUser.email.toLowerCase()
+    );
+    safeSet(STORAGE_KEYS.USERS, updatedUsers);
+
+    // 3. Nếu là phiên đăng nhập hiện tại thì xóa session
+    const currentMember = this.getCurrentMember();
+    if (currentMember && currentMember.id === targetUser.id) {
+      this.clearMemberSession();
+    }
+
+    return {
+      user: targetUser,
+      chipsRefunded,
+      usdtRefunded,
+      destinationTonWallet: ADMIN_TON_WALLET,
+    };
   },
 
   // 5. TON Wallet & Telegram Binding

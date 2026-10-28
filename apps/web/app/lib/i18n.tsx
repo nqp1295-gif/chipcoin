@@ -45,7 +45,7 @@ export const DICTIONARIES: Record<SupportedLanguage, Record<string, string>> = {
     nav_register_desc: 'Tạo tài khoản hội viên nhận +5,000 CHIP',
 
     // Navigation - System
-    nav_sys_accounts: 'Quản Lý Tài Khoản 4 Cấp',
+    nav_sys_accounts: 'Quản Lý Tài Khoản',
     nav_sys_accounts_desc: 'Admin, Trợ lý, Chuyên viên, Người dùng',
     nav_sys_treasury: 'Ví Quản Trị Hệ Thống',
     nav_sys_treasury_desc: 'Ví TON TBzt...4KPhh & Quỹ thu phí 1% USDT',

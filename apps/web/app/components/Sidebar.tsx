@@ -335,10 +335,10 @@ export const SYSTEM_MENU_GROUPS: MenuGroup[] = [
     items: [
       {
         nameKey: 'nav_sys_accounts',
-        defaultName: 'Quản Lý Tài Khoản 4 Cấp',
+        defaultName: 'Quản Lý Tài Khoản',
         href: '/system',
         exact: true,
-        badge: '4 Cấp',
+        badge: 'Active',
         badgeType: 'gold',
         descKey: 'nav_sys_accounts_desc',
         defaultDesc: 'Admin, Trợ lý, Chuyên viên, Người dùng',
