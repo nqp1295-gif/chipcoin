@@ -37,7 +37,7 @@ const TASKS: ActivityTask[] = [
     rewardUnits: 5000,
     rewardText: '+5,000 CHIP',
     category: 'ONE_TIME',
-    description: 'Xác thực địa chỉ email thành công qua đường dẫn kích hoạt bảo mật. Điểm thưởng sẽ được ghi ngay vào sổ cái kép của bạn.',
+    description: 'Xác thực địa chỉ email thành công qua đường dẫn kích hoạt bảo mật. Điểm thưởng sẽ được cộng ngay vào ví điểm thưởng của bạn.',
     actionUrl: '/verify-email',
     actionText: 'Xác minh email',
     canClaimDirectly: true,
@@ -61,7 +61,7 @@ const TASKS: ActivityTask[] = [
     rewardUnits: 15000,
     rewardText: '+15,000 CHIP',
     category: 'COMMUNITY',
-    description: 'Theo dõi tin tức phát triển công nghệ, đợt airdrop token nội bộ và đối soát sổ cái hàng tuần cùng các hội viên khác.',
+    description: 'Theo dõi tin tức phát triển công nghệ, các đợt phát thưởng token nội bộ và cập nhật quyền lợi hàng tuần cùng cộng đồng.',
     actionText: 'Tham gia kênh cộng đồng',
     canClaimDirectly: true,
   },
@@ -80,13 +80,13 @@ const TASKS: ActivityTask[] = [
   {
     id: 'task_ledger_test',
     icon: '⚡',
-    title: 'Trải Nghiệm Khởi Tạo Giao Dịch Sổ Cái',
+    title: 'Trải Nghiệm Khởi Tạo Giao Dịch Thử Nghiệm',
     rewardUnits: 5000,
     rewardText: '+5,000 CHIP',
     category: 'DAILY',
-    description: 'Kiểm tra tốc độ hạch toán giao dịch sổ cái kép Double-entry Ledger bảo đảm cân bằng DEBIT / CREDIT tức thì.',
+    description: 'Kiểm tra tốc độ hạch toán giao dịch tức thì, bảo đảm cân bằng và an toàn số dư ví điểm.',
     actionUrl: '/wallet',
-    actionText: 'Mở ví kiểm tra sổ cái',
+    actionText: 'Mở ví kiểm tra giao dịch',
     canClaimDirectly: true,
   },
 ];
@@ -157,12 +157,7 @@ export default function ActivitiesPage() {
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'info' } | null>(null);
 
   const loadMember = () => {
-    let mem = ChipStore.getCurrentMember();
-    if (!mem) {
-      const users = ChipStore.getUsers();
-      mem = users.find((u) => u.roles.includes('USER')) || users[0];
-      if (mem) ChipStore.setMemberSession(mem);
-    }
+    const mem = ChipStore.getCurrentMember();
     setCurrentUser(mem);
 
     if (mem) {

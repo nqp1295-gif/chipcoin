@@ -135,9 +135,9 @@ export default function SystemWalletPage() {
               marginBottom: '4px',
             }}
           >
-            🪙 QUẢN TRỊ HỆ THỐNG — SỔ CÁI KÉP & KHO QUỸ MASTER
+            🪙 QUẢN TRỊ HỆ THỐNG — KHO QUỸ MASTER TREASURY
           </div>
-          <h1 style={{ fontSize: '2rem', margin: 0 }}>Sổ Cái Kép & Kho Quỹ Hệ Thống</h1>
+          <h1 style={{ fontSize: '2rem', margin: 0 }}>Kho Quỹ Hệ Thống & Phân Bổ Hạn Mức</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', marginTop: '4px' }}>
             Quản trị kho quỹ Treasury, điều chuyển hạn mức điểm thưởng và kiểm soát cân đối Nợ/Có
           </p>
@@ -194,7 +194,7 @@ export default function SystemWalletPage() {
             >
               KHO QUỸ TỔNG (SYSTEM TREASURY)
             </span>
-            <span className="badge badge-gold">MASTER LEDGER</span>
+            <span className="badge badge-gold">MASTER TREASURY</span>
           </div>
 
           <div style={{ marginTop: '1.5rem', marginBottom: '1.5rem' }}>
@@ -278,9 +278,9 @@ export default function SystemWalletPage() {
         </div>
       </div>
 
-      {/* Journal Ledger Table */}
+      {/* Journal Table */}
       <div className="glass-card" style={{ padding: '1.4rem' }}>
-        <h3 style={{ fontSize: '1.15rem', marginBottom: '1.2rem' }}>Nhật Ký Hạch Toán Sổ Cái Kép Toàn Hệ Thống</h3>
+        <h3 style={{ fontSize: '1.15rem', marginBottom: '1.2rem' }}>Nhật Ký Hạch Toán Toàn Hệ Thống</h3>
 
         <div className="table-container">
           <table className="data-table">
@@ -299,7 +299,7 @@ export default function SystemWalletPage() {
               {transactions.length === 0 ? (
                 <tr>
                   <td colSpan={7} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-muted)' }}>
-                    Chưa có giao dịch hạch toán nào trong sổ cái hệ thống.
+                    Chưa có giao dịch hạch toán nào trong hệ thống.
                   </td>
                 </tr>
               ) : (

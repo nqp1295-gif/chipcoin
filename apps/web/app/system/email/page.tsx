@@ -530,7 +530,7 @@ export default function SystemEmailMonitoringPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
           <div>
             <h2 style={{ fontSize: '1.25rem', margin: 0, color: '#fff' }}>
-              Nhật Ký Hàng Đợi Email (Outbox Jobs Ledger)
+              Nhật Ký Hàng Đợi Email (Outbox Queue Jobs)
             </h2>
             <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
               Theo dõi lịch sử phát hành email xác thực, độ trễ gửi thư và trạng thái gửi của từng phiên

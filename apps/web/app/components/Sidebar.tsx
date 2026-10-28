@@ -362,7 +362,7 @@ export const SYSTEM_MENU_GROUPS: MenuGroup[] = [
       },
       {
         nameKey: 'nav_sys_treasury',
-        defaultName: 'Sổ Cái Kép Master Treasury',
+        defaultName: 'Kho Quỹ Master Treasury',
         href: '/system/wallet',
         badge: 'Treasury',
         badgeType: 'gold',
@@ -705,7 +705,7 @@ export default function Sidebar({
                 </span>
               </div>
               <div className="glance-subtext">
-                <span>{IS_LOCAL_DEV ? 'Kho Quỹ: 500M CHIP Vault' : 'Sổ Cái Kép Toàn Hệ Thống'}</span>
+                <span>{IS_LOCAL_DEV ? 'Kho Quỹ: 500M CHIP Vault' : 'Kho Quỹ Toàn Hệ Thống'}</span>
                 <Link href="/system/wallet" className="glance-link" onClick={onCloseMobile}>
                   Kho quỹ →
                 </Link>
@@ -713,35 +713,63 @@ export default function Sidebar({
             </div>
           ) : (
             /* User Member Glance Widget with live data */
-            <div className="sidebar-glance-card">
-              <div className="glance-header">
-                <span className="glance-label">{t('balance_label')}</span>
-                <Link href="/rank" style={{ textDecoration: 'none' }} onClick={onCloseMobile}>
+            memberUser ? (
+              <div className="sidebar-glance-card">
+                <div className="glance-header">
+                  <span className="glance-label">{t('balance_label')}</span>
+                  <Link href="/rank" style={{ textDecoration: 'none' }} onClick={onCloseMobile}>
+                    <span
+                      className="glance-tier-badge"
+                      style={{
+                        color: memberTierMeta.badgeColor,
+                        borderColor: memberTierMeta.badgeColor,
+                        background: 'rgba(0,0,0,0.3)',
+                      }}
+                    >
+                      {memberUser.tier}
+                    </span>
+                  </Link>
+                </div>
+                <div className="glance-balance-row">
+                  <span className="glance-amount">
+                    {memberUser.chipsBalance.toLocaleString()}
+                  </span>
+                  <span className="glance-unit">CHIP</span>
+                </div>
+                <div className="glance-subtext">
+                  <span>≈ ${(memberUser.chipsBalance / 10000).toFixed(2)} USD</span>
+                  <Link href="/wallet" className="glance-link" onClick={onCloseMobile}>
+                    Ví của tôi →
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="sidebar-glance-card" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                <div className="glance-header">
+                  <span className="glance-label" style={{ color: '#94a3b8' }}>KHÁCH TRUY CẬP</span>
                   <span
                     className="glance-tier-badge"
                     style={{
-                      color: memberTierMeta.badgeColor,
-                      borderColor: memberTierMeta.badgeColor,
+                      color: '#94a3b8',
+                      borderColor: '#475569',
                       background: 'rgba(0,0,0,0.3)',
                     }}
                   >
-                    {memberUser?.tier || defaultTier}
+                    CHƯA ĐĂNG NHẬP
                   </span>
-                </Link>
+                </div>
+                <div className="glance-balance-row">
+                  <span className="glance-amount" style={{ color: '#94a3b8' }}>0</span>
+                  <span className="glance-unit">CHIP</span>
+                </div>
+                <div className="glance-subtext">
+                  <span style={{ color: 'var(--text-muted)' }}>Quà chào mừng +5,000</span>
+                  <Link href="/login" className="glance-link" onClick={onCloseMobile}>
+                    Đăng nhập ngay →
+                  </Link>
+                </div>
               </div>
-              <div className="glance-balance-row">
-                <span className="glance-amount">
-                  {(memberUser?.chipsBalance ?? defaultBalance).toLocaleString()}
-                </span>
-                <span className="glance-unit">CHIP</span>
-              </div>
-              <div className="glance-subtext">
-                <span>≈ ${(((memberUser?.chipsBalance ?? defaultBalance)) / 10000).toFixed(2)} USD</span>
-                <Link href="/wallet" className="glance-link" onClick={onCloseMobile}>
-                  Ví của tôi →
-                </Link>
-              </div>
-            </div>
+            )
           )
         ) : (
           <div
@@ -847,7 +875,7 @@ export default function Sidebar({
                   <span className="system-status-text">Outbox: 100% Hoạt Động</span>
                   <span className="system-live-chip">LIVE</span>
                 </div>
-                <div className="system-meta-text">PostgreSQL Worker &amp; Sổ Cái Kép</div>
+                <div className="system-meta-text">PostgreSQL Worker &amp; Quản Trị Hệ Thống</div>
                 <div className="system-meta-sub">Chu kỳ quét 2s • 0 bản ghi tồn</div>
               </Link>
             ) : (
@@ -872,7 +900,7 @@ export default function Sidebar({
                 <div className="system-status-indicator">
                   <span style={{ fontSize: '0.9rem' }}>🛡️</span>
                   <span className="system-status-text" style={{ color: '#ffffff' }}>
-                    Sổ Cái Hội Viên Active
+                    Ví Điểm Hội Viên Active
                   </span>
                 </div>
                 <div className="system-meta-text">Tích lũy điểm CHIP nội bộ</div>

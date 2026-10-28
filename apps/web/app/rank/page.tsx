@@ -33,12 +33,7 @@ export default function RankPage() {
   const [promotions, setPromotions] = useState<TierPromotionRecord[]>([]);
 
   const loadData = () => {
-    let mem = ChipStore.getCurrentMember();
-    if (!mem) {
-      const users = ChipStore.getUsers();
-      mem = users.find((u) => u.roles.includes('USER')) || users[0];
-      if (mem) ChipStore.setMemberSession(mem);
-    }
+    const mem = ChipStore.getCurrentMember();
     setCurrentUser(mem);
     const allPromos = ChipStore.getPromotions();
     setPromotions(allPromos);
@@ -463,7 +458,7 @@ export default function RankPage() {
                         </span>
                         <span>
                           {config.extendedPrivileges
-                            ? 'Đặc quyền mở rộng từ hệ thống (Hạn mức cao, ưu tiên đối soát sổ cái)'
+                            ? 'Đặc quyền mở rộng từ hệ thống (Hạn mức cao, ưu tiên đối soát giao dịch)'
                             : 'Đặc quyền cơ bản'}
                         </span>
                       </li>

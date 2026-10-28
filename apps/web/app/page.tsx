@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useI18n } from './lib/i18n';
 import { ChipStore, StoredUser, TIER_CONFIGS } from './lib/store';
 
@@ -13,6 +14,7 @@ const IS_LOCAL_DEV =
   process.env?.NEXT_PUBLIC_USE_SEED_DATA === 'true';
 
 export default function UserOverviewPage() {
+  const router = useRouter();
   const { t } = useI18n();
   const [currentUser, setCurrentUser] = useState<StoredUser | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -44,8 +46,10 @@ export default function UserOverviewPage() {
 
   const handleQuickCheckin = () => {
     if (!currentUser) {
-      setFeedback('Vui lòng đăng nhập tài khoản để nhận điểm danh!');
-      setTimeout(() => setFeedback(null), 3500);
+      setFeedback('Vui lòng đăng nhập hoặc tạo tài khoản để thực hiện điểm danh và nhận thưởng!');
+      setTimeout(() => {
+        router.push('/login');
+      }, 1500);
       return;
     }
 
@@ -87,7 +91,20 @@ export default function UserOverviewPage() {
       >
         <div style={{ maxWidth: '850px', position: 'relative', zIndex: 2 }}>
           <div style={{ display: 'inline-flex', marginBottom: '1rem' }}>
-            <span className="badge badge-gold">{t('overview_hero_badge')}</span>
+            {currentUser ? (
+              <span className="badge badge-gold">{t('overview_hero_badge')}</span>
+            ) : (
+              <span
+                className="badge"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  color: '#f5d77f',
+                  border: '1px solid var(--border-bronze)',
+                }}
+              >
+                👁️ Chế Độ Khách — Chỉ Xem Tổng Quan
+              </span>
+            )}
           </div>
 
           <h1
@@ -116,52 +133,107 @@ export default function UserOverviewPage() {
               color: 'var(--text-secondary)',
               fontSize: '1.05rem',
               lineHeight: 1.6,
-              marginBottom: '1.8rem',
+              marginBottom: currentUser ? '1.8rem' : '1.2rem',
             }}
           >
             {t('overview_hero_desc')}
           </p>
 
-          <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
-            <Link
-              href="/activities"
-              className="nav-btn"
-              style={{ fontSize: '0.95rem', padding: '10px 24px' }}
-            >
-              {t('overview_btn_activities')}
-            </Link>
-
-            <Link
-              href="/rank"
-              className="btn-secondary"
-              style={{ fontSize: '0.95rem', padding: '10px 24px' }}
-            >
-              {t('overview_btn_rank')}
-            </Link>
-
-            <Link
-              href="/wallet"
-              className="btn-secondary"
-              style={{ fontSize: '0.95rem', padding: '10px 24px' }}
-            >
-              {t('overview_btn_wallet')}
-            </Link>
-
-            <button
-              onClick={handleQuickCheckin}
-              className="nav-btn"
-              disabled={isClaimedToday}
+          {!currentUser && (
+            <div
               style={{
-                fontSize: '0.95rem',
-                padding: '10px 24px',
-                background: isClaimedToday ? 'rgba(52, 211, 153, 0.2)' : 'rgba(212, 175, 55, 0.15)',
-                color: isClaimedToday ? '#34d399' : '#f5d77f',
-                border: isClaimedToday ? '1px solid rgba(52, 211, 153, 0.4)' : '1px solid var(--border-bronze)',
-                cursor: isClaimedToday ? 'default' : 'pointer',
+                background: 'rgba(212, 175, 55, 0.08)',
+                border: '1px solid var(--border-bronze)',
+                borderRadius: '10px',
+                padding: '12px 18px',
+                marginBottom: '1.8rem',
+                fontSize: '0.92rem',
+                lineHeight: 1.6,
+                color: '#fef3c7',
               }}
             >
-              {isClaimedToday ? '✓ Đã điểm danh hôm nay' : t('overview_btn_checkin')}
-            </button>
+              👋 <strong>Chào mừng bạn đến với CHIPCOIN!</strong> Bạn đang xem ở chế độ Khách vãng lai. Vui lòng <strong>Đăng nhập</strong> hoặc <strong>Đăng ký tài khoản</strong> để kích hoạt ví điểm, điểm danh hàng ngày và truy cập đầy đủ các trang thông tin cá nhân.
+            </div>
+          )}
+
+          <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
+            {currentUser ? (
+              <>
+                <Link
+                  href="/activities"
+                  className="nav-btn"
+                  style={{ fontSize: '0.95rem', padding: '10px 24px' }}
+                >
+                  {t('overview_btn_activities')}
+                </Link>
+
+                <Link
+                  href="/rank"
+                  className="btn-secondary"
+                  style={{ fontSize: '0.95rem', padding: '10px 24px' }}
+                >
+                  {t('overview_btn_rank')}
+                </Link>
+
+                <Link
+                  href="/wallet"
+                  className="btn-secondary"
+                  style={{ fontSize: '0.95rem', padding: '10px 24px' }}
+                >
+                  {t('overview_btn_wallet')}
+                </Link>
+
+                <button
+                  onClick={handleQuickCheckin}
+                  className="nav-btn"
+                  disabled={isClaimedToday}
+                  style={{
+                    fontSize: '0.95rem',
+                    padding: '10px 24px',
+                    background: isClaimedToday ? 'rgba(52, 211, 153, 0.2)' : 'rgba(212, 175, 55, 0.15)',
+                    color: isClaimedToday ? '#34d399' : '#f5d77f',
+                    border: isClaimedToday ? '1px solid rgba(52, 211, 153, 0.4)' : '1px solid var(--border-bronze)',
+                    cursor: isClaimedToday ? 'default' : 'pointer',
+                  }}
+                >
+                  {isClaimedToday ? '✓ Đã điểm danh hôm nay' : t('overview_btn_checkin')}
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/register"
+                  className="nav-btn"
+                  style={{ fontSize: '0.95rem', padding: '10px 24px' }}
+                >
+                  ✨ Đăng Ký Tài Khoản Nhận Thưởng
+                </Link>
+
+                <Link
+                  href="/login"
+                  className="btn-secondary"
+                  style={{ fontSize: '0.95rem', padding: '10px 24px' }}
+                >
+                  🔑 Đăng Nhập
+                </Link>
+
+                <button
+                  onClick={handleQuickCheckin}
+                  className="btn-secondary"
+                  style={{
+                    fontSize: '0.95rem',
+                    padding: '10px 24px',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    color: 'var(--text-muted)',
+                    border: '1px dashed var(--border-subtle)',
+                    cursor: 'pointer',
+                  }}
+                  title="Cần đăng nhập để điểm danh"
+                >
+                  🔒 Đăng nhập để điểm danh (+250)
+                </button>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -197,10 +269,12 @@ export default function UserOverviewPage() {
               marginTop: '8px',
             }}
           >
-            {balance.toLocaleString()}
+            {currentUser ? balance.toLocaleString() : '--'}
           </div>
           <div style={{ fontSize: '0.82rem', color: '#38bdf8', marginTop: '4px' }}>
-            ≈ {(balance / 5000000).toFixed(4)} USDT (1 USDT = 5,000,000 CHIP)
+            {currentUser
+              ? `≈ ${(balance / 5000000).toFixed(4)} USDT (1 USDT = 5,000,000 CHIP)`
+              : 'Đăng nhập để xem số dư'}
           </div>
         </div>
 
@@ -210,22 +284,22 @@ export default function UserOverviewPage() {
             <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>
               {t('overview_stat_tier')}
             </span>
-            <span style={{ color: tierMeta.badgeColor }}>👑</span>
+            <span style={{ color: currentUser ? tierMeta.badgeColor : 'var(--text-muted)' }}>👑</span>
           </div>
           <div
             style={{
               fontSize: '1.8rem',
               fontWeight: 800,
-              color: tierMeta.badgeColor,
+              color: currentUser ? tierMeta.badgeColor : 'var(--text-muted)',
               marginTop: '8px',
             }}
           >
-            {currentTier}
+            {currentUser ? currentTier : 'Khách Truy Cập'}
           </div>
-          <div style={{ fontSize: '0.82rem', color: '#34d399', marginTop: '4px' }}>
-            {tierMeta.bonusRate > 0
-              ? `+${tierMeta.bonusRate * 100}% bonus`
-              : 'Active'}
+          <div style={{ fontSize: '0.82rem', color: currentUser ? '#34d399' : 'var(--text-muted)', marginTop: '4px' }}>
+            {currentUser
+              ? (tierMeta.bonusRate > 0 ? `+${tierMeta.bonusRate * 100}% bonus` : 'Active')
+              : 'Chưa đăng ký tài khoản'}
           </div>
         </div>
 
@@ -245,10 +319,10 @@ export default function UserOverviewPage() {
               marginTop: '8px',
             }}
           >
-            {streakDays} / 7
+            {currentUser ? `${streakDays} / 7` : '0 / 7'}
           </div>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            Streak Status
+            {currentUser ? 'Streak Status' : 'Cần đăng nhập'}
           </div>
         </div>
 
@@ -258,20 +332,20 @@ export default function UserOverviewPage() {
             <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>
               {t('overview_stat_status')}
             </span>
-            <span className="status-dot-pulse" />
+            <span className={currentUser ? 'status-dot-pulse' : ''} style={!currentUser ? { width: '8px', height: '8px', borderRadius: '50%', background: 'var(--text-muted)' } : undefined} />
           </div>
           <div
             style={{
               fontSize: '1.8rem',
               fontWeight: 800,
-              color: '#34d399',
+              color: currentUser ? '#34d399' : 'var(--text-muted)',
               marginTop: '8px',
             }}
           >
-            {t('overview_status_active')}
+            {currentUser ? t('overview_status_active') : 'Chưa Đăng Ký'}
           </div>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            Double-Entry Ledger Verified
+            {currentUser ? 'Tài Khoản Đang Hoạt Động' : 'Vui lòng đăng ký tài khoản'}
           </div>
         </div>
       </section>
@@ -307,11 +381,11 @@ export default function UserOverviewPage() {
           </div>
           <div style={{ marginTop: '1.5rem', paddingTop: '1.2rem', borderTop: '1px solid var(--border-subtle)' }}>
             <Link
-              href="/activities"
+              href={currentUser ? '/activities' : '/login?redirect=/activities'}
               className="nav-btn"
               style={{ display: 'inline-flex', padding: '10px 20px', fontSize: '0.9rem' }}
             >
-              {t('overview_box1_btn')}
+              {currentUser ? t('overview_box1_btn') : 'Đăng nhập để tham gia →'}
             </Link>
           </div>
         </div>
@@ -341,7 +415,7 @@ export default function UserOverviewPage() {
           </div>
           <div style={{ marginTop: '1.5rem', paddingTop: '1.2rem', borderTop: '1px solid var(--border-subtle)' }}>
             <Link
-              href="/rank"
+              href={currentUser ? '/rank' : '/login?redirect=/rank'}
               className="nav-btn"
               style={{
                 display: 'inline-flex',
@@ -351,7 +425,7 @@ export default function UserOverviewPage() {
                 color: '#0b0c0e',
               }}
             >
-              {t('overview_box2_btn')}
+              {currentUser ? t('overview_box2_btn') : 'Đăng nhập xem cấp bậc →'}
             </Link>
           </div>
         </div>
@@ -367,8 +441,12 @@ export default function UserOverviewPage() {
             </span>
           </div>
 
-          <Link href="/wallet" className="nav-btn" style={{ fontSize: '0.85rem', padding: '6px 14px' }}>
-            {t('overview_view_all')}
+          <Link
+            href={currentUser ? '/wallet' : '/login'}
+            className="nav-btn"
+            style={{ fontSize: '0.85rem', padding: '6px 14px' }}
+          >
+            {currentUser ? t('overview_view_all') : 'Đăng nhập để xem ví →'}
           </Link>
         </div>
 
@@ -384,7 +462,24 @@ export default function UserOverviewPage() {
               </tr>
             </thead>
             <tbody>
-              {IS_LOCAL_DEV ? (
+              {!currentUser ? (
+                <tr>
+                  <td colSpan={5} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-secondary)' }}>
+                    <div style={{ marginBottom: '8px', fontSize: '1.5rem' }}>🔒</div>
+                    <div>
+                      Bạn đang xem ở chế độ Khách. Vui lòng{' '}
+                      <Link href="/login" style={{ color: '#f5d77f', textDecoration: 'underline', fontWeight: 600 }}>
+                        Đăng nhập
+                      </Link>{' '}
+                      hoặc{' '}
+                      <Link href="/register" style={{ color: '#38bdf8', textDecoration: 'underline', fontWeight: 600 }}>
+                        Đăng ký tài khoản
+                      </Link>{' '}
+                      để xem lịch sử tích lũy điểm thưởng cá nhân.
+                    </div>
+                  </td>
+                </tr>
+              ) : IS_LOCAL_DEV ? (
                 <>
               <tr>
                 <td style={{ fontFamily: 'var(--font-mono)', color: '#ffffff', fontWeight: 600 }}>
@@ -459,7 +554,7 @@ export default function UserOverviewPage() {
               ) : (
                 <tr>
                   <td colSpan={5} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '24px' }}>
-                    Chưa có giao dịch nào. Hãy đăng nhập để xem lịch sử giao dịch của bạn.
+                    Chưa có giao dịch nào.
                   </td>
                 </tr>
               )}

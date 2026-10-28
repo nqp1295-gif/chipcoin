@@ -37,12 +37,7 @@ export default function TonWalletPage() {
   const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   const loadUser = () => {
-    let mem = ChipStore.getCurrentMember();
-    if (!mem) {
-      const users = ChipStore.getUsers();
-      mem = users.find((u) => u.roles.includes('USER')) || users[0];
-      if (mem) ChipStore.setMemberSession(mem);
-    }
+    const mem = ChipStore.getCurrentMember();
     setCurrentUser(mem);
     if (mem?.tonWalletAddress) {
       setTonAddress(mem.tonWalletAddress);
@@ -718,7 +713,7 @@ export default function TonWalletPage() {
                   {verifying ? (
                     <>
                       <div className="spinner" />
-                      Đang xác minh sổ cái...
+                      Đang xác minh giao dịch...
                     </>
                   ) : (
                     `💎 ${t('ton_btn_bind')}`

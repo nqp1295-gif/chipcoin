@@ -24,13 +24,7 @@ export default function ProfilePage() {
   const [showSupportModal, setShowSupportModal] = useState(false);
 
   const loadUser = () => {
-    let mem = ChipStore.getCurrentMember();
-    if (!mem) {
-      // Default to first active user if session not explicitly initialized
-      const users = ChipStore.getUsers();
-      mem = users.find((u) => u.roles.includes('USER')) || users[0];
-      if (mem) ChipStore.setMemberSession(mem);
-    }
+    const mem = ChipStore.getCurrentMember();
     setCurrentUser(mem);
     if (mem) {
       setUsername(mem.username || '');
@@ -367,7 +361,7 @@ export default function ProfilePage() {
               <h2 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span>🔒</span> {t('profile_readonly_title')}
               </h2>
-              <span className="badge badge-gold">Ledger Sealed</span>
+              <span className="badge badge-gold">Đã Khóa Bảo Mật</span>
             </div>
 
             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', lineHeight: 1.5, marginBottom: '1.5rem' }}>
@@ -513,7 +507,7 @@ export default function ProfilePage() {
             </div>
 
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '1.4rem' }}>
-              Để bảo vệ an toàn số dư tài sản và tính toàn vẹn của sổ cái kép, các thông tin định danh như Email, User ID,
+              Để bảo vệ an toàn số dư tài sản và tính bảo mật của tài khoản, các thông tin định danh như Email, User ID,
               hoặc yêu cầu hủy liên kết ví cần được xác minh trực tiếp bởi Bộ phận Quản trị An ninh Hệ thống:
             </p>
 

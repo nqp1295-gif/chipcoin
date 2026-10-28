@@ -32,12 +32,7 @@ export default function DepositPage() {
   const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   const loadData = () => {
-    let mem = ChipStore.getCurrentMember();
-    if (!mem) {
-      const users = ChipStore.getUsers();
-      mem = users.find((u) => u.roles.includes('USER')) || users[0];
-      if (mem) ChipStore.setMemberSession(mem);
-    }
+    const mem = ChipStore.getCurrentMember();
     setCurrentUser(mem);
     const list = ChipStore.getDeposits();
     setDeposits(list);

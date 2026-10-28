@@ -13,19 +13,13 @@ export default function ReferralsPage() {
   const [copiedLink, setCopiedLink] = useState(false);
 
   const loadData = () => {
-    let mem = ChipStore.getCurrentMember();
-    if (!mem) {
-      const users = ChipStore.getUsers();
-      mem = users.find((u) => u.roles.includes('USER')) || users[0];
-      if (mem) ChipStore.setMemberSession(mem);
-    }
+    const mem = ChipStore.getCurrentMember();
     setCurrentUser(mem);
     if (mem) {
       const list = ChipStore.getReferralsByReferrer(mem.referralCode);
       setReferrals(list);
     } else {
-      const list = ChipStore.getReferrals();
-      setReferrals(list.slice(0, 5));
+      setReferrals([]);
     }
   };
 

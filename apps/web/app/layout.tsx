@@ -5,7 +5,7 @@ import AppShell from './components/AppShell';
 
 export const metadata: Metadata = {
   title: 'CHIPCOIN — Nền tảng tích luỹ điểm thưởng nội bộ & Quản trị hệ thống',
-  description: 'Hệ thống tích luỹ điểm thưởng nội bộ CHIPCOIN, sổ cái kép Double-entry Ledger và Transactional Outbox bảo mật.',
+  description: 'Hệ thống tích luỹ điểm thưởng nội bộ CHIPCOIN, cơ chế bảo mật cao cấp và Transactional Outbox bảo mật.',
 };
 
 export const viewport: Viewport = {

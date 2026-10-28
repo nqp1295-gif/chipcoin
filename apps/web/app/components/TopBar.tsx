@@ -338,9 +338,11 @@ export default function TopBar({ onOpenMobileMenu }: TopBarProps) {
                 </>
               ) : (
                 <>
-                  <div className="topbar-status-badge">
-                    <span style={{ color: '#fbbf24' }}>🪙</span>
-                    <span className="status-label">1,250,000 CHIP</span>
+                  <div className="topbar-status-badge hide-mobile">
+                    <span style={{ color: 'var(--text-muted)' }}>👤</span>
+                    <span className="status-label" style={{ color: 'var(--text-secondary)' }}>
+                      Chưa đăng nhập
+                    </span>
                   </div>
 
                   <div className="topbar-auth-links" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -351,11 +353,11 @@ export default function TopBar({ onOpenMobileMenu }: TopBarProps) {
                       {t('btn_register')}
                     </Link>
 
-                    {/* Dedicated Avatar Icon Button next to Register Button */}
+                    {/* Dedicated Avatar Icon Button for Guest -> links to /login */}
                     <Link
-                      href="/profile"
+                      href="/login"
                       className="topbar-avatar-btn"
-                      title={t('btn_profile')}
+                      title="Đăng nhập tài khoản"
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',
@@ -363,9 +365,9 @@ export default function TopBar({ onOpenMobileMenu }: TopBarProps) {
                         width: '38px',
                         height: '38px',
                         borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #fbbf24 0%, #d97706 100%)',
-                        border: '2px solid #f5d77f',
-                        boxShadow: '0 0 12px rgba(212, 175, 55, 0.45)',
+                        background: 'rgba(255, 255, 255, 0.08)',
+                        border: '1px solid var(--border-subtle)',
+                        boxShadow: 'none',
                         overflow: 'hidden',
                         cursor: 'pointer',
                         position: 'relative',

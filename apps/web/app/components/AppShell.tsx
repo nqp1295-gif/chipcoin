@@ -20,6 +20,15 @@ const AUTH_ROUTES = [
   '/resend-verification',
 ];
 
+const PROTECTED_MEMBER_ROUTES = [
+  '/profile',
+  '/wallet',
+  '/ton-wallet',
+  '/referrals',
+  '/rank',
+  '/activities',
+];
+
 export default function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -27,6 +36,9 @@ export default function AppShell({ children }: AppShellProps) {
   const isSystemRoute = pathname.startsWith('/system');
   const isSystemLogin = pathname === '/system/login';
   const isAuthRoute = AUTH_ROUTES.includes(pathname);
+  const isMemberProtected = PROTECTED_MEMBER_ROUTES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
 
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -143,6 +155,13 @@ export default function AppShell({ children }: AppShellProps) {
     }
   }, [pathname, isSystemRoute, isSystemLogin, router]);
 
+  // Member Route Guard: Khách hàng chưa đăng ký/chưa đăng nhập không được xem trang cá nhân
+  useEffect(() => {
+    if (authChecked && isMemberProtected && !hasMemberSession) {
+      router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
+    }
+  }, [authChecked, isMemberProtected, hasMemberSession, pathname, router]);
+
   const handleToggleCollapse = () => {
     setIsCollapsed((prev) => {
       const next = !prev;
@@ -212,7 +231,55 @@ export default function AppShell({ children }: AppShellProps) {
         <TopBar onOpenMobileMenu={() => setIsMobileOpen(true)} />
 
         <main className="app-content-area">
-          <div className="pc-standard-container">{children}</div>
+          <div className="pc-standard-container">
+            {/* If visiting a protected member route without session, render lock barrier */}
+            {isMemberProtected && !hasMemberSession ? (
+              <div
+                style={{
+                  textAlign: 'center',
+                  padding: '3.5rem 1.5rem',
+                  maxWidth: '540px',
+                  margin: '3rem auto',
+                  border: '1px solid var(--border-bronze)',
+                }}
+                className="glass-card"
+              >
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>
+                <h2 style={{ fontSize: '1.5rem', marginBottom: '0.6rem', color: '#f5d77f' }}>
+                  Yêu Cầu Đăng Nhập
+                </h2>
+                <p
+                  style={{
+                    color: 'var(--text-secondary)',
+                    marginBottom: '1.6rem',
+                    fontSize: '0.92rem',
+                    lineHeight: 1.6,
+                  }}
+                >
+                  Trang thông tin cá nhân và quản lý ví điểm chỉ dành cho hội viên đã đăng nhập tài khoản CHIPCOIN.
+                  Vui lòng đăng nhập hoặc tạo tài khoản mới để tiếp tục.
+                </p>
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <Link
+                    href={`/login?redirect=${encodeURIComponent(pathname)}`}
+                    className="nav-btn"
+                    style={{ padding: '10px 22px' }}
+                  >
+                    Đăng Nhập Ngay
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="btn-secondary"
+                    style={{ padding: '10px 22px' }}
+                  >
+                    Tạo Tài Khoản Mới
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              children
+            )}
+          </div>
         </main>
 
         {/* Chân trang phân tách 100% độc lập */}
@@ -227,11 +294,11 @@ export default function AppShell({ children }: AppShellProps) {
                   </span>
                   <span className="footer-bullet">&bull;</span>
                   <span>
-                    Chỉ dành cho nhân sự được phân quyền (ADMIN, ASSISTANT, SPECIALIST). Mọi thao tác đều được ghi nhận vào sổ cái kép bất biến PostgreSQL.
+                    Chỉ dành cho nhân sự được phân quyền (ADMIN, ASSISTANT, SPECIALIST). Mọi thao tác đều được ghi nhận vào nhật ký kiểm toán bảo mật PostgreSQL.
                   </span>
                 </div>
                 <div className="footer-copyright">
-                  © 2026 CHIPCOIN System Console. Kiến trúc Transactional Outbox Worker &amp; Double-Entry Ledger.
+                  © 2026 CHIPCOIN System Console. Kiến trúc Transactional Outbox Worker &amp; Cơ Chế Hạch Toán Minh Bạch.
                 </div>
                 <div className="footer-links">
                   <Link href="/system" className="footer-link">

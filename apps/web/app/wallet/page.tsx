@@ -86,12 +86,7 @@ export default function WalletPage() {
   const [feedback, setFeedback] = useState<string | null>(null);
 
   const loadData = () => {
-    let mem = ChipStore.getCurrentMember();
-    if (!mem) {
-      const users = ChipStore.getUsers();
-      mem = users.find((u) => u.roles.includes('USER')) || users[0];
-      if (mem) ChipStore.setMemberSession(mem);
-    }
+    const mem = ChipStore.getCurrentMember();
     setCurrentUser(mem);
     if (mem) {
       setBalance(mem.chipsBalance);
@@ -110,8 +105,8 @@ export default function WalletPage() {
   }, []);
 
   const walletAddress = currentUser?.id
-    ? `CHIP-${currentUser.id.toUpperCase()}-LEDGER`
-    : 'CHIP-ACC-7918-9921-LEDGER';
+    ? `CHIP-${currentUser.id.toUpperCase()}-WALLET`
+    : 'CHIP-ACC-7918-9921-WALLET';
 
   const handleCopy = () => {
     navigator.clipboard.writeText(walletAddress);
@@ -549,7 +544,7 @@ export default function WalletPage() {
             </span>
           </div>
 
-          <span className="badge badge-active">PostgreSQL Strict Ledger</span>
+          <span className="badge badge-active">Xác Thực Bảo Mật PostgreSQL</span>
         </div>
 
         <div className="table-container">

@@ -34,12 +34,7 @@ export default function ConvertPage() {
   const [conversions, setConversions] = useState<ConversionOrder[]>([]);
 
   const loadData = () => {
-    let mem = ChipStore.getCurrentMember();
-    if (!mem) {
-      const users = ChipStore.getUsers();
-      mem = users.find((u) => u.roles.includes('USER')) || users[0];
-      if (mem) ChipStore.setMemberSession(mem);
-    }
+    const mem = ChipStore.getCurrentMember();
     setCurrentUser(mem);
     setConversions(ChipStore.getConversions());
   };
@@ -175,7 +170,7 @@ export default function ConvertPage() {
               marginBottom: '4px',
             }}
           >
-            🔄 ATOMIC TWO-WAY LEDGER SWAP
+            🔄 ATOMIC TWO-WAY SWAP
           </div>
           <h1 style={{ fontSize: '2rem', margin: 0 }}>{t('convert_title')}</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', marginTop: '4px' }}>
@@ -420,7 +415,7 @@ export default function ConvertPage() {
                 <b>Cơ chế hai chiều:</b> Thành viên có thể đổi CHIP sang USDT nội bộ hoặc dùng USDT đổi lấy CHIP để tăng cấp bậc hội viên.
               </li>
               <li>
-                <b>Bảo đảm sổ cái kép:</b> Mọi lệnh quy đổi được hạch toán đồng thời giữa tài khoản cá nhân và quỹ thanh khoản của hệ thống.
+                <b>Hạch toán tự động:</b> Mọi lệnh quy đổi được cập nhật đồng thời và an toàn giữa tài khoản cá nhân và quỹ thanh khoản của hệ thống.
               </li>
               <li>
                 <b>Quyền rút tiền ra ngoài:</b> Số dư USDT quy đổi có thể rút về ví TON cá nhân hoặc Telegram Wallet khi thành viên đạt từ hạng <b>CHIP PLATINUM</b> trở lên.

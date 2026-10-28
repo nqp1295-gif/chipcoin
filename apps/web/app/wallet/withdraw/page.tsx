@@ -32,12 +32,7 @@ export default function WithdrawPage() {
   const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   const loadData = () => {
-    let mem = ChipStore.getCurrentMember();
-    if (!mem) {
-      const users = ChipStore.getUsers();
-      mem = users.find((u) => u.roles.includes('USER')) || users[0];
-      if (mem) ChipStore.setMemberSession(mem);
-    }
+    const mem = ChipStore.getCurrentMember();
     setCurrentUser(mem);
     if (mem?.tonWalletAddress && !destAddress) {
       setDestAddress(mem.tonWalletAddress);
@@ -496,7 +491,7 @@ export default function WithdrawPage() {
           {/* Security & Cooldown Notice */}
           <div className="glass-card" style={{ padding: '1.4rem' }}>
             <h4 style={{ margin: '0 0 8px 0', color: 'var(--accent-bronze-light)', fontSize: '0.95rem' }}>
-              🛡️ Bảo Mật Giao Dịch Sổ Cái Kép
+              🛡️ Bảo Mật Giao Dịch Đa Tầng
             </h4>
             <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
               Mọi lệnh rút tiền đều được kiểm tra chữ ký mật mã, đối soát số dư trên PostgreSQL Master Treasury và tuân thủ giới hạn an toàn để đảm bảo tính toàn vẹn tuyệt đối của hệ sinh thái CHIPCOIN.
