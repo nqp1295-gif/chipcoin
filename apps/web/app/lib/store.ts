@@ -134,8 +134,9 @@ export interface StoredUser {
   streakDays: number;
   lastClaimDate?: string;
   avatarUrl?: string; // Custom uploaded avatar base64 or URL
-  tonWalletAddress?: string; // Connected TON wallet address (EQ... / UQ...)
+  tonWalletAddress?: string; // Connected wallet address (EQ.../UQ... on TON, or T... on TRON)
   tonBoundAt?: string;
+  walletNetwork?: 'TON' | 'TRON';
   telegramUserId?: string; // Connected Telegram ID e.g. "tg_982144912"
   telegramUsername?: string; // Telegram @username
   twoFactorEnabled?: boolean; // 2FA protection for withdrawals/conversions
@@ -143,11 +144,69 @@ export interface StoredUser {
 
 // ============================================================================
 // SYSTEM ADMIN TREASURY & 1% TRANSACTION FEE ENGINE
-// Connected TON Wallet: TBztwgxtzSBPvFA56VM5Mpozh6Gj84KPhh
-// All member USDT transactions incur 1% fee transferred to this treasury
+// Default TRON (TRC-20 USDT): TBztwgxtzSBPvFA56VM5Mpozh6Gj84KPhh (Explorer: Tronscan)
+// Default TON (USDT Jetton): EQBvW8Z5huBkMJYdn3PCDnHoKK3xNJa_W0C_z8LgqG12Ton (Explorer: Tonviewer)
 // ============================================================================
-export const ADMIN_TON_WALLET = 'TBztwgxtzSBPvFA56VM5Mpozh6Gj84KPhh';
+export const DEFAULT_ADMIN_TRON_WALLET = 'TBztwgxtzSBPvFA56VM5Mpozh6Gj84KPhh';
+export const DEFAULT_ADMIN_TON_WALLET = 'EQBvW8Z5huBkMJYdn3PCDnHoKK3xNJa_W0C_z8LgqG12Ton';
+export const ADMIN_TON_WALLET = 'TBztwgxtzSBPvFA56VM5Mpozh6Gj84KPhh'; // Legacy alias
 export const USDT_TRANSACTION_FEE_RATE = 0.01; // 1%
+
+export function detectWalletNetwork(address: string): {
+  network: 'TRON' | 'TON' | 'UNKNOWN';
+  networkName: string;
+  shortName: string;
+  explorerName: string;
+  explorerUrl: string;
+  badgeColor: string;
+  icon: string;
+  isTron: boolean;
+  isTon: boolean;
+} {
+  const clean = (address || '').trim();
+  if (clean.startsWith('T') && clean.length === 34) {
+    return {
+      network: 'TRON',
+      networkName: 'Mạng TRON (TRC-20 USDT)',
+      shortName: 'TRON TRC-20',
+      explorerName: 'Tronscan',
+      explorerUrl: `https://tronscan.org/#/address/${clean}`,
+      badgeColor: '#ef4444',
+      icon: '🔴',
+      isTron: true,
+      isTon: false,
+    };
+  }
+  if (
+    clean.startsWith('EQ') ||
+    clean.startsWith('UQ') ||
+    /^-?[0-9]:[a-fA-F0-9]{64}$/.test(clean) ||
+    (clean.length >= 44 && !clean.startsWith('T'))
+  ) {
+    return {
+      network: 'TON',
+      networkName: 'Mạng The Open Network (TON)',
+      shortName: 'TON Network',
+      explorerName: 'Tonviewer',
+      explorerUrl: `https://tonviewer.com/${clean}`,
+      badgeColor: '#0098ea',
+      icon: '💎',
+      isTron: false,
+      isTon: true,
+    };
+  }
+  return {
+    network: 'UNKNOWN',
+    networkName: clean.startsWith('T') ? 'Mạng TRON (TRC-20)' : 'Mạng The Open Network (TON)',
+    shortName: clean.startsWith('T') ? 'TRON TRC-20' : 'TON Network',
+    explorerName: clean.startsWith('T') ? 'Tronscan' : 'Tonviewer',
+    explorerUrl: clean.startsWith('T') ? `https://tronscan.org/#/address/${clean}` : `https://tonviewer.com/${clean}`,
+    badgeColor: '#94a3b8',
+    icon: '⚡',
+    isTron: clean.startsWith('T'),
+    isTon: !clean.startsWith('T'),
+  };
+}
 
 export interface AdminFeeRecord {
   id: string;
@@ -159,7 +218,7 @@ export interface AdminFeeRecord {
   volumeUsdt: number;
   feeRate: number; // 0.01 (1%)
   feeUsdt: number;
-  beneficiaryWallet: string; // "TBztwgxtzSBPvFA56VM5Mpozh6Gj84KPhh"
+  beneficiaryWallet: string;
   orderId: string;
   txHash?: string;
   status: 'RECORDED';
@@ -685,6 +744,7 @@ const STORAGE_KEYS = {
   DEPOSITS: 'chipcoin_synced_deposits_v4',
   WITHDRAWALS: 'chipcoin_synced_withdrawals_v4',
   ADMIN_FEES: 'chipcoin_admin_fees_v1',
+  ADMIN_WALLET_CONFIG: 'chipcoin_admin_wallet_config_v1',
   USER_SESSION: 'chipcoin_user_session',
   SYSTEM_SESSION: 'chipcoin_system_session',
 };
@@ -1068,20 +1128,72 @@ export const ChipStore = {
     };
   },
 
-  // 5. TON Wallet & Telegram Binding
-  bindTonWallet(userId: string, tonAddress: string): StoredUser {
+  // 5. TON Wallet & Telegram Binding (Supports both TON Network and TRON TRC-20 Network)
+  bindTonWallet(userId: string, address: string, network?: 'TON' | 'TRON'): StoredUser {
     const users = this.getUsers();
     const idx = users.findIndex((u) => u.id === userId);
     if (idx === -1) throw new Error('User not found');
 
     const u = users[idx];
-    u.tonWalletAddress = tonAddress.trim();
+    const detected = detectWalletNetwork(address);
+    u.tonWalletAddress = address.trim();
     u.tonBoundAt = new Date().toISOString();
+    u.walletNetwork = network || (detected.isTron ? 'TRON' : 'TON');
 
     users[idx] = u;
     safeSet(STORAGE_KEYS.USERS, users);
     this.syncSessionIfActive(u);
     return u;
+  },
+
+  // 5b. Admin System Wallets Configuration
+  getAdminWalletConfig(): {
+    tronWallet: string;
+    tonWallet: string;
+    activeNetwork: 'TRON' | 'TON';
+  } {
+    return safeGet(STORAGE_KEYS.ADMIN_WALLET_CONFIG, {
+      tronWallet: DEFAULT_ADMIN_TRON_WALLET,
+      tonWallet: DEFAULT_ADMIN_TON_WALLET,
+      activeNetwork: 'TRON' as const,
+    });
+  },
+
+  setAdminWalletConfig(config: {
+    tronWallet?: string;
+    tonWallet?: string;
+    activeNetwork?: 'TRON' | 'TON';
+  }): { tronWallet: string; tonWallet: string; activeNetwork: 'TRON' | 'TON' } {
+    const current = this.getAdminWalletConfig();
+    const updated = {
+      tronWallet: (config.tronWallet !== undefined ? config.tronWallet : current.tronWallet).trim(),
+      tonWallet: (config.tonWallet !== undefined ? config.tonWallet : current.tonWallet).trim(),
+      activeNetwork: config.activeNetwork || current.activeNetwork,
+    };
+    safeSet(STORAGE_KEYS.ADMIN_WALLET_CONFIG, updated);
+    return updated;
+  },
+
+  getActiveAdminWallet(): {
+    address: string;
+    network: 'TRON' | 'TON';
+    networkName: string;
+    explorerName: string;
+    explorerUrl: string;
+  } {
+    const cfg = this.getAdminWalletConfig();
+    const address =
+      cfg.activeNetwork === 'TON'
+        ? cfg.tonWallet || DEFAULT_ADMIN_TON_WALLET
+        : cfg.tronWallet || DEFAULT_ADMIN_TRON_WALLET;
+    const meta = detectWalletNetwork(address);
+    return {
+      address,
+      network: cfg.activeNetwork,
+      networkName: meta.networkName,
+      explorerName: meta.explorerName,
+      explorerUrl: meta.explorerUrl,
+    };
   },
 
   linkTelegram(userId: string, telegramId: string, telegramUsername?: string): StoredUser {
@@ -1361,8 +1473,12 @@ export const ChipStore = {
     const totalFeeUsdt = Number(fees.reduce((sum, f) => sum + (f.feeUsdt || 0), 0).toFixed(6));
     const totalVolumeUsdt = Number(fees.reduce((sum, f) => sum + (f.volumeUsdt || 0), 0).toFixed(6));
     const chipEquivalent = Math.round(totalFeeUsdt * CHIP_PER_USDT);
+    const activeWallet = this.getActiveAdminWallet();
+    const walletConfig = this.getAdminWalletConfig();
     return {
-      tonWallet: ADMIN_TON_WALLET,
+      tonWallet: activeWallet.address,
+      activeWallet,
+      walletConfig,
       totalFeeUsdt,
       totalVolumeUsdt,
       totalTxCount: fees.length,

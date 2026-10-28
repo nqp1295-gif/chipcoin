@@ -4,7 +4,7 @@ import { useState, useEffect, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '../lib/api';
-import { ChipStore, ADMIN_TON_WALLET } from '../lib/store';
+import { ChipStore, ADMIN_TON_WALLET, detectWalletNetwork } from '../lib/store';
 import {
   sendPasswordResetEmail,
   sendStatusChangeEmail,
@@ -1113,10 +1113,25 @@ export default function SystemAccountsPage() {
               </div>
 
               <div style={{ marginTop: '10px', fontSize: '0.78rem', color: '#cbd5e1', lineHeight: 1.4 }}>
-                💎 <strong>Địa chỉ Ví TON Quản Trị Chính Thức nhận hoàn số dư USDT:</strong>
-                <div style={{ fontFamily: 'var(--font-mono)', color: '#38bdf8', fontSize: '0.8rem', marginTop: '2px', wordBreak: 'break-all' }}>
-                  {ADMIN_TON_WALLET}
-                </div>
+                {(() => {
+                  const meta = detectWalletNetwork(ADMIN_TON_WALLET);
+                  return (
+                    <>
+                      {meta.icon} <strong>Địa chỉ Ví {meta.shortName} Quản Trị nhận hoàn số dư USDT:</strong>
+                      <div style={{ fontFamily: 'var(--font-mono)', color: meta.isTron ? '#fca5a5' : '#38bdf8', fontSize: '0.8rem', marginTop: '2px', wordBreak: 'break-all' }}>
+                        {ADMIN_TON_WALLET}{' '}
+                        <a
+                          href={meta.explorerUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: meta.isTron ? '#f87171' : '#38bdf8', fontWeight: 600, textDecoration: 'underline', marginLeft: '6px' }}
+                        >
+                          (Xem trên {meta.explorerName} ↗)
+                        </a>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             </div>
 

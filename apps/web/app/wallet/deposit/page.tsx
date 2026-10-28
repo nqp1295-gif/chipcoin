@@ -8,6 +8,7 @@ import {
   StoredUser,
   DepositIntent,
   CHIP_PER_USDT,
+  detectWalletNetwork,
 } from '../../lib/store';
 import WalletNavTabs from '../components/WalletNavTabs';
 
@@ -357,9 +358,24 @@ export default function DepositPage() {
 
               {/* Deposit Address */}
               <div>
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
-                  Địa chỉ ví nhận (TON Master Treasury):
-                </div>
+                {(() => {
+                  const depMeta = detectWalletNetwork(activeIntent.depositAddress);
+                  return (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                        Địa chỉ ví nhận ({depMeta.networkName}):
+                      </span>
+                      <a
+                        href={depMeta.explorerUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ fontSize: '0.74rem', color: depMeta.isTron ? '#f87171' : '#38bdf8', textDecoration: 'none', fontWeight: 600 }}
+                      >
+                        Tra cứu trên {depMeta.explorerName} ↗
+                      </a>
+                    </div>
+                  );
+                })()}
                 <div
                   style={{
                     display: 'flex',

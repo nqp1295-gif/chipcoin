@@ -6,6 +6,9 @@ import {
   ChipStore,
   AdminFeeRecord,
   ADMIN_TON_WALLET,
+  DEFAULT_ADMIN_TRON_WALLET,
+  DEFAULT_ADMIN_TON_WALLET,
+  detectWalletNetwork,
   CHIP_PER_USDT,
 } from '../../lib/store';
 
@@ -88,6 +91,17 @@ export default function SystemWalletPage() {
     totalTxCount: 0,
     chipEquivalent: 0,
   });
+  const [walletConfig, setWalletConfig] = useState({
+    tronWallet: DEFAULT_ADMIN_TRON_WALLET,
+    tonWallet: DEFAULT_ADMIN_TON_WALLET,
+    activeNetwork: 'TRON' as 'TRON' | 'TON',
+  });
+  const [showConfigModal, setShowConfigModal] = useState(false);
+  const [editTron, setEditTron] = useState('');
+  const [editTon, setEditTon] = useState('');
+  const [editNetwork, setEditNetwork] = useState<'TRON' | 'TON'>('TRON');
+  const [configMsg, setConfigMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+
   const [activeTab, setActiveTab] = useState<'FEES' | 'POOLS' | 'JOURNAL'>('FEES');
   const [simulating, setSimulating] = useState(false);
   const [copiedAddr, setCopiedAddr] = useState(false);
@@ -98,6 +112,8 @@ export default function SystemWalletPage() {
     setFeeRecords(fees);
     const stats = ChipStore.getAdminTreasuryStats();
     setTreasuryStats(stats);
+    const cfg = ChipStore.getAdminWalletConfig();
+    setWalletConfig(cfg);
   };
 
   useEffect(() => {
@@ -111,10 +127,50 @@ export default function SystemWalletPage() {
     };
   }, []);
 
+  const activeAddress =
+    walletConfig.activeNetwork === 'TON'
+      ? walletConfig.tonWallet || DEFAULT_ADMIN_TON_WALLET
+      : walletConfig.tronWallet || DEFAULT_ADMIN_TRON_WALLET;
+
+  const activeWalletMeta = detectWalletNetwork(activeAddress);
+
   const handleCopyTonWallet = () => {
-    navigator.clipboard.writeText(ADMIN_TON_WALLET);
+    navigator.clipboard.writeText(activeAddress);
     setCopiedAddr(true);
     setTimeout(() => setCopiedAddr(false), 2000);
+  };
+
+  const handleOpenConfigModal = () => {
+    setEditTron(walletConfig.tronWallet || DEFAULT_ADMIN_TRON_WALLET);
+    setEditTon(walletConfig.tonWallet || DEFAULT_ADMIN_TON_WALLET);
+    setEditNetwork(walletConfig.activeNetwork);
+    setConfigMsg(null);
+    setShowConfigModal(true);
+  };
+
+  const handleSaveConfig = (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (editNetwork === 'TRON' && !editTron.trim().startsWith('T')) {
+        setConfigMsg({ text: 'Địa chỉ TRON (TRC-20) phải bắt đầu bằng chữ T (34 ký tự).', type: 'error' });
+        return;
+      }
+      if (editNetwork === 'TON' && !editTon.trim().startsWith('EQ') && !editTon.trim().startsWith('UQ')) {
+        setConfigMsg({ text: 'Địa chỉ ví TON phải bắt đầu bằng EQ... hoặc UQ... (48 ký tự).', type: 'error' });
+        return;
+      }
+      const updated = ChipStore.setAdminWalletConfig({
+        tronWallet: editTron.trim(),
+        tonWallet: editTon.trim(),
+        activeNetwork: editNetwork,
+      });
+      setWalletConfig(updated);
+      setConfigMsg({ text: '✓ Cập nhật cấu hình ví quản trị thành công!', type: 'success' });
+      loadData();
+      setTimeout(() => setShowConfigModal(false), 1200);
+    } catch (err: any) {
+      setConfigMsg({ text: err.message || 'Lỗi lưu cấu hình', type: 'error' });
+    }
   };
 
   const handleAllocateTreasury = () => {
@@ -213,13 +269,16 @@ export default function SystemWalletPage() {
         </div>
       )}
 
-      {/* Hero Card: Connected Official TON Admin Wallet */}
+      {/* Hero Card: Connected Official Admin Treasury Wallet (Supports both TRON TRC-20 & TON) */}
       <section
         className="glass-card"
         style={{
-          background: 'radial-gradient(circle at 100% 0%, rgba(0, 152, 234, 0.22) 0%, rgba(18, 20, 24, 0.98) 70%)',
-          border: '1.5px solid rgba(0, 152, 234, 0.45)',
-          boxShadow: '0 16px 48px rgba(0, 152, 234, 0.15)',
+          background:
+            activeWalletMeta.isTron
+              ? 'radial-gradient(circle at 100% 0%, rgba(239, 68, 68, 0.22) 0%, rgba(18, 20, 24, 0.98) 70%)'
+              : 'radial-gradient(circle at 100% 0%, rgba(0, 152, 234, 0.22) 0%, rgba(18, 20, 24, 0.98) 70%)',
+          border: `1.5px solid ${activeWalletMeta.isTron ? 'rgba(239, 68, 68, 0.45)' : 'rgba(0, 152, 234, 0.45)'}`,
+          boxShadow: `0 16px 48px ${activeWalletMeta.isTron ? 'rgba(239, 68, 68, 0.15)' : 'rgba(0, 152, 234, 0.15)'}`,
           padding: '2rem',
           position: 'relative',
           overflow: 'hidden',
@@ -228,37 +287,60 @@ export default function SystemWalletPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.2rem' }}>
           <div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-              <span className="badge badge-gold" style={{ background: 'rgba(0, 152, 234, 0.2)', color: '#38bdf8', border: '1px solid #38bdf8' }}>
-                💎 VÍ TON QUẢN TRỊ CHÍNH THỨC
+              <span
+                className="badge badge-gold"
+                style={{
+                  background: activeWalletMeta.isTron ? 'rgba(239, 68, 68, 0.2)' : 'rgba(0, 152, 234, 0.2)',
+                  color: activeWalletMeta.isTron ? '#f87171' : '#38bdf8',
+                  border: `1px solid ${activeWalletMeta.isTron ? '#f87171' : '#38bdf8'}`,
+                }}
+              >
+                {activeWalletMeta.icon} VÍ {activeWalletMeta.shortName.toUpperCase()} QUẢN TRỊ CHÍNH THỨC
               </span>
               <span style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 600 }}>
                 ● Đang kết nối trực tiếp
               </span>
             </div>
             <h2 style={{ fontSize: '1.4rem', margin: '4px 0 6px 0', color: '#ffffff' }}>
-              Địa Chỉ Ví TON Nhận Toàn Bộ Phí Giao Dịch Hội Viên
+              Địa Chỉ Ví Quản Trị Nhận Toàn Bộ Phí Giao Dịch Hội Viên
             </h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: 0, maxWidth: '720px', lineHeight: 1.5 }}>
-              Mọi giao dịch USDT của hội viên trên toàn bộ nền tảng (quy đổi CHIP ↔ USDT, rút tiền) đều tự động chịu mức phí <b>1% * khối lượng giao dịch</b> và được ghi nhận trực tiếp vào địa chỉ ví TON dưới đây.
+              Mọi giao dịch USDT của hội viên trên toàn bộ nền tảng (quy đổi CHIP ↔ USDT, rút tiền) đều tự động chịu mức phí <b>1% * khối lượng giao dịch</b> và được ghi nhận trực tiếp vào địa chỉ ví dưới đây ({activeWalletMeta.networkName}).
             </p>
           </div>
 
-          <a
-            href={`https://tonviewer.com/${ADMIN_TON_WALLET}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-secondary"
-            style={{ fontSize: '0.82rem', padding: '8px 14px', textDecoration: 'none' }}
-          >
-            🔍 Xem trên Tonviewer ↗
-          </a>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <button
+              onClick={handleOpenConfigModal}
+              className="btn-secondary"
+              style={{ fontSize: '0.82rem', padding: '8px 14px', cursor: 'pointer' }}
+            >
+              ⚙️ Cấu Hình / Đổi Ví Quản Trị
+            </button>
+            <a
+              href={activeWalletMeta.explorerUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary"
+              style={{
+                fontSize: '0.82rem',
+                padding: '8px 14px',
+                textDecoration: 'none',
+                background: activeWalletMeta.isTron ? 'rgba(239, 68, 68, 0.15)' : 'rgba(0, 152, 234, 0.15)',
+                borderColor: activeWalletMeta.isTron ? '#f87171' : '#38bdf8',
+                color: activeWalletMeta.isTron ? '#fca5a5' : '#7dd3fc',
+              }}
+            >
+              🔍 Xem trên {activeWalletMeta.explorerName} ({activeWalletMeta.shortName}) ↗
+            </a>
+          </div>
         </div>
 
-        {/* The Official TON Wallet Address Display */}
+        {/* The Official Wallet Address Display */}
         <div
           style={{
             background: 'rgba(0, 0, 0, 0.55)',
-            border: '1px solid rgba(0, 152, 234, 0.4)',
+            border: `1px solid ${activeWalletMeta.isTron ? 'rgba(239, 68, 68, 0.4)' : 'rgba(0, 152, 234, 0.4)'}`,
             borderRadius: '10px',
             padding: '14px 18px',
             display: 'flex',
@@ -266,26 +348,26 @@ export default function SystemWalletPage() {
             justifyContent: 'space-between',
             gap: '12px',
             flexWrap: 'wrap',
-            marginBottom: '1.5rem',
+            marginBottom: '1.2rem',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: '280px' }}>
-            <span style={{ fontSize: '1.5rem' }}>💎</span>
+            <span style={{ fontSize: '1.5rem' }}>{activeWalletMeta.icon}</span>
             <div>
               <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                ĐỊA CHỈ VÍ TON QUẢN TRỊ (OFFICIAL SYSTEM REVENUE WALLET)
+                ĐỊA CHỈ VÍ QUẢN TRỊ ({activeWalletMeta.networkName.toUpperCase()})
               </div>
               <div
                 style={{
                   fontFamily: 'JetBrains Mono, monospace',
                   fontSize: '1.15rem',
                   fontWeight: 800,
-                  color: '#38bdf8',
+                  color: activeWalletMeta.isTron ? '#fca5a5' : '#38bdf8',
                   wordBreak: 'break-all',
                   marginTop: '2px',
                 }}
               >
-                {ADMIN_TON_WALLET}
+                {activeAddress}
               </div>
             </div>
           </div>
@@ -303,6 +385,28 @@ export default function SystemWalletPage() {
             >
               {copiedAddr ? '✓ Đã sao chép ví!' : '📋 Sao chép địa chỉ ví'}
             </button>
+          </div>
+        </div>
+
+        {/* Blockchain Explorer & Network Notice Alert Box */}
+        <div
+          style={{
+            background: 'rgba(234, 179, 8, 0.08)',
+            border: '1px solid rgba(234, 179, 8, 0.35)',
+            borderRadius: '8px',
+            padding: '12px 16px',
+            marginBottom: '1.5rem',
+            display: 'flex',
+            gap: '12px',
+            alignItems: 'flex-start',
+          }}
+        >
+          <span style={{ fontSize: '1.3rem' }}>💡</span>
+          <div style={{ fontSize: '0.82rem', color: '#fef08a', lineHeight: 1.55 }}>
+            <strong>Hướng dẫn tra cứu Blockchain Explorer &amp; Tránh lỗi 404:</strong><br />
+            &bull; <strong>Mạng TRON (TRC-20 USDT)</strong>: Địa chỉ bắt đầu bằng chữ <code>T...</code> (34 ký tự như <code>TBztwgxtz...</code>). Phải tra cứu trên <strong>Tronscan.org</strong>.<br />
+            &bull; <strong>Mạng TON (The Open Network)</strong>: Địa chỉ bắt đầu bằng <code>EQ...</code> hoặc <code>UQ...</code> (48 ký tự). Tra cứu trên <strong>Tonviewer.com</strong>.<br />
+            <em>* Lưu ý: Nếu mở địa chỉ mạng TRON trên Tonviewer sẽ bị lỗi <strong>404 Invalid address</strong> vì hai blockchain hoạt động độc lập. Hệ thống đã tự động liên kết chính xác sang <strong>Tronscan</strong>.</em>
           </div>
         </div>
 
@@ -710,6 +814,164 @@ export default function SystemWalletPage() {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Admin Wallet Configuration Modal */}
+      {showConfigModal && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.75)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '1rem',
+          }}
+        >
+          <div
+            className="glass-card"
+            style={{
+              maxWidth: '560px',
+              width: '100%',
+              borderColor: 'var(--border-bronze)',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(212, 175, 55, 0.15)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.3rem', margin: 0, color: '#f5d77f' }}>
+                  ⚙️ Cấu Hình Địa Chỉ Ví Quản Trị Hệ Thống
+                </h2>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', marginTop: '4px', margin: 0 }}>
+                  Quản lý địa chỉ nhận phí 1% USDT và hoàn quỹ tài sản khi xóa tài khoản.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowConfigModal(false)}
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '1.5rem', cursor: 'pointer' }}
+              >
+                &times;
+              </button>
+            </div>
+
+            {configMsg && (
+              <div
+                className={`alert-box ${configMsg.type === 'success' ? 'alert-success' : 'alert-error'}`}
+                style={{ padding: '0.8rem 1rem', marginBottom: '1rem' }}
+              >
+                <span>{configMsg.type === 'success' ? '✓' : '⚠️'}</span>
+                <div>{configMsg.text}</div>
+              </div>
+            )}
+
+            <form onSubmit={handleSaveConfig} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+              {/* Network Choice */}
+              <div className="form-group">
+                <label className="form-label">Chọn Mạng Lưới Quản Trị Mặc Định:</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setEditNetwork('TRON')}
+                    style={{
+                      padding: '12px 10px',
+                      borderRadius: '8px',
+                      background: editNetwork === 'TRON' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255, 255, 255, 0.03)',
+                      border: editNetwork === 'TRON' ? '1.5px solid #ef4444' : '1px solid var(--border-subtle)',
+                      color: editNetwork === 'TRON' ? '#fca5a5' : 'var(--text-secondary)',
+                      fontWeight: editNetwork === 'TRON' ? 700 : 500,
+                      cursor: 'pointer',
+                      textAlign: 'center',
+                      fontSize: '0.85rem',
+                    }}
+                  >
+                    🔴 TRON (TRC-20 USDT)
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                      Explorer: Tronscan
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setEditNetwork('TON')}
+                    style={{
+                      padding: '12px 10px',
+                      borderRadius: '8px',
+                      background: editNetwork === 'TON' ? 'rgba(0, 152, 234, 0.2)' : 'rgba(255, 255, 255, 0.03)',
+                      border: editNetwork === 'TON' ? '1.5px solid #0098ea' : '1px solid var(--border-subtle)',
+                      color: editNetwork === 'TON' ? '#7dd3fc' : 'var(--text-secondary)',
+                      fontWeight: editNetwork === 'TON' ? 700 : 500,
+                      cursor: 'pointer',
+                      textAlign: 'center',
+                      fontSize: '0.85rem',
+                    }}
+                  >
+                    💎 TON (USDT Jetton)
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                      Explorer: Tonviewer
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* TRON Address */}
+              <div className="form-group">
+                <label className="form-label" htmlFor="tron-addr">
+                  Địa Chỉ Ví TRON TRC-20 (bắt đầu bằng T, 34 ký tự):
+                </label>
+                <input
+                  id="tron-addr"
+                  type="text"
+                  className="form-input"
+                  placeholder="TBztwgxtzSBPvFA56VM5Mpozh6Gj84KPhh"
+                  value={editTron}
+                  onChange={(e) => setEditTron(e.target.value)}
+                  style={{ fontFamily: 'var(--font-mono)', fontSize: '0.88rem' }}
+                  required
+                />
+                <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  Tra cứu tại: <a href={`https://tronscan.org/#/address/${editTron.trim()}`} target="_blank" rel="noreferrer" style={{ color: '#f87171' }}>tronscan.org</a>
+                </div>
+              </div>
+
+              {/* TON Address */}
+              <div className="form-group">
+                <label className="form-label" htmlFor="ton-addr">
+                  Địa Chỉ Ví TON (bắt đầu bằng EQ... hoặc UQ..., 48 ký tự):
+                </label>
+                <input
+                  id="ton-addr"
+                  type="text"
+                  className="form-input"
+                  placeholder="EQBvW8Z5huBkMJYdn3PCDnHoKK3xNJa_W0C_z8LgqG12Ton"
+                  value={editTon}
+                  onChange={(e) => setEditTon(e.target.value)}
+                  style={{ fontFamily: 'var(--font-mono)', fontSize: '0.88rem' }}
+                  required
+                />
+                <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  Tra cứu tại: <a href={`https://tonviewer.com/${editTon.trim()}`} target="_blank" rel="noreferrer" style={{ color: '#38bdf8' }}>tonviewer.com</a>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', marginTop: '1rem' }}>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => setShowConfigModal(false)}
+                  style={{ flex: 1 }}
+                >
+                  Đóng
+                </button>
+                <button type="submit" className="btn-primary" style={{ flex: 2 }}>
+                  💾 Lưu Cấu Hình Ví Quản Trị
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
