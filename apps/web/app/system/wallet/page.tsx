@@ -11,6 +11,7 @@ import {
   detectWalletNetwork,
   CHIP_PER_USDT,
 } from '../../lib/store';
+import { useI18n } from '../../lib/i18n';
 
 // ============================================================================
 // ENVIRONMENT GATE: System mock data only loaded in local dev mode
@@ -81,6 +82,7 @@ const _RAW_SYSTEM_TRANSACTIONS: LedgerTransaction[] = [
 const SYSTEM_TRANSACTIONS: LedgerTransaction[] = IS_LOCAL_DEV ? _RAW_SYSTEM_TRANSACTIONS : [];
 
 export default function SystemWalletPage() {
+  const { t } = useI18n();
   const [treasuryBalance, setTreasuryBalance] = useState(IS_LOCAL_DEV ? 499985000 : 0);
   const [transactions, setTransactions] = useState<LedgerTransaction[]>(SYSTEM_TRANSACTIONS);
   const [feeRecords, setFeeRecords] = useState<AdminFeeRecord[]>([]);
@@ -315,7 +317,7 @@ export default function SystemWalletPage() {
               className="btn-secondary"
               style={{ fontSize: '0.82rem', padding: '8px 14px', cursor: 'pointer' }}
             >
-              ⚙️ Cấu Hình / Đổi Ví Quản Trị
+              {t('sys_btn_config_wallet')}
             </button>
             <a
               href={activeWalletMeta.explorerUrl}
@@ -420,19 +422,19 @@ export default function SystemWalletPage() {
         >
           <div style={{ background: 'rgba(0,0,0,0.4)', padding: '14px', borderRadius: '10px', border: '1px solid var(--border-subtle)' }}>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
-              TỔNG PHÍ THU VỀ VÍ (USDT)
+              {t('sys_stat_total_fee')}
             </div>
             <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#38bdf8', fontFamily: 'Outfit, sans-serif', marginTop: '4px' }}>
               {treasuryStats.totalFeeUsdt.toFixed(4)} <span style={{ fontSize: '0.9rem' }}>USDT</span>
             </div>
             <div style={{ fontSize: '0.75rem', color: '#f5d77f', marginTop: '2px' }}>
-              ≈ {Math.round(treasuryStats.totalFeeUsdt * CHIP_PER_USDT).toLocaleString()} CHIP quy ước
+              ≈ {Math.round(treasuryStats.totalFeeUsdt * CHIP_PER_USDT).toLocaleString()} CHIP
             </div>
           </div>
 
           <div style={{ background: 'rgba(0,0,0,0.4)', padding: '14px', borderRadius: '10px', border: '1px solid var(--border-subtle)' }}>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
-              KHỐI LƯỢNG GIAO DỊCH USDT
+              {t('sys_stat_total_vol')}
             </div>
             <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#ffffff', fontFamily: 'Outfit, sans-serif', marginTop: '4px' }}>
               {treasuryStats.totalVolumeUsdt.toFixed(2)} <span style={{ fontSize: '0.9rem' }}>USDT</span>
@@ -483,7 +485,7 @@ export default function SystemWalletPage() {
             cursor: 'pointer',
           }}
         >
-          💰 Sổ Ký Quỹ Thu Phí Giao Dịch 1% ({feeRecords.length})
+          💰 {t('sys_tab_fee_ledger')} ({feeRecords.length})
         </button>
 
         <button
@@ -499,7 +501,7 @@ export default function SystemWalletPage() {
             cursor: 'pointer',
           }}
         >
-          🏦 Kho Quỹ Master CHIP &amp; Sub-Pools
+          🏦 {t('sys_tab_pools')}
         </button>
 
         <button
@@ -515,7 +517,7 @@ export default function SystemWalletPage() {
             cursor: 'pointer',
           }}
         >
-          📜 Nhật Ký Bút Toán Kép
+          📜 {t('sys_tab_sys_journal')}
         </button>
       </div>
 
@@ -540,15 +542,14 @@ export default function SystemWalletPage() {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>MÃ GIAO DỊCH</th>
-                  <th>THỜI GIAN</th>
-                  <th>HỘI VIÊN THỰC HIỆN</th>
-                  <th>LOẠI GIAO DỊCH</th>
-                  <th>KHỐI LƯỢNG (USDT)</th>
-                  <th>TỶ LỆ</th>
-                  <th>PHÍ GHI NHẬN (USDT)</th>
-                  <th>VÍ TON NHẬN PHÍ</th>
-                  <th>TRẠNG THÁI</th>
+                  <th>{t('sys_col_tx_code')}</th>
+                  <th>{t('sys_col_tx_time')}</th>
+                  <th>{t('sys_col_tx_member')}</th>
+                  <th>{t('sys_col_tx_type')}</th>
+                  <th>{t('sys_col_tx_volume')}</th>
+                  <th>{t('sys_col_tx_fee')}</th>
+                  <th>{t('sys_col_tx_wallet')}</th>
+                  <th>{t('sys_col_tx_status')}</th>
                 </tr>
               </thead>
               <tbody>

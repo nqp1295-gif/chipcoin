@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '../lib/api';
 import { ChipStore, ADMIN_TON_WALLET, detectWalletNetwork } from '../lib/store';
+import { useI18n } from '../lib/i18n';
 import {
   sendPasswordResetEmail,
   sendStatusChangeEmail,
@@ -27,6 +28,7 @@ interface AccountItem {
 
 export default function SystemAccountsPage() {
   const router = useRouter();
+  const { t } = useI18n();
 
   // Current session
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -433,11 +435,11 @@ export default function SystemAccountsPage() {
               marginBottom: '4px',
             }}
           >
-            🛡️ BẢNG ĐIỀU HÀNH NỘI BỘ
+            {t('sys_acc_badge')}
           </div>
-          <h1 style={{ fontSize: '2rem', margin: 0 }}>Quản Lý Tài Khoản</h1>
+          <h1 style={{ fontSize: '2rem', margin: 0 }}>{t('sys_acc_title')}</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', marginTop: '4px' }}>
-            Quản trị danh sách tài khoản, giám sát thời gian cập nhật, đặt lại mật khẩu, chuyển đổi trạng thái và quyết toán hoàn quỹ.
+            {t('sys_acc_desc')}
           </p>
         </div>
 
@@ -470,7 +472,7 @@ export default function SystemAccountsPage() {
             className="nav-btn"
             style={{ cursor: 'pointer', border: 'none' }}
           >
-            + Tạo Tài Khoản Mới
+            {t('sys_btn_create_acc')}
           </button>
 
           <button
@@ -478,7 +480,7 @@ export default function SystemAccountsPage() {
             className="btn-secondary"
             style={{ padding: '8px 16px', fontSize: '0.88rem' }}
           >
-            Đăng xuất
+            {t('btn_logout')}
           </button>
         </div>
       </div>
@@ -632,7 +634,7 @@ export default function SystemAccountsPage() {
           <input
             type="text"
             className="form-input"
-            placeholder="🔍 Tìm theo email hoặc tên..."
+            placeholder={t('sys_search_placeholder', '🔍 Tìm theo email hoặc tên...')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{ maxWidth: '360px' }}
@@ -644,7 +646,7 @@ export default function SystemAccountsPage() {
             onChange={(e) => setRoleFilter(e.target.value)}
             style={{ maxWidth: '220px' }}
           >
-            <option value="ALL">Tất cả phân quyền ({totalAccounts})</option>
+            <option value="ALL">{t('sys_filter_role_all', 'Tất Cả Vai Trò')} ({totalAccounts})</option>
             <option value="ADMIN">👑 Quản Trị Viên ({adminCount})</option>
             <option value="ASSISTANT">💼 Trợ Lý ({assistantCount})</option>
             <option value="SPECIALIST">🔍 Chuyên Viên ({specialistCount})</option>
@@ -658,7 +660,7 @@ export default function SystemAccountsPage() {
           disabled={loadingAccounts}
           style={{ padding: '8px 16px', fontSize: '0.88rem' }}
         >
-          {loadingAccounts ? 'Đang làm mới...' : '🔄 Làm mới'}
+          {loadingAccounts ? '...' : '🔄 ' + t('btn_filter', 'Lọc')}
         </button>
       </div>
 
@@ -667,13 +669,13 @@ export default function SystemAccountsPage() {
         <table className="data-table">
           <thead>
             <tr>
-              <th>Tài Khoản / Email</th>
-              <th>Cấp Phân Quyền</th>
-              <th>Trạng Thái</th>
+              <th>{t('sys_col_acc_email', 'Tài Khoản / Email')}</th>
+              <th>{t('sys_col_role', 'Cấp Phân Quyền')}</th>
+              <th>{t('sys_col_status', 'Trạng Thái')}</th>
               <th>Xác Minh Email</th>
               <th>Thời Gian Tạo</th>
-              <th>Thời Gian Cập Nhật</th>
-              <th style={{ textAlign: 'center' }}>Thao Tác</th>
+              <th>{t('sys_col_updated_at', 'Thời Gian Cập Nhật')}</th>
+              <th style={{ textAlign: 'center' }}>{t('sys_col_actions', 'Thao Tác')}</th>
             </tr>
           </thead>
           <tbody>
@@ -760,7 +762,7 @@ export default function SystemAccountsPage() {
                           color: '#38bdf8',
                         }}
                       >
-                        🔑 Reset Pass
+                        🔑 {t('sys_action_reset_pwd', 'Reset Pass')}
                       </button>
 
                       {/* 2. Dừng hoạt động / Kích hoạt */}
@@ -782,7 +784,7 @@ export default function SystemAccountsPage() {
                             color: '#fbbf24',
                           }}
                         >
-                          ⏸️ Dừng
+                          ⏸️ {t('sys_action_suspend', 'Dừng')}
                         </button>
                       ) : (
                         <button
@@ -802,7 +804,7 @@ export default function SystemAccountsPage() {
                             color: '#34d399',
                           }}
                         >
-                          ▶️ Kích Hoạt
+                          ▶️ {t('sys_action_activate', 'Kích Hoạt')}
                         </button>
                       )}
 
@@ -824,7 +826,7 @@ export default function SystemAccountsPage() {
                           color: '#f87171',
                         }}
                       >
-                        🗑️ Xóa Vĩnh Viễn
+                        🗑️ {t('sys_action_delete', 'Xóa')}
                       </button>
                     </div>
                   </td>

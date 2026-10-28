@@ -4,8 +4,10 @@ import { useState, useEffect, type FormEvent, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { apiRequest } from '../lib/api';
+import { useI18n } from '../lib/i18n';
 
 function ResendVerificationContent() {
+  const { t } = useI18n();
   const searchParams = useSearchParams();
   const initialEmail = searchParams.get('email') || '';
 
@@ -78,9 +80,9 @@ function ResendVerificationContent() {
     <div style={{ maxWidth: '480px', margin: '0 auto' }}>
       <div className="glass-card">
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '1.9rem', marginBottom: '0.5rem' }}>Gửi lại email xác minh</h1>
+          <h1 style={{ fontSize: '1.9rem', marginBottom: '0.5rem' }}>{t('resend_title')}</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem' }}>
-            Nhận mã liên kết mới nếu email trước đó bị thất lạc hoặc hết hạn
+            {t('resend_desc')}
           </p>
         </div>
 
@@ -114,7 +116,7 @@ function ResendVerificationContent() {
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label" htmlFor="resend-email">
-              Địa chỉ Email tài khoản
+              {t('resend_email_label')}
             </label>
             <input
               id="resend-email"
@@ -138,12 +140,12 @@ function ResendVerificationContent() {
             {loading ? (
               <>
                 <div className="spinner" />
-                Đang gửi yêu cầu...
+                {t('resend_submitting')}
               </>
             ) : retryAfter !== null && retryAfter > 0 ? (
               `Thử lại sau (${retryAfter}s)`
             ) : (
-              'Gửi lại liên kết xác minh'
+              t('resend_btn_submit')
             )}
           </button>
         </form>

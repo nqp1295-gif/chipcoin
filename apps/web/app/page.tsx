@@ -102,7 +102,7 @@ export default function UserOverviewPage() {
                   border: '1px solid var(--border-bronze)',
                 }}
               >
-                👁️ Chế Độ Khách — Chỉ Xem Tổng Quan
+                {t('guest_mode_badge', '👁️ Chế Độ Khách — Chỉ Xem Tổng Quan')}
               </span>
             )}
           </div>
@@ -152,7 +152,7 @@ export default function UserOverviewPage() {
                 color: '#fef3c7',
               }}
             >
-              👋 <strong>Chào mừng bạn đến với CHIPCOIN!</strong> Bạn đang xem ở chế độ Khách vãng lai. Vui lòng <strong>Đăng nhập</strong> hoặc <strong>Đăng ký tài khoản</strong> để kích hoạt ví điểm, điểm danh hàng ngày và truy cập đầy đủ các trang thông tin cá nhân.
+              {t('guest_mode_banner')}
             </div>
           )}
 
@@ -196,7 +196,7 @@ export default function UserOverviewPage() {
                     cursor: isClaimedToday ? 'default' : 'pointer',
                   }}
                 >
-                  {isClaimedToday ? '✓ Đã điểm danh hôm nay' : t('overview_btn_checkin')}
+                  {isClaimedToday ? t('checked_in_today', '✓ Đã điểm danh hôm nay') : t('overview_btn_checkin')}
                 </button>
               </>
             ) : (
@@ -206,7 +206,7 @@ export default function UserOverviewPage() {
                   className="nav-btn"
                   style={{ fontSize: '0.95rem', padding: '10px 24px' }}
                 >
-                  ✨ Đăng Ký Tài Khoản Nhận Thưởng
+                  {t('guest_btn_register_reward', '✨ Đăng Ký Tài Khoản Nhận Thưởng')}
                 </Link>
 
                 <Link
@@ -214,7 +214,7 @@ export default function UserOverviewPage() {
                   className="btn-secondary"
                   style={{ fontSize: '0.95rem', padding: '10px 24px' }}
                 >
-                  🔑 Đăng Nhập
+                  {t('guest_btn_login', '🔑 Đăng Nhập')}
                 </Link>
 
                 <button
@@ -228,9 +228,9 @@ export default function UserOverviewPage() {
                     border: '1px dashed var(--border-subtle)',
                     cursor: 'pointer',
                   }}
-                  title="Cần đăng nhập để điểm danh"
+                  title={t('guest_need_login', 'Cần đăng nhập')}
                 >
-                  🔒 Đăng nhập để điểm danh (+250)
+                  {t('guest_btn_checkin_locked', '🔒 Đăng nhập để điểm danh (+250)')}
                 </button>
               </>
             )}
@@ -274,7 +274,7 @@ export default function UserOverviewPage() {
           <div style={{ fontSize: '0.82rem', color: '#38bdf8', marginTop: '4px' }}>
             {currentUser
               ? `≈ ${(balance / 5000000).toFixed(4)} USDT (1 USDT = 5,000,000 CHIP)`
-              : 'Đăng nhập để xem số dư'}
+              : t('guest_login_to_view_balance', 'Đăng nhập để xem số dư')}
           </div>
         </div>
 
@@ -294,12 +294,12 @@ export default function UserOverviewPage() {
               marginTop: '8px',
             }}
           >
-            {currentUser ? currentTier : 'Khách Truy Cập'}
+            {currentUser ? currentTier : t('guest_visitor', 'Khách Truy Cập')}
           </div>
           <div style={{ fontSize: '0.82rem', color: currentUser ? '#34d399' : 'var(--text-muted)', marginTop: '4px' }}>
             {currentUser
               ? (tierMeta.bonusRate > 0 ? `+${tierMeta.bonusRate * 100}% bonus` : 'Active')
-              : 'Chưa đăng ký tài khoản'}
+              : t('guest_not_registered', 'Chưa đăng ký tài khoản')}
           </div>
         </div>
 
@@ -322,7 +322,7 @@ export default function UserOverviewPage() {
             {currentUser ? `${streakDays} / 7` : '0 / 7'}
           </div>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            {currentUser ? 'Streak Status' : 'Cần đăng nhập'}
+            {currentUser ? t('streak_status', 'Streak Status') : t('guest_need_login', 'Cần đăng nhập')}
           </div>
         </div>
 
@@ -342,10 +342,10 @@ export default function UserOverviewPage() {
               marginTop: '8px',
             }}
           >
-            {currentUser ? t('overview_status_active') : 'Chưa Đăng Ký'}
+            {currentUser ? t('overview_status_active') : t('guest_not_registered', 'Chưa Đăng Ký')}
           </div>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            {currentUser ? 'Tài Khoản Đang Hoạt Động' : 'Vui lòng đăng ký tài khoản'}
+            {currentUser ? t('account_active', 'Tài Khoản Đang Hoạt Động') : t('guest_please_register', 'Vui lòng đăng ký tài khoản')}
           </div>
         </div>
       </section>
@@ -385,7 +385,7 @@ export default function UserOverviewPage() {
               className="nav-btn"
               style={{ display: 'inline-flex', padding: '10px 20px', fontSize: '0.9rem' }}
             >
-              {currentUser ? t('overview_box1_btn') : 'Đăng nhập để tham gia →'}
+              {currentUser ? t('overview_box1_btn') : t('guest_login_to_participate', 'Đăng nhập để tham gia →')}
             </Link>
           </div>
         </div>
@@ -425,7 +425,7 @@ export default function UserOverviewPage() {
                 color: '#0b0c0e',
               }}
             >
-              {currentUser ? t('overview_box2_btn') : 'Đăng nhập xem cấp bậc →'}
+              {currentUser ? t('overview_box2_btn') : t('guest_login_to_view_tier', 'Đăng nhập xem cấp bậc →')}
             </Link>
           </div>
         </div>
@@ -446,7 +446,7 @@ export default function UserOverviewPage() {
             className="nav-btn"
             style={{ fontSize: '0.85rem', padding: '6px 14px' }}
           >
-            {currentUser ? t('overview_view_all') : 'Đăng nhập để xem ví →'}
+            {currentUser ? t('overview_view_all') : t('guest_login_to_view_wallet', 'Đăng nhập để xem ví →')}
           </Link>
         </div>
 
@@ -467,15 +467,7 @@ export default function UserOverviewPage() {
                   <td colSpan={5} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-secondary)' }}>
                     <div style={{ marginBottom: '8px', fontSize: '1.5rem' }}>🔒</div>
                     <div>
-                      Bạn đang xem ở chế độ Khách. Vui lòng{' '}
-                      <Link href="/login" style={{ color: '#f5d77f', textDecoration: 'underline', fontWeight: 600 }}>
-                        Đăng nhập
-                      </Link>{' '}
-                      hoặc{' '}
-                      <Link href="/register" style={{ color: '#38bdf8', textDecoration: 'underline', fontWeight: 600 }}>
-                        Đăng ký tài khoản
-                      </Link>{' '}
-                      để xem lịch sử tích lũy điểm thưởng cá nhân.
+                      {t('guest_history_locked')}
                     </div>
                   </td>
                 </tr>
@@ -554,7 +546,7 @@ export default function UserOverviewPage() {
               ) : (
                 <tr>
                   <td colSpan={5} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '24px' }}>
-                    Chưa có giao dịch nào.
+                    {t('no_transactions_yet', 'Chưa có giao dịch nào.')}
                   </td>
                 </tr>
               )}

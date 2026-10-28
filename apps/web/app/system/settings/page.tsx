@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useI18n } from '../../lib/i18n';
 
 export default function SystemSettingsPage() {
+  const { t } = useI18n();
   const [appName, setAppName] = useState('CHIPCOIN Platform');
   const [pointSymbol, setPointSymbol] = useState('CHIP');
   const [allowRegistration, setAllowRegistration] = useState(true);
@@ -58,11 +60,11 @@ export default function SystemSettingsPage() {
               marginBottom: '4px',
             }}
           >
-            ⚙️ QUẢN TRỊ HỆ THỐNG — TRUNG TÂM CẤU HÌNH
+            {t('sys_settings_badge')}
           </div>
-          <h1 style={{ fontSize: '2rem', margin: 0 }}>Cấu Hình Toàn Bộ Hệ Thống</h1>
+          <h1 style={{ fontSize: '2rem', margin: 0 }}>{t('sys_settings_title')}</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', marginTop: '4px' }}>
-            Thiết lập tham số an toàn, giới hạn tốc độ và cấu hình kết nối Outbox Worker
+            {t('sys_settings_desc')}
           </p>
         </div>
 
@@ -73,7 +75,7 @@ export default function SystemSettingsPage() {
             className="nav-btn"
             style={{ cursor: 'pointer', border: 'none', gap: '8px' }}
           >
-            {saving ? 'Đang lưu cài đặt...' : '💾 Lưu Cấu Hình'}
+            {saving ? t('sys_saving') : `💾 ${t('sys_btn_save_config')}`}
           </button>
         </div>
       </div>

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '../lib/api';
 import { ChipStore } from '../lib/store';
+import { useI18n } from '../lib/i18n';
 
 // ============================================================================
 // ENVIRONMENT GATE: Auto-fill demo credentials only in local dev mode
@@ -16,6 +17,7 @@ const IS_LOCAL_DEV =
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const [email, setEmail] = useState(IS_LOCAL_DEV ? 'sophia.chain@example.com' : '');
   const [password, setPassword] = useState(IS_LOCAL_DEV ? 'Member@Chiprin2026!' : '');
 
@@ -103,9 +105,9 @@ export default function LoginPage() {
       <div className="glass-card">
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{ fontSize: '2rem', marginBottom: '6px' }}>🪙</div>
-          <h1 style={{ fontSize: '1.9rem', marginBottom: '0.5rem' }}>Đăng nhập CHIPCOIN</h1>
+          <h1 style={{ fontSize: '1.9rem', marginBottom: '0.5rem' }}>{t('login_title')}</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem' }}>
-            Truy cập cổng hạch toán và điểm thưởng hội viên
+            {t('login_desc')}
           </p>
         </div>
 
@@ -120,7 +122,7 @@ export default function LoginPage() {
                     href={`/resend-verification?email=${encodeURIComponent(email)}`}
                     style={{ textDecoration: 'underline', fontWeight: 600, color: 'var(--accent-bronze)' }}
                   >
-                    👉 Bấm vào đây để nhận lại email xác minh
+                    👉 {t('login_resend_link')}
                   </Link>
                 </div>
               )}
@@ -149,7 +151,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label className="form-label" htmlFor="email">
-                Địa chỉ Email
+                {t('login_email_label')}
               </label>
               <input
                 id="email"
@@ -166,7 +168,7 @@ export default function LoginPage() {
 
             <div className="form-group">
               <label className="form-label" htmlFor="password">
-                Mật khẩu
+                {t('login_pass_label')}
               </label>
               <input
                 id="password"
@@ -185,17 +187,17 @@ export default function LoginPage() {
               {loading ? (
                 <>
                   <div className="spinner" />
-                  Đang xác thực...
+                  {t('login_submitting')}
                 </>
               ) : (
-                'Đăng nhập'
+                t('btn_login')
               )}
             </button>
 
             <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-              Chưa có tài khoản?{' '}
+              {t('login_no_acc')}{' '}
               <Link href="/register" style={{ color: 'var(--accent-bronze)', fontWeight: 600 }}>
-                Đăng ký ngay (+5,000 CHIP)
+                {t('login_register_link')}
               </Link>
             </div>
           </form>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { useI18n } from '../../lib/i18n';
 import {
   ChipStore,
   StoredUser,
@@ -15,6 +16,7 @@ import { apiRequest } from '../../lib/api';
 type TimePreset = '24h' | '7d' | '30d' | '90d' | 'all';
 
 export default function SystemReportsPage() {
+  const { t } = useI18n();
   const [timePreset, setTimePreset] = useState<TimePreset>('30d');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
@@ -293,11 +295,11 @@ export default function SystemReportsPage() {
               marginBottom: '4px',
             }}
           >
-            📊 QUẢN TRỊ HỆ THỐNG — THỐNG KÊ &amp; BÁO CÁO TOÀN DIỆN
+            {t('sys_reports_badge')}
           </div>
-          <h1 style={{ fontSize: '2rem', margin: 0 }}>Thống Kê Báo Cáo Hệ Thống</h1>
+          <h1 style={{ fontSize: '2rem', margin: 0 }}>{t('sys_reports_title')}</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', marginTop: '4px' }}>
-            Báo cáo chi tiết lịch sử tạo tài khoản, lịch sử thăng hạng và phân bổ CHIP theo hạng mức &amp; hội viên
+            {t('sys_reports_desc')}
           </p>
         </div>
 

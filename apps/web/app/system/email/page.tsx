@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useI18n } from '../../lib/i18n';
 import { apiRequest } from '../../lib/api';
 
 // ============================================================================
@@ -100,6 +101,7 @@ const _RAW_INITIAL_LOGS: OutboxLog[] = [
 const INITIAL_LOGS: OutboxLog[] = IS_LOCAL_DEV ? _RAW_INITIAL_LOGS : [];
 
 export default function SystemEmailMonitoringPage() {
+  const { t } = useI18n();
   const [statusData, setStatusData] = useState<EmailStatusData | null>(null);
   const [loadingStatus, setLoadingStatus] = useState<boolean>(true);
   const [logs, setLogs] = useState<OutboxLog[]>(INITIAL_LOGS);
@@ -234,14 +236,13 @@ export default function SystemEmailMonitoringPage() {
               }}
             >
               <span className="pulse-dot" style={{ background: '#38bdf8' }} />
-              GMAIL SMTP &amp; OUTBOX DISPATCHER
+              {t('sys_email_badge')}
             </div>
             <h1 style={{ fontSize: '1.85rem', marginBottom: '0.4rem', color: '#fff' }}>
-              Giám Sát Gmail SMTP &amp; Hàng Đợi Xác Thực
+              {t('sys_email_title')}
             </h1>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', maxWidth: '780px', lineHeight: 1.5 }}>
-              Kênh phát hành email xác thực tự động sử dụng tài khoản <strong>jinofc.ytb@gmail.com</strong> qua giao thức
-              STARTTLS (Port 587/465). Cơ chế Transactional Outbox đảm bảo 100% email không thất lạc, bảo vệ chống quét link scanner và giới hạn tần suất nghiêm ngặt.
+              {t('sys_email_desc')}
             </p>
           </div>
 
@@ -255,7 +256,7 @@ export default function SystemEmailMonitoringPage() {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
               </svg>
-              {loadingStatus ? 'Đang Tải...' : 'Làm Mới Trạng Thái'}
+              {loadingStatus ? t('status_loading') : t('btn_refresh_status')}
             </button>
           </div>
         </div>

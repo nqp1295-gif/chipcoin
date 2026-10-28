@@ -367,7 +367,7 @@ export const SYSTEM_MENU_GROUPS: MenuGroup[] = [
         badge: 'TON Fee',
         badgeType: 'gold',
         descKey: 'nav_sys_treasury_desc',
-        defaultDesc: 'Ví TON TBzt...4KPhh & Quỹ thu phí 1% USDT',
+        defaultDesc: 'Ví TON Quản Trị & Quỹ thu phí 1% USDT',
         icon: ({ active }) => (
           <svg
             width="20"
@@ -701,13 +701,13 @@ export default function Sidebar({
               </div>
               <div className="glance-balance-row">
                 <span className="glance-amount" style={{ fontSize: '1.25rem', color: '#ffffff' }}>
-                  {staffSession?.email ? staffSession.email.split('@')[0] : (IS_LOCAL_DEV ? 'admin_sec' : 'Chưa đăng nhập')}
+                  {staffSession?.email ? staffSession.email.split('@')[0] : (IS_LOCAL_DEV ? 'admin_sec' : t('not_logged_in', 'Chưa đăng nhập'))}
                 </span>
               </div>
               <div className="glance-subtext">
-                <span>{IS_LOCAL_DEV ? 'Kho Quỹ: 500M CHIP Vault' : 'Kho Quỹ Toàn Hệ Thống'}</span>
+                <span>{IS_LOCAL_DEV ? 'Kho Quỹ: 500M CHIP Vault' : t('sys_wallet_title', 'Kho Quỹ Toàn Hệ Thống')}</span>
                 <Link href="/system/wallet" className="glance-link" onClick={onCloseMobile}>
-                  Kho quỹ →
+                  {t('nav_sys_treasury', 'Kho quỹ')} →
                 </Link>
               </div>
             </div>
@@ -739,14 +739,14 @@ export default function Sidebar({
                 <div className="glance-subtext">
                   <span>≈ ${(memberUser.chipsBalance / 10000).toFixed(2)} USD</span>
                   <Link href="/wallet" className="glance-link" onClick={onCloseMobile}>
-                    Ví của tôi →
+                    {t('nav_wallet', 'Ví của tôi')} →
                   </Link>
                 </div>
               </div>
             ) : (
               <div className="sidebar-glance-card" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
                 <div className="glance-header">
-                  <span className="glance-label" style={{ color: '#94a3b8' }}>KHÁCH TRUY CẬP</span>
+                  <span className="glance-label" style={{ color: '#94a3b8' }}>{t('guest_visitor', 'KHÁCH TRUY CẬP')}</span>
                   <span
                     className="glance-tier-badge"
                     style={{
@@ -755,7 +755,7 @@ export default function Sidebar({
                       background: 'rgba(0,0,0,0.3)',
                     }}
                   >
-                    CHƯA ĐĂNG NHẬP
+                    {t('not_logged_in', 'CHƯA ĐĂNG NHẬP')}
                   </span>
                 </div>
                 <div className="glance-balance-row">
@@ -763,9 +763,9 @@ export default function Sidebar({
                   <span className="glance-unit">CHIP</span>
                 </div>
                 <div className="glance-subtext">
-                  <span style={{ color: 'var(--text-muted)' }}>Quà chào mừng +5,000</span>
+                  <span style={{ color: 'var(--text-muted)' }}>{t('welcome_gift', 'Quà chào mừng +5,000')}</span>
                   <Link href="/login" className="glance-link" onClick={onCloseMobile}>
-                    Đăng nhập ngay →
+                    {t('login_now', 'Đăng nhập ngay →')}
                   </Link>
                 </div>
               </div>

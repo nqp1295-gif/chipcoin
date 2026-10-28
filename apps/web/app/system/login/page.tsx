@@ -3,6 +3,7 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useI18n } from '../../lib/i18n';
 import { apiRequest } from '../../lib/api';
 
 // ============================================================================
@@ -35,6 +36,7 @@ const PRESET_ACCOUNTS = {
 
 export default function SystemLoginPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const [email, setEmail] = useState(IS_LOCAL_DEV ? 'admin@chiprin.com' : '');
   const [password, setPassword] = useState(IS_LOCAL_DEV ? 'Admin@Chiprin2026!' : '');
   const [showPassword, setShowPassword] = useState(false);
@@ -132,13 +134,13 @@ export default function SystemLoginPage() {
   const roleNameVN = (role: string) => {
     switch (role?.toUpperCase()) {
       case 'ADMIN':
-        return 'Quản Trị Viên';
+        return t('sys_login_role_admin');
       case 'ASSISTANT':
-        return 'Trợ Lý';
+        return t('sys_login_role_assistant');
       case 'SPECIALIST':
-        return 'Chuyên Viên';
+        return t('sys_login_role_specialist');
       default:
-        return 'Nhân Sự Hệ Thống';
+        return t('role_staff');
     }
   };
 
@@ -170,15 +172,14 @@ export default function SystemLoginPage() {
               marginBottom: '1rem',
             }}
           >
-            🛡️ CỔNG QUẢN TRỊ NỘI BỘ
+            {t('sys_login_badge')}
           </div>
 
           <h1 style={{ fontSize: '1.95rem', marginBottom: '0.6rem' }}>
-            Đăng Nhập Quản Trị Hệ Thống
+            {t('sys_login_title')}
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: 1.5 }}>
-            Router riêng cho nhóm Accounts-System:{' '}
-            <strong style={{ color: '#fff' }}>Quản Trị Viên, Trợ Lý &amp; Chuyên Viên</strong>.
+            {t('sys_login_desc')}
           </p>
         </div>
 
@@ -196,7 +197,7 @@ export default function SystemLoginPage() {
                   letterSpacing: '0.04em',
                 }}
               >
-                🧪 Chọn vai trò đăng nhập nhanh (Chế độ Test Local):
+                {t('sys_login_preset_title')}
               </div>
               <div
                 style={{
@@ -226,7 +227,7 @@ export default function SystemLoginPage() {
                 >
                   <div style={{ fontSize: '1.3rem', marginBottom: '3px' }}>👑</div>
                   <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f5d77f' }}>
-                    Quản Trị Viên
+                    {t('sys_login_role_admin')}
                   </div>
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Toàn quyền</div>
                 </button>
@@ -252,7 +253,7 @@ export default function SystemLoginPage() {
                 >
                   <div style={{ fontSize: '1.3rem', marginBottom: '3px' }}>💼</div>
                   <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#a5b4fc' }}>
-                    Trợ Lý
+                    {t('sys_login_role_assistant')}
                   </div>
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Điều hành</div>
                 </button>
@@ -278,7 +279,7 @@ export default function SystemLoginPage() {
                 >
                   <div style={{ fontSize: '1.3rem', marginBottom: '3px' }}>🔍</div>
                   <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#7dd3fc' }}>
-                    Chuyên Viên
+                    {t('sys_login_role_specialist')}
                   </div>
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Nghiệp vụ</div>
                 </button>
@@ -360,7 +361,7 @@ export default function SystemLoginPage() {
           <div>
             <div className="alert-box alert-success" style={{ display: 'block' }}>
               <div style={{ fontWeight: 700, fontSize: '1.05rem', marginBottom: '6px' }}>
-                🎉 Xác thực tài khoản quản trị thành công!
+                🎉 {t('sys_login_success_title')}
               </div>
               <p style={{ fontSize: '0.9rem', marginBottom: '10px' }}>
                 Xin chào <strong>{loggedInAccount.email}</strong>. Đang chuyển hướng vào Bảng Quản Trị Hệ Thống...
@@ -387,7 +388,7 @@ export default function SystemLoginPage() {
 
             <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
               <Link href="/system" className="btn-primary" style={{ justifyContent: 'center' }}>
-                Vào Bảng Quản Trị Hệ Thống ngay →
+                {t('sys_login_enter_admin')}
               </Link>
             </div>
           </div>
@@ -395,7 +396,7 @@ export default function SystemLoginPage() {
           <form onSubmit={handleSubmit}>
             <div className="form-group" style={{ marginBottom: '1.2rem' }}>
               <label className="form-label" htmlFor="sys-email">
-                Email Quản Trị Hệ Thống
+                {t('sys_login_email_label')}
               </label>
               <input
                 id="sys-email"
@@ -413,7 +414,7 @@ export default function SystemLoginPage() {
             <div className="form-group" style={{ marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                 <label className="form-label" htmlFor="sys-password" style={{ margin: 0 }}>
-                  Mật Khẩu Quản Trị
+                  {t('sys_login_pass_label')}
                 </label>
                 <button
                   type="button"
@@ -455,7 +456,7 @@ export default function SystemLoginPage() {
                 cursor: loading ? 'wait' : 'pointer',
               }}
             >
-              {loading ? 'Đang xác thực hệ thống...' : 'Đăng Nhập Cổng Quản Trị'}
+              {loading ? t('sys_login_submitting') : t('sys_login_btn_submit')}
             </button>
           </form>
         )}
@@ -479,7 +480,7 @@ export default function SystemLoginPage() {
               textDecoration: 'none',
             }}
           >
-            ← Cổng đăng nhập người dùng
+            {t('sys_login_link_user')}
           </Link>
 
           <Link
@@ -490,7 +491,7 @@ export default function SystemLoginPage() {
               fontWeight: 600,
             }}
           >
-            Về trang chủ →
+            {t('sys_login_link_home')}
           </Link>
         </div>
       </div>

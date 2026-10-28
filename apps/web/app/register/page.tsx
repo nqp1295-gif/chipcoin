@@ -5,8 +5,10 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { apiRequest } from '../lib/api';
 import { ChipStore } from '../lib/store';
+import { useI18n } from '../lib/i18n';
 
 function RegisterForm() {
+  const { t } = useI18n();
   const searchParams = useSearchParams();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -103,9 +105,9 @@ function RegisterForm() {
       <div className="glass-card">
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{ fontSize: '2rem', marginBottom: '6px' }}>🪙</div>
-          <h1 style={{ fontSize: '1.9rem', marginBottom: '0.5rem' }}>Tạo tài khoản CHIPCOIN</h1>
+          <h1 style={{ fontSize: '1.9rem', marginBottom: '0.5rem' }}>{t('reg_title')}</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem' }}>
-            Tham gia hệ thống tích luỹ điểm thưởng nội bộ nhận ngay <strong>+5,000 CHIP</strong>
+            {t('reg_desc')}
           </p>
         </div>
 
@@ -120,42 +122,19 @@ function RegisterForm() {
           <div>
             <div className="alert-box alert-success" style={{ display: 'block' }}>
               <div style={{ fontWeight: 700, fontSize: '1.05rem', marginBottom: '6px' }}>
-                🎉 Đăng ký thành công!
+                {t('reg_success_title')}
               </div>
               <p style={{ fontSize: '0.9rem', lineHeight: 1.5, marginBottom: '8px' }}>
-                Chào mừng bạn đến với CHIPCOIN. Bạn đã được tặng <strong>+5,000 CHIP</strong> chào mừng
-                và phân hạng <strong>CHIP MEMBER</strong>.
+                {t('reg_success_desc')}
               </p>
-              {referralCode && (
-                <div style={{ fontSize: '0.82rem', color: '#f5d77f', marginBottom: '8px' }}>
-                  ✓ Đã gắn vào nhánh bảo trợ của mã: <strong>{referralCode}</strong>
-                </div>
-              )}
-              <div
-                style={{
-                  background: 'rgba(0,0,0,0.25)',
-                  padding: '10px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  fontSize: '0.82rem',
-                  lineHeight: 1.45,
-                }}
-              >
-                <div style={{ color: '#38bdf8', fontWeight: 700, marginBottom: '4px' }}>
-                  ✉️ Vui lòng xác thực email của bạn:
-                </div>
-                <div>
-                  Một email xác nhận đã được gửi từ <strong>jinofc.ytb@gmail.com</strong> tới hòm thư của bạn. Vui lòng mở hộp thư (kiểm tra cả mục Spam / Thư rác) và bấm liên kết xác nhận trong vòng <strong>15 phút</strong> để kích hoạt tài khoản.
-                </div>
-              </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '1.8rem' }}>
-              <Link href="/verify-email" className="btn-primary" style={{ textAlign: 'center' }}>
-                Nhập Mã / Xác Thực Email Ngay →
+              <Link href="/login" className="btn-primary" style={{ textAlign: 'center' }}>
+                {t('reg_success_btn')}
               </Link>
               <Link href="/" className="btn-secondary" style={{ textAlign: 'center' }}>
-                Vào Bảng Điều Khiển Của Tôi
+                {t('nav_overview')}
               </Link>
             </div>
           </div>
@@ -163,27 +142,24 @@ function RegisterForm() {
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label className="form-label" htmlFor="username">
-                Tên người dùng
+                {t('reg_username_label')}
               </label>
               <input
                 id="username"
                 type="text"
                 className="form-input"
-                placeholder="vd: satoshi_vn, Nguyen Van A, alex.99"
+                placeholder="satoshi_vn, Nguyen Van A, alex.99"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 disabled={loading}
                 autoComplete="username"
                 required
               />
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
-                Từ 2 đến 50 ký tự (hỗ trợ chữ cái tiếng Việt/Anh, chữ số, khoảng trắng, gạch dưới _, gạch ngang - và dấu .)
-              </span>
             </div>
 
             <div className="form-group">
               <label className="form-label" htmlFor="email">
-                Địa chỉ Email
+                {t('reg_email_label')}
               </label>
               <input
                 id="email"
@@ -200,7 +176,7 @@ function RegisterForm() {
 
             <div className="form-group">
               <label className="form-label" htmlFor="password">
-                Mật khẩu (tối thiểu 12 ký tự)
+                {t('reg_pass_label')}
               </label>
               <input
                 id="password"
@@ -218,11 +194,11 @@ function RegisterForm() {
             <div className="form-group">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <label className="form-label" htmlFor="referralCode">
-                  Mã Người Giới Thiệu (Tùy chọn)
+                  {t('reg_ref_label')}
                 </label>
                 {referralCode && (
                   <span style={{ fontSize: '0.75rem', color: '#34d399', fontWeight: 600 }}>
-                    ✓ Đã áp dụng mã
+                    ✓ {referralCode}
                   </span>
                 )}
               </div>
@@ -230,7 +206,7 @@ function RegisterForm() {
                 id="referralCode"
                 type="text"
                 className="form-input"
-                placeholder="vd: CHIP-ALEX-99"
+                placeholder="CHIP-ALEX-99"
                 value={referralCode}
                 onChange={(e) => setReferralCode(e.target.value)}
                 disabled={loading}
@@ -246,17 +222,17 @@ function RegisterForm() {
               {loading ? (
                 <>
                   <div className="spinner" />
-                  Đang xử lý...
+                  {t('reg_submitting')}
                 </>
               ) : (
-                'Hoàn tất đăng ký (+5,000 CHIP)'
+                t('reg_btn_submit')
               )}
             </button>
 
             <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-              Đã có tài khoản?{' '}
+              {t('reg_have_acc')}{' '}
               <Link href="/login" style={{ color: 'var(--accent-bronze)', fontWeight: 600 }}>
-                Đăng nhập ngay
+                {t('reg_login_link')}
               </Link>
             </div>
           </form>

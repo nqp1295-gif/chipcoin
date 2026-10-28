@@ -76,16 +76,20 @@ export default function TopBar({ onOpenMobileMenu }: TopBarProps) {
     if (pathname === '/rank') return t('nav_rank');
     if (pathname === '/referrals') return t('nav_referrals');
     if (pathname === '/wallet') return t('nav_wallet');
+    if (pathname === '/wallet/deposit') return `${t('nav_wallet')} - ${t('tab_deposit')}`;
+    if (pathname === '/wallet/convert') return `${t('nav_wallet')} - ${t('tab_convert')}`;
+    if (pathname === '/wallet/withdraw') return `${t('nav_wallet')} - ${t('tab_withdraw')}`;
     if (pathname === '/ton-wallet') return t('nav_ton_wallet');
     if (pathname === '/profile') return t('nav_profile');
     if (pathname === '/resend-verification') return t('nav_resend');
     if (pathname === '/login') return t('nav_login');
     if (pathname === '/register') return t('nav_register');
-    if (pathname === '/verify-email') return 'Xác Thực Email';
+    if (pathname === '/verify-email') return t('auth_verify_title') || t('nav_resend');
 
     if (pathname === '/system') return t('nav_sys_accounts');
     if (pathname === '/system/wallet') return t('nav_sys_treasury');
     if (pathname === '/system/tracking') return t('nav_sys_tracking');
+    if (pathname === '/system/email') return t('nav_sys_email');
     if (pathname === '/system/reports') return t('nav_sys_reports');
     if (pathname === '/system/settings') return t('nav_sys_settings');
     if (pathname === '/system/login') return t('nav_sys_login');
@@ -341,7 +345,7 @@ export default function TopBar({ onOpenMobileMenu }: TopBarProps) {
                   <div className="topbar-status-badge hide-mobile">
                     <span style={{ color: 'var(--text-muted)' }}>👤</span>
                     <span className="status-label" style={{ color: 'var(--text-secondary)' }}>
-                      Chưa đăng nhập
+                      {t('not_logged_in')}
                     </span>
                   </div>
 
@@ -357,7 +361,7 @@ export default function TopBar({ onOpenMobileMenu }: TopBarProps) {
                     <Link
                       href="/login"
                       className="topbar-avatar-btn"
-                      title="Đăng nhập tài khoản"
+                      title={t('btn_login')}
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',

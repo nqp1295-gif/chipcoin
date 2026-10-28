@@ -4,8 +4,10 @@ import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { apiRequest } from '../lib/api';
+import { useI18n } from '../lib/i18n';
 
 function VerifyEmailContent() {
+  const { t } = useI18n();
   const searchParams = useSearchParams();
   const tokenFromUrl = searchParams.get('token') || '';
 
@@ -76,10 +78,10 @@ function VerifyEmailContent() {
         <div style={{ textAlign: 'center', marginBottom: '1.8rem' }}>
           <div style={{ fontSize: '2.4rem', marginBottom: '8px' }}>✉️</div>
           <h1 style={{ fontSize: '1.9rem', marginBottom: '0.4rem', color: '#fff' }}>
-            Xác Minh Địa Chỉ Email
+            {t('verify_title')}
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem' }}>
-            Kích hoạt tài khoản CHIPCOIN chính thức phát hành từ <strong>jinofc.ytb@gmail.com</strong>
+            {t('verify_desc')}
           </p>
         </div>
 
@@ -88,7 +90,7 @@ function VerifyEmailContent() {
           <div style={{ textAlign: 'center', padding: '2.5rem 0' }}>
             <div className="spinner" style={{ width: '40px', height: '40px', margin: '0 auto 1.2rem auto' }} />
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
-              Đang xác thực mã token mật mã SHA-256 trên cơ sở dữ liệu...
+              {t('verify_verifying')}
             </p>
           </div>
         )}
@@ -142,22 +144,19 @@ function VerifyEmailContent() {
           <div style={{ textAlign: 'center' }}>
             <div className="alert-box alert-success" style={{ display: 'block', textAlign: 'left' }}>
               <div style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: '6px' }}>
-                🎉 Xác Minh Thành Công!
+                {t('verify_success_title')}
               </div>
               <p style={{ fontSize: '0.92rem', lineHeight: 1.5, marginBottom: '8px' }}>
-                Tài khoản của bạn đã được kích hoạt thành công (trạng thái <strong>ACTIVE</strong>). Bạn đã chính thức gia nhập cộng đồng CHIPCOIN với hạng <strong>CHIP MEMBER</strong>.
+                {t('verify_success_desc')}
               </p>
-              <div style={{ fontSize: '0.82rem', color: '#4ade80', borderTop: '1px solid rgba(74, 222, 128, 0.2)', paddingTop: '6px' }}>
-                ✓ Thư xác nhận thành công (Mẫu B) đã được gửi từ <strong>jinofc.ytb@gmail.com</strong> tới hộp thư của bạn.
-              </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '1.8rem' }}>
               <Link href="/login" className="btn-primary" style={{ textAlign: 'center', padding: '12px 20px' }}>
-                Đăng Nhập Ngay →
+                {t('verify_btn_login')}
               </Link>
               <Link href="/" className="btn-secondary" style={{ textAlign: 'center' }}>
-                Về Trang Tổng Quan
+                {t('nav_overview')}
               </Link>
             </div>
           </div>
@@ -177,7 +176,7 @@ function VerifyEmailContent() {
 
             <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <Link href="/resend-verification" className="btn-primary" style={{ textAlign: 'center' }}>
-                Yêu Cầu Gửi Lại Email Xác Minh
+                {t('verify_btn_resend')}
               </Link>
             </div>
           </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useI18n } from '../../lib/i18n';
 
 // ============================================================================
 // ENVIRONMENT GATE: Mock outbox events only loaded in local dev mode
@@ -77,6 +78,7 @@ const _RAW_INITIAL_EVENTS: OutboxEvent[] = [
 const INITIAL_EVENTS: OutboxEvent[] = IS_LOCAL_DEV ? _RAW_INITIAL_EVENTS : [];
 
 export default function SystemTrackingPage() {
+  const { t } = useI18n();
   const [events, setEvents] = useState<OutboxEvent[]>(INITIAL_EVENTS);
   const [scanning, setScanning] = useState(false);
   const [filter, setFilter] = useState<'ALL' | 'SENT' | 'PENDING'>('ALL');
@@ -138,11 +140,11 @@ export default function SystemTrackingPage() {
               marginBottom: '4px',
             }}
           >
-            ⚡ QUẢN TRỊ HỆ THỐNG — GIÁM SÁT TIẾN TRÌNH OUTBOX
+            {t('sys_tracking_badge')}
           </div>
-          <h1 style={{ fontSize: '2rem', margin: 0 }}>Giám Sát Tiến Trình Outbox Live</h1>
+          <h1 style={{ fontSize: '2rem', margin: 0 }}>{t('sys_tracking_title')}</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', marginTop: '4px' }}>
-            Theo dõi trạng thái thời gian thực của Worker Outbox, hàng đợi gửi email và tính toàn vẹn sự kiện
+            {t('sys_tracking_desc')}
           </p>
         </div>
 
@@ -153,7 +155,7 @@ export default function SystemTrackingPage() {
             className="nav-btn"
             style={{ cursor: 'pointer', border: 'none', gap: '8px' }}
           >
-            {scanning ? 'Đang quét hàng đợi...' : '🔄 Quét Outbox Ngay'}
+            {scanning ? t('sys_scanning') : `🔄 ${t('sys_btn_scan_now')}`}
           </button>
         </div>
       </div>

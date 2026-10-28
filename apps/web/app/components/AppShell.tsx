@@ -246,7 +246,7 @@ export default function AppShell({ children }: AppShellProps) {
               >
                 <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>
                 <h2 style={{ fontSize: '1.5rem', marginBottom: '0.6rem', color: '#f5d77f' }}>
-                  Yêu Cầu Đăng Nhập
+                  {t('login_title')}
                 </h2>
                 <p
                   style={{
@@ -256,8 +256,7 @@ export default function AppShell({ children }: AppShellProps) {
                     lineHeight: 1.6,
                   }}
                 >
-                  Trang thông tin cá nhân và quản lý ví điểm chỉ dành cho hội viên đã đăng nhập tài khoản CHIPCOIN.
-                  Vui lòng đăng nhập hoặc tạo tài khoản mới để tiếp tục.
+                  {t('guest_mode_banner')}
                 </p>
                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
                   <Link
@@ -265,14 +264,14 @@ export default function AppShell({ children }: AppShellProps) {
                     className="nav-btn"
                     style={{ padding: '10px 22px' }}
                   >
-                    Đăng Nhập Ngay
+                    {t('login_btn_submit')}
                   </Link>
                   <Link
                     href="/register"
                     className="btn-secondary"
                     style={{ padding: '10px 22px' }}
                   >
-                    Tạo Tài Khoản Mới
+                    {t('btn_register')}
                   </Link>
                 </div>
               </div>
@@ -294,62 +293,62 @@ export default function AppShell({ children }: AppShellProps) {
                   </span>
                   <span className="footer-bullet">&bull;</span>
                   <span>
-                    Chỉ dành cho nhân sự được phân quyền (ADMIN, ASSISTANT, SPECIALIST). Mọi thao tác đều được ghi nhận vào nhật ký kiểm toán bảo mật PostgreSQL.
+                    {t('brand_system_title')}
                   </span>
                 </div>
                 <div className="footer-copyright">
-                  © 2026 CHIPCOIN System Console. Kiến trúc Transactional Outbox Worker &amp; Cơ Chế Hạch Toán Minh Bạch.
+                  {t('footer_copyright')}
                 </div>
                 <div className="footer-links">
                   <Link href="/system" className="footer-link">
-                    🛡️ Quản Lý 4 Cấp Độ
+                    🛡️ {t('nav_sys_accounts')}
                   </Link>
                   <span className="footer-bullet">&bull;</span>
                   <Link href="/system/wallet" className="footer-link">
-                    🪙 Kho Quỹ Master Treasury
+                    🪙 {t('nav_sys_treasury')}
                   </Link>
                   <span className="footer-bullet">&bull;</span>
                   <Link href="/system/tracking" className="footer-link">
-                    ⚡ Giám Sát Outbox
+                    ⚡ {t('nav_sys_tracking')}
                   </Link>
                   <span className="footer-bullet">&bull;</span>
                   <Link href="/system/reports" className="footer-link">
-                    📊 Báo Cáo &amp; Đối Soát
+                    📊 {t('nav_sys_reports')}
                   </Link>
                   <span className="footer-bullet">&bull;</span>
                   <Link href="/system/settings" className="footer-link">
-                    ⚙️ Cấu Hình Toàn Hệ Thống
+                    ⚙️ {t('nav_sys_settings')}
                   </Link>
                 </div>
               </>
             ) : (
-              /* Footer Chuyên Biệt Cho Web Người Dùng (Đã bỏ dòng "Hệ thống phần thưởng nội bộ — Không blockchain — Chưa hỗ trợ rút tiền") */
+              /* Footer Chuyên Biệt Cho Web Người Dùng */
               <>
                 <div className="footer-meta">
                   <span className="footer-title">CHIPCOIN Platform</span>
                   <span className="footer-bullet">&bull;</span>
                   <span>
-                    Nền tảng tích luỹ điểm thưởng &amp; hạch toán số dư minh bạch
+                    {t('overview_hero_badge')}
                   </span>
                 </div>
                 <div className="footer-copyright">
-                  © 2026 CHIPCOIN Member Loyalty. Tích luỹ điểm thưởng an toàn &amp; minh bạch.
+                  {t('footer_copyright')}
                 </div>
                 <div className="footer-links">
                   <Link href="/wallet" className="footer-link">
-                    🪙 Ví Điểm Thưởng Của Tôi
+                    🪙 {t('nav_wallet')}
                   </Link>
                   <span className="footer-bullet">&bull;</span>
                   <Link href="/activities" className="footer-link">
-                    ⭐ Hoạt Động Tích Lũy
+                    ⭐ {t('nav_activities')}
                   </Link>
                   <span className="footer-bullet">&bull;</span>
                   <Link href="/rank" className="footer-link">
-                    👑 Thăng Hạng Hội Viên
+                    👑 {t('nav_rank')}
                   </Link>
                   <span className="footer-bullet">&bull;</span>
                   <Link href="/referrals" className="footer-link">
-                    🤝 Mời Bạn Bè
+                    🤝 {t('nav_referrals')}
                   </Link>
                 </div>
               </>
