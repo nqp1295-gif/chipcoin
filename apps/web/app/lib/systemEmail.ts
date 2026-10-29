@@ -69,26 +69,24 @@ export async function sendEmailViaRelay({
       });
       return { success: true, messageId: data.messageId };
     } else {
-      // Still log fallback record in client-side mode
       logOutboxEmail({
         id: emailId,
         template: templateLabel,
         recipient: to,
-        status: 'SENT',
-        note: `Đã dispatch email nội bộ: ${subject}`,
+        status: 'FAILED',
+        note: `Lỗi gửi SMTP: ${data.error || 'relay_failed'}`,
       });
-      return { success: true, messageId: emailId };
+      return { success: false, error: data.error || 'Không thể gửi email qua SMTP' };
     }
   } catch (err: any) {
-    // If relay endpoint is unreachable, log as queued/sent for local dev continuity
     logOutboxEmail({
       id: emailId,
       template: templateLabel,
       recipient: to,
-      status: 'SENT',
-      note: `Đã dispatch email thông báo: ${subject}`,
+      status: 'FAILED',
+      note: `Lỗi kết nối email: ${err.message}`,
     });
-    return { success: true, messageId: emailId };
+    return { success: false, error: err.message };
   }
 }
 
@@ -248,3 +246,132 @@ export async function sendAccountDeletedEmail(
     templateLabel: 'Xóa Vĩnh Viễn Tài Khoản & Hoàn Quỹ',
   });
 }
+
+// 4. Wallet Binding OTP Email (TON / TRON Network)
+export async function sendWalletOtpEmail({
+  email,
+  username,
+  otpCode,
+  walletAddress,
+  network = 'TON',
+}: {
+  email: string;
+  username?: string;
+  otpCode: string;
+  walletAddress: string;
+  network?: 'TON' | 'TRON';
+}) {
+  const networkName = network === 'TRON' ? 'TRON (TRC-20 USDT)' : 'The Open Network (TON)';
+  const subject = `[CHIPCOIN] Mã OTP xác nhận liên kết ví ${networkName}: ${otpCode}`;
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #121418; color: #ffffff; padding: 26px; border-radius: 12px; border: 1.5px solid #00c2ff;">
+      <div style="text-align: center; margin-bottom: 22px;">
+        <h2 style="color: #00c2ff; margin: 0; font-size: 22px; letter-spacing: 1px;">CHIPCOIN SECURITY CENTER</h2>
+        <p style="color: #94a3b8; font-size: 13px; margin: 5px 0 0 0;">Xác Thực OTP 2 Lớp (2FA) — Liên Kết Ví Bảo Mật</p>
+      </div>
+
+      <p style="font-size: 14px; line-height: 1.6;">Xin chào <strong>${username || email}</strong>,</p>
+      <p style="font-size: 14px; line-height: 1.6; color: #cbd5e1;">
+        Hệ thống CHIPCOIN ghi nhận yêu cầu liên kết địa chỉ ví <strong>${networkName}</strong> vào tài khoản của bạn.
+      </p>
+
+      <div style="background: rgba(0, 194, 255, 0.08); border: 1.5px solid #00c2ff; padding: 22px; border-radius: 10px; margin: 24px 0; text-align: center;">
+        <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; font-weight: bold;">
+          MÃ XÁC THỰC BẢO MẬT OTP (HIỆU LỰC 5 PHÚT):
+        </div>
+        <div style="font-family: 'Courier New', monospace; font-size: 36px; font-weight: 800; color: #38bdf8; letter-spacing: 8px;">
+          ${otpCode}
+        </div>
+      </div>
+
+      <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.12); padding: 14px 16px; border-radius: 8px; margin-bottom: 20px;">
+        <div style="font-size: 11px; color: #f5d77f; text-transform: uppercase; font-weight: bold; margin-bottom: 6px;">
+          ĐỊA CHỈ VÍ YÊU CẦU LIÊN KẾT (${networkName}):
+        </div>
+        <div style="font-family: monospace; font-size: 13px; color: #ffffff; word-break: break-all;">
+          ${walletAddress}
+        </div>
+      </div>
+
+      <div style="background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 12px 14px; border-radius: 4px; margin-bottom: 20px;">
+        <strong style="color: #f87171; font-size: 13px;">LƯU Ý BẢO MẬT QUAN TRỌNG:</strong>
+        <p style="margin: 4px 0 0 0; font-size: 13px; color: #cbd5e1; line-height: 1.5;">
+          Tuyệt đối <strong>không cung cấp mã OTP này cho bất kỳ ai</strong>, kể cả nhân viên tự xưng là Quản trị viên CHIPCOIN. Nếu bạn không thực hiện yêu cầu này, vui lòng đổi mật khẩu ngay lập tức.
+        </p>
+      </div>
+
+      <p style="font-size: 12px; color: #94a3b8; margin-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 14px; text-align: center;">
+        Email này được gửi tự động từ máy chủ bảo mật CHIPCOIN Web3 Platform.
+      </p>
+    </div>
+  `;
+
+  return sendEmailViaRelay({
+    to: email,
+    subject,
+    html,
+    templateLabel: `OTP Liên Kết Ví ${network}`,
+  });
+}
+
+// 5. Withdrawal 2FA OTP Email
+export async function sendWithdrawalOtpEmail({
+  email,
+  username,
+  otpCode,
+  amountUsdt,
+  destAddress,
+}: {
+  email: string;
+  username?: string;
+  otpCode: string;
+  amountUsdt: number;
+  destAddress: string;
+}) {
+  const subject = `[CHIPCOIN] Mã OTP xác thực lệnh rút tiền ${amountUsdt} USDT: ${otpCode}`;
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #121418; color: #ffffff; padding: 26px; border-radius: 12px; border: 1.5px solid #f5d77f;">
+      <div style="text-align: center; margin-bottom: 22px;">
+        <h2 style="color: #f5d77f; margin: 0; font-size: 22px;">CHIPCOIN SECURITY CENTER</h2>
+        <p style="color: #94a3b8; font-size: 13px; margin: 5px 0 0 0;">Xác Thực OTP 2 Lớp (2FA) — Lệnh Rút USDT</p>
+      </div>
+
+      <p style="font-size: 14px; line-height: 1.6;">Xin chào <strong>${username || email}</strong>,</p>
+      <p style="font-size: 14px; line-height: 1.6; color: #cbd5e1;">
+        Hệ thống nhận được yêu cầu rút <strong>${amountUsdt} USDT</strong> từ tài khoản của bạn.
+      </p>
+
+      <div style="background: rgba(245, 215, 127, 0.08); border: 1.5px solid #f5d77f; padding: 22px; border-radius: 10px; margin: 24px 0; text-align: center;">
+        <div style="font-size: 12px; color: #f5d77f; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; font-weight: bold;">
+          MÃ OTP XÁC NHẬN RÚT TIỀN (HIỆU LỰC 5 PHÚT):
+        </div>
+        <div style="font-family: 'Courier New', monospace; font-size: 36px; font-weight: 800; color: #f5d77f; letter-spacing: 8px;">
+          ${otpCode}
+        </div>
+      </div>
+
+      <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.12); padding: 14px 16px; border-radius: 8px; margin-bottom: 20px;">
+        <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: bold; margin-bottom: 6px;">
+          ĐỊA CHỈ VÍ ĐÍCH NHẬN TIỀN:
+        </div>
+        <div style="font-family: monospace; font-size: 13px; color: #38bdf8; word-break: break-all;">
+          ${destAddress}
+        </div>
+      </div>
+
+      <p style="font-size: 12px; color: #94a3b8; margin-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 14px; text-align: center;">
+        Nếu bạn không thực hiện lệnh rút này, vui lòng khóa tài khoản hoặc liên hệ quản trị viên ngay lập tức.
+      </p>
+    </div>
+  `;
+
+  return sendEmailViaRelay({
+    to: email,
+    subject,
+    html,
+    templateLabel: 'OTP Rút Tiền USDT',
+  });
+}
+

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useI18n } from '../lib/i18n';
 import { ChipStore, StoredUser, TIER_CONFIGS, detectWalletNetwork } from '../lib/store';
 import WalletNavTabs from '../wallet/components/WalletNavTabs';
+import { sendWalletOtpEmail } from '../lib/systemEmail';
 
 // ============================================================================
 // ENVIRONMENT GATE: Test helper UI only available in local dev mode
@@ -25,8 +26,11 @@ export default function TonWalletPage() {
   const [nonce, setNonce] = useState('');
   const [signedNonce, setSignedNonce] = useState('');
   const [otpCode, setOtpCode] = useState('');
+  const [expectedOtp, setExpectedOtp] = useState('');
+  const [otpExpiresAt, setOtpExpiresAt] = useState<number>(0);
   const [otpSent, setOtpSent] = useState(false);
   const [otpTimer, setOtpTimer] = useState(0);
+  const [sendingOtp, setSendingOtp] = useState(false);
 
   // Telegram Binding States
   const [telegramId, setTelegramId] = useState('');
@@ -118,26 +122,121 @@ export default function TonWalletPage() {
     setStep(2);
   };
 
-  // Step 2: Verify cryptographic signature & send OTP
-  const handleProceedToStep3 = () => {
+  // Step 2: Verify cryptographic signature & send real OTP via email relay
+  const handleProceedToStep3 = async () => {
     setFeedback(null);
-    setOtpSent(true);
-    setOtpTimer(60);
+
+    if (!currentUser?.email) {
+      setFeedback({
+        message: 'Tài khoản của bạn chưa có địa chỉ email bảo mật. Vui lòng cập nhật email trong mục Hồ Sơ trước khi liên kết ví.',
+        type: 'error',
+      });
+      return;
+    }
+
+    const val = validateAddress(tonAddress);
+    const resolvedNetwork = val.detectedNetwork === 'TRON' ? 'TRON' : 'TON';
+    const generated = Math.floor(100000 + Math.random() * 900000).toString();
+
+    setSendingOtp(true);
     setFeedback({
-      message: `✨ Mã OTP 6 chữ số đã được gửi tới email bảo mật: ${currentUser?.email || 'email của bạn'}`,
+      message: `Đang kết nối gửi mã OTP bảo mật tới email: ${currentUser.email}...`,
       type: 'info',
     });
-    setStep(3);
+
+    try {
+      const res = await sendWalletOtpEmail({
+        email: currentUser.email,
+        username: currentUser.username || currentUser.email,
+        otpCode: generated,
+        walletAddress: tonAddress.trim(),
+        network: resolvedNetwork,
+      });
+
+      setSendingOtp(false);
+      setExpectedOtp(generated);
+      setOtpExpiresAt(Date.now() + 5 * 60 * 1000); // 5 minutes TTL
+      setOtpSent(true);
+      setOtpTimer(60);
+      setStep(3);
+
+      if (res.success) {
+        setFeedback({
+          message: `✨ Mã OTP 6 chữ số đã được gửi tới email bảo mật: ${currentUser.email}. Vui lòng kiểm tra hộp thư (cả mục Thư rác/Spam nếu chưa thấy).`,
+          type: 'info',
+        });
+      } else {
+        setFeedback({
+          message: `⚠️ Không thể gửi mail tự động (${res.error || 'Lỗi SMTP'}). ${IS_LOCAL_DEV ? `[Dev Mode: Mã OTP là ${generated}]` : 'Vui lòng kiểm tra lại cấu hình hoặc bấm gửi lại.'}`,
+          type: 'error',
+        });
+      }
+    } catch (err: any) {
+      setSendingOtp(false);
+      setExpectedOtp(generated);
+      setOtpExpiresAt(Date.now() + 5 * 60 * 1000);
+      setOtpSent(true);
+      setOtpTimer(60);
+      setStep(3);
+      setFeedback({
+        message: `⚠️ Lỗi kết nối khi gửi email OTP: ${err.message}. ${IS_LOCAL_DEV ? `[Dev Mode: Mã OTP là ${generated}]` : ''}`,
+        type: 'error',
+      });
+    }
   };
 
   // Send / Resend OTP
-  const handleSendOtp = () => {
-    setOtpSent(true);
-    setOtpTimer(60);
+  const handleSendOtp = async () => {
+    if (!currentUser?.email) return;
+
+    setFeedback(null);
+    const val = validateAddress(tonAddress);
+    const resolvedNetwork = val.detectedNetwork === 'TRON' ? 'TRON' : 'TON';
+    const generated = Math.floor(100000 + Math.random() * 900000).toString();
+
+    setSendingOtp(true);
     setFeedback({
-      message: `✨ Đã gửi lại mã OTP 6 chữ số tới email: ${currentUser?.email}`,
+      message: `Đang gửi lại mã OTP tới email: ${currentUser.email}...`,
       type: 'info',
     });
+
+    try {
+      const res = await sendWalletOtpEmail({
+        email: currentUser.email,
+        username: currentUser.username || currentUser.email,
+        otpCode: generated,
+        walletAddress: tonAddress.trim(),
+        network: resolvedNetwork,
+      });
+
+      setSendingOtp(false);
+      setExpectedOtp(generated);
+      setOtpExpiresAt(Date.now() + 5 * 60 * 1000);
+      setOtpSent(true);
+      setOtpTimer(60);
+
+      if (res.success) {
+        setFeedback({
+          message: `✨ Đã gửi lại mã OTP 6 chữ số tới email: ${currentUser.email}`,
+          type: 'info',
+        });
+      } else {
+        setFeedback({
+          message: `⚠️ Không thể gửi email: ${res.error || 'Lỗi SMTP'}. ${IS_LOCAL_DEV ? `[Dev Mode: Mã OTP là ${generated}]` : ''}`,
+          type: 'error',
+        });
+      }
+    } catch (err: any) {
+      setSendingOtp(false);
+      setExpectedOtp(generated);
+      setOtpExpiresAt(Date.now() + 5 * 60 * 1000);
+      setOtpSent(true);
+      setOtpTimer(60);
+      setFeedback({
+        message: `⚠️ Lỗi gửi email: ${err.message}. ${IS_LOCAL_DEV ? `[Dev Mode: Mã OTP là ${generated}]` : ''}`,
+        type: 'error',
+      });
+    }
   };
 
   // Step 3: Complete verification & bind
@@ -147,8 +246,23 @@ export default function TonWalletPage() {
 
     if (!currentUser) return;
 
-    if (!otpCode || otpCode.trim().length < 6) {
+    if (!otpCode || otpCode.trim().length !== 6) {
       setFeedback({ message: 'Vui lòng nhập đủ mã OTP bảo mật 6 chữ số.', type: 'error' });
+      return;
+    }
+
+    if (otpExpiresAt && Date.now() > otpExpiresAt) {
+      setFeedback({ message: 'Mã OTP đã hết hạn (quá 5 phút). Vui lòng bấm "Gửi lại mã OTP" để nhận mã mới.', type: 'error' });
+      return;
+    }
+
+    // Allow dev bypass code 123456 only in local dev mode
+    const isDevBypass = IS_LOCAL_DEV && otpCode.trim() === '123456';
+    if (expectedOtp && otpCode.trim() !== expectedOtp && !isDevBypass) {
+      setFeedback({
+        message: 'Mã OTP không chính xác. Vui lòng kiểm tra lại mã 6 chữ số đã gửi về email của bạn.',
+        type: 'error',
+      });
       return;
     }
 
@@ -823,6 +937,7 @@ export default function TonWalletPage() {
                 <button
                   type="button"
                   onClick={handleProceedToStep3}
+                  disabled={sendingOtp}
                   className="nav-btn"
                   style={{
                     background: 'linear-gradient(135deg, #00c2ff 0%, #0077b6 100%)',
@@ -830,9 +945,15 @@ export default function TonWalletPage() {
                     padding: '10px 22px',
                     fontSize: '0.88rem',
                     fontWeight: 700,
+                    opacity: sendingOtp ? 0.75 : 1,
+                    cursor: sendingOtp ? 'not-allowed' : 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
                   }}
                 >
-                  {t('ton_btn_confirm_proof', 'Xác nhận chữ ký & Nhận OTP Email →')}
+                  {sendingOtp && <div className="spinner" style={{ width: '14px', height: '14px' }} />}
+                  {sendingOtp ? 'Đang gửi mã OTP...' : t('ton_btn_confirm_proof', 'Xác nhận chữ ký & Nhận OTP Email →')}
                 </button>
               </div>
             </div>
@@ -869,19 +990,32 @@ export default function TonWalletPage() {
                 />
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '0.6rem', flexWrap: 'wrap' }}>
                 <button
                   type="button"
                   onClick={handleSendOtp}
-                  disabled={otpTimer > 0}
+                  disabled={otpTimer > 0 || sendingOtp}
                   className="btn-secondary"
-                  style={{ fontSize: '0.82rem', padding: '6px 14px' }}
+                  style={{
+                    fontSize: '0.82rem',
+                    padding: '6px 14px',
+                    opacity: sendingOtp || otpTimer > 0 ? 0.65 : 1,
+                    cursor: sendingOtp || otpTimer > 0 ? 'default' : 'pointer',
+                  }}
                 >
-                  {otpTimer > 0 ? t('ton_resend_otp_wait', 'Gửi lại sau ({0}s)').replace('{0}', String(otpTimer)) : t('ton_resend_otp_btn', 'Gửi lại mã OTP')}
+                  {sendingOtp
+                    ? 'Đang gửi...'
+                    : otpTimer > 0
+                    ? t('ton_resend_otp_wait', 'Gửi lại sau ({0}s)').replace('{0}', String(otpTimer))
+                    : t('ton_resend_otp_btn', 'Gửi lại mã OTP')}
                 </button>
                 <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                  {t('ton_otp_email_dest', 'Email nhận:')} {currentUser?.email}
+                  {t('ton_otp_email_dest', 'Email nhận:')} <strong style={{ color: '#ffffff' }}>{currentUser?.email}</strong>
                 </span>
+              </div>
+
+              <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.5 }}>
+                💡 <em>Lưu ý: Nếu không thấy email trong Hộp thư đến (Inbox), quý khách vui lòng kiểm tra thêm mục <strong>Thư rác (Spam / Junk)</strong> hoặc <strong>Quảng cáo (Promotions)</strong>.</em>
               </div>
 
               <div style={{ display: 'flex', gap: '12px' }}>

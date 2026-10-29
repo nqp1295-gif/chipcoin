@@ -10,6 +10,7 @@ import {
   TIER_CONFIGS,
 } from '../../lib/store';
 import WalletNavTabs from '../components/WalletNavTabs';
+import { sendWithdrawalOtpEmail } from '../../lib/systemEmail';
 
 // ============================================================================
 // ENVIRONMENT GATE: Simulation presets only enabled in local dev mode
@@ -25,8 +26,11 @@ export default function WithdrawPage() {
   const [destAddress, setDestAddress] = useState('');
   const [amountUsdt, setAmountUsdt] = useState<string>(IS_LOCAL_DEV ? '2.0' : '');
   const [otpCode, setOtpCode] = useState('');
+  const [expectedOtp, setExpectedOtp] = useState('');
+  const [otpExpiresAt, setOtpExpiresAt] = useState<number>(0);
   const [otpSent, setOtpSent] = useState(false);
   const [otpTimer, setOtpTimer] = useState(0);
+  const [sendingOtp, setSendingOtp] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [withdrawals, setWithdrawals] = useState<WithdrawalOrder[]>([]);
   const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
@@ -68,13 +72,60 @@ export default function WithdrawPage() {
   const currentTierMeta = currentUser?.tier ? TIER_CONFIGS[currentUser.tier] : TIER_CONFIGS[defaultTier];
   const canWithdraw = currentTierMeta.canTransferAndWithdraw;
 
-  const handleSendOtp = () => {
-    setOtpSent(true);
-    setOtpTimer(60);
+  const handleSendOtp = async () => {
+    if (!currentUser?.email) {
+      setFeedback({
+        message: 'Tài khoản chưa cập nhật email bảo mật. Vui lòng vào Hồ Sơ để cập nhật email.',
+        type: 'error',
+      });
+      return;
+    }
+
+    setFeedback(null);
+    const generated = Math.floor(100000 + Math.random() * 900000).toString();
+    setSendingOtp(true);
     setFeedback({
-      message: `✨ Mã xác thực rút tiền 6 chữ số đã được gửi tới email bảo mật: ${currentUser?.email || 'email của bạn'}`,
+      message: `Đang gửi mã xác thực rút tiền tới email: ${currentUser.email}...`,
       type: 'info',
     });
+
+    try {
+      const res = await sendWithdrawalOtpEmail({
+        email: currentUser.email,
+        username: currentUser.username || currentUser.email,
+        otpCode: generated,
+        amountUsdt: numUsdt,
+        destAddress: destAddress.trim() || 'Ví TON của bạn',
+      });
+
+      setSendingOtp(false);
+      setExpectedOtp(generated);
+      setOtpExpiresAt(Date.now() + 5 * 60 * 1000);
+      setOtpSent(true);
+      setOtpTimer(60);
+
+      if (res.success) {
+        setFeedback({
+          message: `✨ Mã xác thực rút tiền 6 chữ số đã được gửi tới email bảo mật: ${currentUser.email}. Vui lòng kiểm tra hộp thư (cả mục Spam/Thư rác nếu không thấy).`,
+          type: 'info',
+        });
+      } else {
+        setFeedback({
+          message: `⚠️ Không thể gửi mail tự động (${res.error || 'Lỗi SMTP'}). ${IS_LOCAL_DEV ? `[Dev Mode: Mã OTP là ${generated}]` : 'Vui lòng thử lại.'}`,
+          type: 'error',
+        });
+      }
+    } catch (err: any) {
+      setSendingOtp(false);
+      setExpectedOtp(generated);
+      setOtpExpiresAt(Date.now() + 5 * 60 * 1000);
+      setOtpSent(true);
+      setOtpTimer(60);
+      setFeedback({
+        message: `⚠️ Lỗi mạng khi gửi OTP: ${err.message}. ${IS_LOCAL_DEV ? `[Dev Mode: Mã OTP là ${generated}]` : ''}`,
+        type: 'error',
+      });
+    }
   };
 
   const handleWithdraw = (e: React.FormEvent) => {
@@ -112,8 +163,19 @@ export default function WithdrawPage() {
       return;
     }
 
-    if (!otpCode || otpCode.trim().length < 6) {
+    if (!otpCode || otpCode.trim().length !== 6) {
       setFeedback({ message: 'Vui lòng nhập đủ mã OTP xác thực rút tiền 6 chữ số.', type: 'error' });
+      return;
+    }
+
+    if (otpExpiresAt && Date.now() > otpExpiresAt) {
+      setFeedback({ message: 'Mã OTP đã hết hạn (quá 5 phút). Vui lòng bấm Gửi lại mã OTP.', type: 'error' });
+      return;
+    }
+
+    const isDevBypass = IS_LOCAL_DEV && otpCode.trim() === '123456';
+    if (expectedOtp && otpCode.trim() !== expectedOtp && !isDevBypass) {
+      setFeedback({ message: 'Mã OTP không chính xác. Vui lòng kiểm tra lại mã đã nhận trong email.', type: 'error' });
       return;
     }
 
@@ -371,18 +433,18 @@ export default function WithdrawPage() {
                 <button
                   type="button"
                   onClick={handleSendOtp}
-                  disabled={otpTimer > 0}
+                  disabled={otpTimer > 0 || sendingOtp}
                   style={{
                     background: 'none',
                     border: 'none',
-                    color: otpTimer > 0 ? 'var(--text-muted)' : '#f5d77f',
+                    color: otpTimer > 0 || sendingOtp ? 'var(--text-muted)' : '#f5d77f',
                     fontSize: '0.75rem',
-                    cursor: otpTimer > 0 ? 'default' : 'pointer',
+                    cursor: otpTimer > 0 || sendingOtp ? 'default' : 'pointer',
                     fontWeight: 600,
                     padding: 0,
                   }}
                 >
-                  {otpTimer > 0 ? `Resend (${otpTimer}s)` : t('withdraw_btn_otp')}
+                  {sendingOtp ? 'Đang gửi...' : otpTimer > 0 ? `Resend (${otpTimer}s)` : t('withdraw_btn_otp')}
                 </button>
               </div>
               <input
